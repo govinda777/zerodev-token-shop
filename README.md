@@ -7,6 +7,11 @@ Este projeto demonstra a implementação de um e-commerce simples utilizando Zer
 Este exemplo visa demonstrar:
 - Como implementar autenticação Web3 usando ZeroDev Smart Accounts
 - Como gerenciar tokens e transações em uma loja digital
+- Como vender NFTs e autenticar pessoas que tem uma NFT e com isso permite ela entrar em uma área restrita do site para apenas as pessoas que tem a NFT
+- Fazer um cobrança recorrente.
+- Fazer stack em USDC  
+- Comprar NFT e receber renda passiva
+- Compra a prazo
 - Como estruturar uma aplicação Next.js com integração Web3
 - Boas práticas de implementação de Account Abstraction
 
@@ -33,6 +38,12 @@ Este exemplo visa demonstrar:
    - Catálogo de produtos
    - Sistema de compra
    - Histórico de transações
+  
+5. **Auditoria**
+   - Contas a pagar
+   - Contas a receber
+   - Dashboard saude financeira
+   - 
 
 ## 💻 Stack Tecnológica
 
