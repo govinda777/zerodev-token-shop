@@ -10,26 +10,40 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onPurchase }: ProductCardProps) {
   return (
-    <div className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      {/* Image container with explicit position: relative style */}
-      <div className="relative h-48 w-full" style={{ position: 'relative' }}>
+    <div className="glass-card group rounded-xl overflow-hidden">
+      {/* Image container with position relative */}
+      <div className="relative h-56 w-full overflow-hidden" style={{ position: 'relative' }}>
         <Image
           src={product.image}
           alt={product.name}
           fill
           priority
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          style={{ objectFit: "cover" }}
+          className="object-cover group-hover:scale-110 transition-all duration-700 ease-in-out"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-purple-900/40 to-transparent opacity-60 group-hover:opacity-70 transition-all duration-500"></div>
+        
+        {/* Badge no canto superior direito */}
+        <div className="absolute top-3 right-3 bg-purple-600/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-white">
+          {product.price} ETH
+        </div>
       </div>
-      <div className="p-4">
-        <h3 className="text-lg font-semibold">{product.name}</h3>
-        <p className="text-gray-600 mt-1">{product.description}</p>
-        <div className="mt-4 flex items-center justify-between">
-          <span className="text-lg font-bold">{product.price} ETH</span>
+      
+      <div className="p-6 relative">
+        {/* Linha decorativa */}
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-purple-500/50 rounded-full"></div>
+        
+        <h3 className="text-xl font-bold font-heading text-white mt-3 group-hover:text-purple-300 transition-colors duration-300">
+          {product.name}
+        </h3>
+        <p className="text-white/70 mt-3 text-sm leading-relaxed min-h-[60px]">
+          {product.description}
+        </p>
+        
+        <div className="mt-6 flex justify-center">
           <button
             onClick={() => onPurchase(product)}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_15px_rgba(168,85,247,0.5)] active:scale-95 uppercase tracking-wider"
           >
             Comprar
           </button>

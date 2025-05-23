@@ -23,32 +23,34 @@ export function Header() {
   };
 
   return (
-    <header className="bg-white shadow">
+    <header className="glass z-10 sticky top-0 backdrop-blur-md py-4">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold" style={{ fontSize: '24px', margin: '8px 0' }}>ZeroDev Token Shop</h1>
+            <h1 className="text-3xl font-bold font-heading text-white neon-text">
+              ZeroDev Token Shop
+            </h1>
           </div>
           
           <div className="flex items-center space-x-4">
             {isConnected ? (
-              <>
-                <div className="text-sm text-gray-600">
+              <div className="flex items-center space-x-3">
+                <div className="text-sm bg-purple-900/30 text-white px-4 py-2 rounded-full font-medium border border-purple-500/30 neon-box">
                   {displayAddress}
                 </div>
                 
                 <button
                   onClick={disconnect}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm font-medium"
+                  className="btn-secondary text-sm"
                 >
                   Disconnect
                 </button>
-              </>
+              </div>
             ) : (
               <button
                 onClick={handleLogin}
                 disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:bg-blue-400"
+                className="btn-primary"
               >
                 {isLoading ? (
                   <span className="flex items-center">
