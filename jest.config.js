@@ -1,10 +1,22 @@
-module.exports = {
-    testEnvironment: 'jsdom',
-    setupFilesAfterEnv: ['@testing-library/jest-dom/extend-expect'],
-    transform: {
-      '^.+\\.(ts|tsx)$': 'ts-jest',
-    },
-    moduleNameMapper: {
-      '^@/(.*)$': '<rootDir>/src/$1',
-    },
-  };
+const nextJest = require('next/jest');
+
+const createJestConfig = nextJest({
+  dir: './'
+});
+
+const customJestConfig = {
+  testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['@testing-library/jest-dom'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  testPathIgnorePatterns: ['/tests/'],
+  transformIgnorePatterns: [],
+  transform: {
+    "^.+\.(js|jsx|ts|tsx|mjs)$": "babel-jest"
+  },
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'mjs'],
+};
+
+module.exports = createJestConfig(customJestConfig);

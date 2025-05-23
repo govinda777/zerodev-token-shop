@@ -1,13 +1,13 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "./useAuth";
 import { getTokenBalance, addTokens, spendTokens } from "@/utils/storage";
 
-interface TokenContextType {
+export interface TokenContextType {
   balance: number;
   addTokens: (amount: number) => void;
-  spendTokens: (amount: number) => void;
+  spendTokens: (amount: number) => Promise<boolean>;
   isLoading: boolean;
 }
 
@@ -43,10 +43,11 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     setBalance(prev => (prev ?? 0) + amount);
   };
 
-  const handleSpendTokens = (amount: number) => {
-    if (!address) return;
-    spendTokens(address, amount);
+  const handleSpendTokens = async (amount: number): Promise<boolean> => {
+    if (!address) return false;
+    const success = await spendTokens(address, amount);
     setBalance(prev => (prev ?? 0) - amount);
+    return success;
   };
 
   return (

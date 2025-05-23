@@ -1,6 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import { ProductCard } from './ProductCard';
 
+// Mock do next/image para evitar o erro de fetchPriority
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ src, alt, fill, sizes, style, priority }) => {
+    return <img src={src} alt={alt} style={style} data-testid="next-image" />;
+  },
+}));
+
 const product = {
   id: '1',
   name: 'Produto Teste',
@@ -13,5 +21,5 @@ test('renders ProductCard with product info', () => {
   render(<ProductCard product={product} onPurchase={jest.fn()} />);
   expect(screen.getByText('Produto Teste')).toBeInTheDocument();
   expect(screen.getByText('Descrição teste')).toBeInTheDocument();
-  expect(screen.getByText(/10 Token/)).toBeInTheDocument();
+  expect(screen.getByText(/10 ETH/)).toBeInTheDocument();
 }); 

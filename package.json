@@ -13,6 +13,7 @@
     "@privy-io/react-auth": "^1.54.0",
     "@tanstack/react-query": "^5.76.1",
     "@types/winston": "^2.4.4",
+    "@zerodev/ecdsa-validator": "^5.4.9",
     "@zerodev/privy": "latest",
     "@zerodev/sdk": "^5.4.35",
     "next": "14.1.0",
@@ -25,21 +26,19 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/jest": "^29.5.14",
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^14.1.2",
+    "@types/jest": "^29.5.12",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@types/uuid": "^9.0.8",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.1.0",
     "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
-    "ts-jest": "^29.3.4",
     "typescript": "^5"
   }
 }

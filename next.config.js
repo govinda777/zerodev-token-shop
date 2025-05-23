@@ -8,6 +8,10 @@ const nextConfig = {
       },
     ],
   },
+  // Força o uso do SWC mesmo com configuração Babel presente
+  experimental: {
+    forceSwcTransforms: true,
+  },
 };
 
 module.exports = nextConfig;

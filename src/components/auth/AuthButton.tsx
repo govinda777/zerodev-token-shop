@@ -1,17 +1,17 @@
-import { useAuth } from '@/utils/auth-context';
+import { useAuth } from './useAuth';
 import { useState } from 'react';
 
 export const LoginButton = () => {
-  const { isAuthenticated, login, logout, error, walletAddress } = useAuth();
+  const { isConnected, connect, disconnect, address } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAuth = async () => {
     try {
       setIsLoading(true);
-      if (isAuthenticated) {
-        await logout();
+      if (isConnected) {
+        disconnect();
       } else {
-        await login();
+        await connect();
       }
     } catch (err) {
       console.error('Authentication error:', err);
@@ -27,7 +27,7 @@ export const LoginButton = () => {
         disabled={isLoading}
         className={`
           px-6 py-2 rounded-lg font-medium
-          ${isAuthenticated 
+          ${isConnected 
             ? 'bg-red-500 hover:bg-red-600 text-white' 
             : 'bg-blue-500 hover:bg-blue-600 text-white'
           }
@@ -41,24 +41,21 @@ export const LoginButton = () => {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
-            {isAuthenticated ? 'Logging out...' : 'Logging in...'}
+            {isConnected ? 'Logging out...' : 'Logging in...'}
           </span>
         ) : (
-          isAuthenticated ? 'Logout' : 'Login with Wallet'
+          isConnected ? 'Logout' : 'Login with Wallet'
         )}
       </button>
       
-      {error && (
-        <p className="text-red-500 text-sm mt-2">
-          {error}
-        </p>
-      )}
-      
-      {isAuthenticated && walletAddress && (
+      {isConnected && address && (
         <p className="text-sm text-gray-600 mt-2">
-          Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+          Connected: {address.slice(0, 6)}...{address.slice(-4)}
         </p>
       )}
     </div>
   );
-}; 
+};
+
+// Exportar LoginButton como AuthButton para compatibilidade
+export const AuthButton = LoginButton; 

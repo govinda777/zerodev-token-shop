@@ -7,6 +7,7 @@ import { WagmiConfig, createConfig } from "wagmi";
 import { mainnet } from "viem/chains";
 import { injected } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { http, createClient } from "viem";
 
 const queryClient = new QueryClient();
 
@@ -15,6 +16,12 @@ const config = createConfig({
   connectors: [
     injected(),
   ],
+  client({ chain }) {
+    return createClient({
+      chain,
+      transport: http()
+    });
+  },
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {

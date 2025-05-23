@@ -18,9 +18,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isConnecting, setIsConnecting] = useState(false);
   const { address, isConnected } = useAccount();
-  const { connect: wagmiConnect } = useConnect({
-    connector: injected(),
-  });
+  const { connect: wagmiConnect } = useConnect();
   const { disconnect: wagmiDisconnect } = useDisconnect();
   const { smartAccountAddress } = useSmartAccount();
   const [mounted, setMounted] = useState(false);
@@ -32,7 +30,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const connect = async () => {
     try {
       setIsConnecting(true);
-      await wagmiConnect();
+      console.log("address", address);
+      await wagmiConnect({ connector: injected() });
     } catch (error) {
       console.error("Failed to connect:", error);
     } finally {

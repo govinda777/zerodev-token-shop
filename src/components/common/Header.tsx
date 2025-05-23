@@ -7,13 +7,16 @@ import { useAuth } from "@/components/auth/useAuth";
 import { useTokens } from "@/hooks/useTokens";
 
 export function Header() {
-  const { displayAddress, isConnected, login, logout, tokens, isFirstLogin } = useAuth();
+  const { address, isConnected, connect, disconnect } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Criar um displayAddress a partir do address
+  const displayAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '';
 
   const handleLogin = async () => {
     setIsLoading(true);
     try {
-      await login();
+      await connect();
     } finally {
       setIsLoading(false);
     }
@@ -30,26 +33,16 @@ export function Header() {
           <div className="flex items-center space-x-4">
             {isConnected ? (
               <>
-                <div className="bg-blue-50 px-3 py-1.5 rounded-full text-blue-700 text-sm font-medium">
-                  {tokens} Tokens
-                </div>
-                
                 <div className="text-sm text-gray-600">
                   {displayAddress}
                 </div>
                 
                 <button
-                  onClick={logout}
+                  onClick={disconnect}
                   className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm font-medium"
                 >
                   Disconnect
                 </button>
-                
-                {isFirstLogin && (
-                  <div className="bg-green-100 text-green-800 text-sm px-3 py-1.5 rounded-md">
-                    +10 Welcome Tokens!
-                  </div>
-                )}
               </>
             ) : (
               <button

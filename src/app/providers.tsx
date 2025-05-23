@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthProvider } from "@/utils/auth-context";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 import { PrivyProvider } from "@privy-io/react-auth";
 
 export function Providers({ children }: { children: React.ReactNode }) {

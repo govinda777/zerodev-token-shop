@@ -2,14 +2,10 @@
 
 import { Header } from "@/components/common/Header";
 import { ProductGrid } from "@/components/shop/ProductGrid";
-import { PurchaseHistory } from "@/components/shop/PurchaseHistory";
 import { useAuth } from '@/components/auth/useAuth';
-import { useProducts } from '@/hooks/useProducts';
-import { useTokens } from '@/hooks/useTokens';
+
 
 export default function Home() {
-  const { isConnected } = useAuth();
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
