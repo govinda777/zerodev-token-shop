@@ -18,7 +18,7 @@ export function ProductGrid() {
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 animate-pulse"></div>
             
             <div className="relative z-10">
-              <div className="w-24 h-24 border-4 border-purple-500/30 rounded-full mx-auto flex items-center justify-center mb-8 bg-purple-500/10">
+              <div className="w-20 h-20 border-4 border-purple-500/30 rounded-full mx-auto flex items-center justify-center mb-8 bg-purple-500/10">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   fill="none" 
@@ -101,7 +101,7 @@ export function ProductGrid() {
             <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-orange-500/5"></div>
             
             <div className="relative z-10">
-              <div className="w-24 h-24 mx-auto mb-8 rounded-full bg-red-500/20 flex items-center justify-center border-4 border-red-500/30">
+              <div className="w-20 h-20 mx-auto mb-8 rounded-full bg-red-500/20 flex items-center justify-center border-4 border-red-500/30">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   fill="none" 
