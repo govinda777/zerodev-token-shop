@@ -11,14 +11,13 @@ export interface TokenContextType {
   isLoading: boolean;
 }
 
-const TokenContext = createContext<TokenContextType | undefined>(undefined);
-export { TokenContext };
+export const TokenContext = createContext<TokenContextType | undefined>(undefined);
 
 export function TokenProvider({ children }: { children: React.ReactNode }) {
-  const [balance, setBalance] = useState<number | undefined>(undefined);
+  const [balance, setBalance] = useState<number>(0);
   const { isConnected, address } = useAuth();
   const [mounted, setMounted] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -30,6 +29,9 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
       getTokenBalance(address).then((bal) => {
         setBalance(bal);
         setIsLoading(false);
+      }).catch(() => {
+        setBalance(0);
+        setIsLoading(false);
       });
     } else if (mounted) {
       setBalance(0);
@@ -40,26 +42,37 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
   const handleAddTokens = (amount: number) => {
     if (!address) return;
     addTokens(address, amount);
-    setBalance(prev => (prev ?? 0) + amount);
+    setBalance(prev => prev + amount);
   };
 
   const handleSpendTokens = async (amount: number): Promise<boolean> => {
     if (!address) return false;
-    const success = await spendTokens(address, amount);
-    setBalance(prev => (prev ?? 0) - amount);
-    return success;
+    try {
+      const success = await spendTokens(address, amount);
+      if (success) {
+        setBalance(prev => prev - amount);
+      }
+      return success;
+    } catch (error) {
+      console.error("Error spending tokens:", error);
+      return false;
+    }
   };
+
+  if (!mounted) {
+    return null; // Return null instead of loading message to avoid nested loading
+  }
 
   return (
     <TokenContext.Provider
       value={{
-        balance: balance ?? 0,
+        balance,
         addTokens: handleAddTokens,
         spendTokens: handleSpendTokens,
         isLoading,
       }}
     >
-      {!mounted || balance === undefined ? <div>Carregando...</div> : children}
+      {children}
     </TokenContext.Provider>
   );
 }

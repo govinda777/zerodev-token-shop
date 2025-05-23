@@ -3,7 +3,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { injected } from "wagmi/connectors";
-import { useSmartAccount } from "@/hooks/useSmartAccount";
 
 interface AuthContextType {
   isConnected: boolean;
@@ -20,7 +19,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { address, isConnected } = useAccount();
   const { connect: wagmiConnect } = useConnect();
   const { disconnect: wagmiDisconnect } = useDisconnect();
-  const { smartAccountAddress } = useSmartAccount();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -30,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const connect = async () => {
     try {
       setIsConnecting(true);
-      console.log("address", address);
+      console.log("Connecting to wallet...");
       await wagmiConnect({ connector: injected() });
     } catch (error) {
       console.error("Failed to connect:", error);
@@ -43,6 +41,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     wagmiDisconnect();
   };
 
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg">Carregando autenticação...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -50,10 +59,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isConnecting,
         connect,
         disconnect,
-        address: smartAccountAddress,
+        address,
       }}
     >
-      {!mounted ? <div>Carregando autenticação...</div> : children}
+      {children}
     </AuthContext.Provider>
   );
 }

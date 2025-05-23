@@ -2,33 +2,31 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/useAuth";
-import { useTokens } from "@/components/auth/TokenProvider";
+import { useTokens } from "@/hooks/useTokens";
 import type { Product } from "@/types/product";
-import { addTransaction } from "@/utils/storage";
-import { Transaction } from "@/types/transaction";
 
-// Mock products data - in a real app this would come from an API
+// Mock data for development
 const MOCK_PRODUCTS: Product[] = [
   {
     id: "1",
-    name: "Digital Art #1",
-    description: "A unique piece of digital art",
-    price: 10,
-    image: "/images/art1.jpg",
+    name: "Produto Digital 1",
+    description: "Descrição do produto digital 1",
+    price: 0.01,
+    image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop",
   },
   {
-    id: "2",
-    name: "Digital Art #2",
-    description: "Another unique piece of digital art",
-    price: 15,
-    image: "/images/art2.jpg",
+    id: "2", 
+    name: "Produto Digital 2",
+    description: "Descrição do produto digital 2",
+    price: 0.02,
+    image: "https://images.unsplash.com/photo-1515378791036-0648a814c963?w=400&h=300&fit=crop",
   },
   {
     id: "3",
-    name: "Digital Art #3",
-    description: "A third unique piece of digital art",
-    price: 20,
-    image: "/images/art3.jpg",
+    name: "Produto Digital 3", 
+    description: "Descrição do produto digital 3",
+    price: 0.03,
+    image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop",
   },
 ];
 
@@ -36,11 +34,14 @@ interface ProductContextType {
   products: Product[];
   isLoading: boolean;
   error: Error | null;
+  purchaseProduct: (product: Product) => Promise<void>;
   purchaseHistory: Product[];
-  purchaseProduct: (product: Product) => Promise<boolean>;
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
+
+// Export the context so it can be used by the hook
+export { ProductContext };
 
 export function ProductProvider({ children }: { children: React.ReactNode }) {
   const [products] = useState<Product[]>(MOCK_PRODUCTS);
@@ -64,54 +65,40 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isConnected, address]);
 
-  const purchaseProduct = async (product: Product): Promise<boolean> => {
+  const purchaseProduct = async (product: Product) => {
     if (!isConnected || !address) {
-      setError(new Error("Not connected"));
-      return false;
+      setError(new Error("Conecte sua carteira primeiro"));
+      return;
     }
-
-    if (balance < product.price) {
-      setError(new Error("Insufficient balance"));
-      return false;
-    }
-
-    setIsLoading(true);
-    setError(null);
 
     try {
-      // Simulate a network delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      setIsLoading(true);
+      setError(null);
 
-      // Spend tokens
-      spendTokens(product.price);
+      const priceInTokens = Math.floor(product.price * 1000); // Convert ETH to tokens (1 ETH = 1000 tokens)
+      
+      if (balance < priceInTokens) {
+        throw new Error("Saldo insuficiente");
+      }
 
-      // Add to purchase history
-      setPurchaseHistory(prev => [...prev, product]);
-
-      // Record transaction
-      addTransaction(address, {
-        hash: '', // ou gere um hash real se disponível
-        from: address,
-        to: '', // preencha se houver destinatário
-        value: product.price.toString(),
-        timestamp: Date.now(),
-        status: 'success',
-        type: 'purchase',
-        metadata: {
-          productId: product.id,
-          productName: product.name,
-          amount: product.price,
-        },
-      });
-
-      return true;
+      const success = await spendTokens(priceInTokens);
+      
+      if (success) {
+        setPurchaseHistory(prev => [product, ...prev]);
+        console.log(`Purchased ${product.name} for ${priceInTokens} tokens`);
+      } else {
+        throw new Error("Falha na transação");
+      }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to purchase product"));
-      return false;
+      setError(err instanceof Error ? err : new Error("Erro desconhecido"));
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <ProductContext.Provider
@@ -119,11 +106,11 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
         products,
         isLoading,
         error,
-        purchaseHistory,
         purchaseProduct,
+        purchaseHistory,
       }}
     >
-      {!mounted ? <div>Carregando produtos...</div> : children}
+      {children}
     </ProductContext.Provider>
   );
 }
