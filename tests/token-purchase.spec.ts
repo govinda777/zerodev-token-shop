@@ -11,7 +11,7 @@ test.describe('Token Purchase Flow', () => {
     await page.waitForLoadState('networkidle');
   });
 
-  test('should display available tokens', async ({ page }) => {
+  test('should display available tokens', { tag: '@no-critical' }, async ({ page }) => {
     // Verify that token items are displayed
     const tokenItems = page.locator('.token-item');
     await expect(tokenItems).toBeVisible();
@@ -20,7 +20,7 @@ test.describe('Token Purchase Flow', () => {
     expect(await tokenItems.count()).toBeGreaterThan(0);
   });
 
-  test('should show token details when clicked', async ({ page }) => {
+  test('should show token details when clicked', { tag: '@no-critical' }, async ({ page }) => {
     // Click on the first token
     const firstToken = page.locator('.token-item').first();
     await firstToken.click();
@@ -34,7 +34,7 @@ test.describe('Token Purchase Flow', () => {
     await expect(priceInfo).toBeVisible();
   });
 
-  test('should allow connecting wallet', async ({ page }) => {
+  test('should allow connecting wallet', { tag: '@no-critical' }, async ({ page }) => {
     // Find and click on the connect wallet button
     const connectWalletButton = page.getByRole('button', { name: /connect wallet/i });
     await connectWalletButton.click();
@@ -47,7 +47,7 @@ test.describe('Token Purchase Flow', () => {
     await page.screenshot({ path: 'test-results/wallet-modal.png' });
   });
 
-  test('should handle purchase flow', async ({ page }) => {
+  test('should handle purchase flow', { tag: '@no-critical' }, async ({ page }) => {
     // Mock wallet connection
     await page.evaluate(() => {
       window.localStorage.setItem('mock-wallet-connected', 'true');

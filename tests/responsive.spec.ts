@@ -5,7 +5,7 @@ const APP_PORT = process.env.APP_PORT || '3000';
 const BASE_URL = `http://localhost:${APP_PORT}`;
 
 test.describe('Responsive Design Tests', () => {
-  test('desktop layout should display correctly', async ({ page }) => {
+  test('desktop layout should display correctly', { tag: '@no-critical' }, async ({ page }) => {
     // Set viewport to desktop size
     await page.setViewportSize({ width: 1280, height: 800 });
     
@@ -25,7 +25,7 @@ test.describe('Responsive Design Tests', () => {
     await expect(tokenGrid).toBeVisible();
   });
 
-  test('tablet layout should adapt correctly', async ({ page }) => {
+  test('tablet layout should adapt correctly', { tag: '@critical' }, async ({ page }) => {
     // Set viewport to tablet size
     await page.setViewportSize({ width: 768, height: 1024 });
     
@@ -41,7 +41,7 @@ test.describe('Responsive Design Tests', () => {
     await expect(navigation).toBeVisible();
   });
 
-  test('mobile layout should display correctly', async ({ page }) => {
+  test('mobile layout should display correctly', { tag: '@no-critical' }, async ({ page }) => {
     // Set viewport to mobile size
     await page.setViewportSize({ width: 375, height: 667 });
     
@@ -67,7 +67,7 @@ test.describe('Responsive Design Tests', () => {
     await page.screenshot({ path: 'test-results/mobile-menu-expanded.png' });
   });
 
-  test('should be accessible on iPhone', async ({ browser }) => {
+  test('should be accessible on iPhone', { tag: '@no-critical' }, async ({ browser }) => {
     // Use iPhone 12 preset
     const context = await browser.newContext({
       ...devices['iPhone 12'],

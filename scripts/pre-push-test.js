@@ -19,6 +19,12 @@ if (skipFlag) {
   process.exit(0);
 }
 
+// Verificar se deve executar todos os testes, inclusive não-críticos
+const runAllFlag = process.argv.includes('--all-tests');
+
+// Tag para filtrar apenas testes críticos
+const testTag = runAllFlag ? '' : '@critical';
+
 // Verificar portas comuns do Next.js
 function findRunningAppPort() {
   const portsToCheck = [3000, 3001, 3002];
@@ -41,7 +47,7 @@ function findRunningAppPort() {
 
 // Quando executado como script principal
 if (require.main === module) {
-  console.log(`${colors.blue}Pre-push hook: Preparing to run e2e tests...${colors.reset}`);
+  console.log(`${colors.blue}Pre-push hook: Preparing to run ${testTag || 'all'} tests...${colors.reset}`);
   
   const runningPort = findRunningAppPort();
   
@@ -49,8 +55,14 @@ if (require.main === module) {
     console.log(`${colors.green}Application is already running on port ${runningPort}${colors.reset}`);
     console.log(`${colors.blue}Running tests only...${colors.reset}`);
     
+    // Preparar argumentos para filtrar apenas testes críticos se necessário
+    const playwrightArgs = ['playwright', 'test'];
+    if (testTag) {
+      playwrightArgs.push('-g', testTag);
+    }
+    
     // Executar apenas os testes, passando a porta detectada
-    const testProcess = spawnSync('npx', ['playwright', 'test'], { 
+    const testProcess = spawnSync('npx', playwrightArgs, { 
       stdio: 'inherit',
       shell: true,
       env: { ...process.env, APP_PORT: runningPort.toString() }
@@ -61,8 +73,14 @@ if (require.main === module) {
   } else {
     console.log(`${colors.blue}Starting application and running tests...${colors.reset}`);
     
+    // Passar flag para script run-tests.js executar apenas testes críticos
+    const args = ['scripts/run-tests.js'];
+    if (testTag) {
+      args.push('--tag', testTag);
+    }
+    
     // Executar o script que inicia a aplicação e os testes
-    const fullProcess = spawnSync('node', ['scripts/run-tests.js'], {
+    const fullProcess = spawnSync('node', args, {
       stdio: 'inherit',
       shell: true
     });

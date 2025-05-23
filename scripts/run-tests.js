@@ -11,7 +11,12 @@ const colors = {
   red: '\x1b[31m',
 };
 
-console.log(`${colors.blue}Starting the application and running tests...${colors.reset}`);
+// Parâmetros da linha de comando
+const args = process.argv.slice(2);
+const tagIndex = args.indexOf('--tag');
+const testTag = tagIndex !== -1 && tagIndex + 1 < args.length ? args[tagIndex + 1] : '';
+
+console.log(`${colors.blue}Starting the application and running tests${testTag ? ` with tag ${testTag}` : ''}...${colors.reset}`);
 
 // Start the Next.js application
 const app = spawn('npm', ['run', 'dev'], { 
@@ -50,8 +55,17 @@ rl.on('line', (line) => {
     setTimeout(() => {
       if (!isTestsRunning && appPort) {
         isTestsRunning = true;
+        
+        // Preparar argumentos do playwright
+        const playwrightArgs = ['playwright', 'test'];
+        
+        // Adicionar filtro de tag se necessário
+        if (testTag) {
+          playwrightArgs.push('-g', testTag);
+        }
+        
         // Run Playwright tests with correct port
-        const tests = spawn('npx', ['playwright', 'test'], { 
+        const tests = spawn('npx', playwrightArgs, { 
           stdio: 'inherit',
           shell: true,
           env: { ...process.env, APP_PORT: appPort }

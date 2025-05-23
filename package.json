@@ -9,11 +9,15 @@
     "lint": "next lint",
     "test": "jest",
     "test:e2e": "playwright test",
+    "test:e2e:critical": "playwright test -g @critical",
+    "test:e2e:no-critical": "playwright test -g @no-critical",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report",
     "test:e2e:all": "node scripts/run-tests.js",
+    "test:e2e:critical-only": "node scripts/run-tests.js --tag @critical",
     "push:skip-tests": "git push --no-verify",
+    "push:all-tests": "node scripts/pre-push-test.js --all-tests && git push",
     "prepare": "husky"
   },
   "dependencies": {

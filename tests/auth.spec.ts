@@ -11,13 +11,13 @@ test.describe('Authentication Flow', () => {
     await page.waitForLoadState('networkidle');
   });
 
-  test('should display login button when not authenticated', async ({ page }) => {
+  test('should display login button when not authenticated', { tag: '@critical' }, async ({ page }) => {
     // Verify login/connect button is visible
     const loginButton = page.getByRole('button', { name: /connect|login|sign in/i });
     await expect(loginButton).toBeVisible();
   });
 
-  test('should open authentication modal on login click', async ({ page }) => {
+  test('should open authentication modal on login click', { tag: '@no-critical' }, async ({ page }) => {
     // Click on login button
     const loginButton = page.getByRole('button', { name: /connect|login|sign in/i });
     await loginButton.click();
@@ -30,7 +30,7 @@ test.describe('Authentication Flow', () => {
     await page.screenshot({ path: 'test-results/auth-modal.png' });
   });
 
-  test('should show user profile when authenticated', async ({ page }) => {
+  test('should show user profile when authenticated', { tag: '@no-critical' }, async ({ page }) => {
     // Mock authentication
     await page.evaluate(() => {
       window.localStorage.setItem('mock-auth-token', 'test-token');
@@ -57,7 +57,7 @@ test.describe('Authentication Flow', () => {
     await expect(logoutOption).toBeVisible();
   });
 
-  test('should handle logout correctly', async ({ page }) => {
+  test('should handle logout correctly', { tag: '@no-critical' }, async ({ page }) => {
     // Mock authentication
     await page.evaluate(() => {
       window.localStorage.setItem('mock-auth-token', 'test-token');

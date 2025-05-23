@@ -5,7 +5,7 @@ const APP_PORT = process.env.APP_PORT || '3000';
 const BASE_URL = `http://localhost:${APP_PORT}`;
 
 test.describe('Application Loading', () => {
-  test('should load the application successfully', async ({ page }) => {
+  test('should load the application successfully', { tag: '@no-critical' }, async ({ page }) => {
     // Navigate to the application
     await page.goto(BASE_URL);
 
