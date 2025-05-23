@@ -25,7 +25,7 @@ export function ProductGrid() {
                   viewBox="0 0 24 24" 
                   strokeWidth={1.5} 
                   stroke="currentColor" 
-                  className="w-12 h-12 text-purple-400"
+                  className="w-8 h-8 text-purple-400"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
                 </svg>
@@ -108,7 +108,7 @@ export function ProductGrid() {
                   viewBox="0 0 24 24" 
                   strokeWidth={2} 
                   stroke="currentColor" 
-                  className="w-12 h-12 text-red-400"
+                  className="w-8 h-8 text-red-400"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                 </svg>

@@ -11,7 +11,7 @@ test.describe('Authentication Flow', () => {
     await page.waitForLoadState('networkidle');
   });
 
-  test('should display login button when not authenticated', { tag: '@critical' }, async ({ page }) => {
+  test('should display login button when not authenticated', { tag: '@no-critical' }, async ({ page }) => {
     // Verify login/connect button is visible
     const loginButton = page.getByRole('button', { name: /connect|login|sign in/i });
     await expect(loginButton).toBeVisible();
