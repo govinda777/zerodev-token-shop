@@ -12,7 +12,7 @@ export default function Home() {
       
       <main className="flex-grow max-w-6xl mx-auto w-full px-4 py-8 sm:px-6 lg:px-8">
         <div>
-          <h1 className="text-3xl font-bold my-4">Teste ProductGrid</h1>
+          <h1 className="text-3xl font-bold" style={{ fontSize: '30px', margin: '16px 0' }}>Teste ProductGrid</h1>
           <ProductGrid />
         </div>
       </main>

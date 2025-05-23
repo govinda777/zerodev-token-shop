@@ -11,8 +11,8 @@ interface ProductCardProps {
 export function ProductCard({ product, onPurchase }: ProductCardProps) {
   return (
     <div className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      {/* Adicione position: relative ao container da imagem */}
-      <div className="relative h-48 w-full">
+      {/* Image container with explicit position: relative style */}
+      <div className="relative h-48 w-full" style={{ position: 'relative' }}>
         <Image
           src={product.image}
           alt={product.name}

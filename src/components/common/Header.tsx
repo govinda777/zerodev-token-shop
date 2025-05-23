@@ -27,7 +27,7 @@ export function Header() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold my-2">ZeroDev Token Shop</h1>
+            <h1 className="text-2xl font-bold" style={{ fontSize: '24px', margin: '8px 0' }}>ZeroDev Token Shop</h1>
           </div>
           
           <div className="flex items-center space-x-4">

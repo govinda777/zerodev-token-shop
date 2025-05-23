@@ -1,9 +1,13 @@
 import { test, expect } from '@playwright/test';
 
+// Use a porta fornecida pelo ambiente ou caia para 3000 como padrão
+const APP_PORT = process.env.APP_PORT || '3000';
+const BASE_URL = `http://localhost:${APP_PORT}`;
+
 test.describe('Token Purchase Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the application and wait for it to load
-    await page.goto('http://localhost:3001');
+    await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
   });
 

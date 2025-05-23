@@ -21,6 +21,7 @@ const app = spawn('npm', ['run', 'dev'], {
 
 let isAppReady = false;
 let isTestsRunning = false;
+let appPort = null;
 
 // Create readline interface to read app output line by line
 const rl = readline.createInterface({
@@ -33,6 +34,13 @@ rl.on('line', (line) => {
   // Echo the app output
   console.log(`${colors.green}[App] ${line}${colors.reset}`);
   
+  // Detect the port
+  const portMatch = line.match(/Local:\s+http:\/\/localhost:(\d+)/);
+  if (portMatch && portMatch[1]) {
+    appPort = portMatch[1];
+    console.log(`${colors.blue}Detected application running on port ${appPort}${colors.reset}`);
+  }
+  
   // Check if the app is ready
   if (line.includes('✓ Ready in')) {
     isAppReady = true;
@@ -40,12 +48,13 @@ rl.on('line', (line) => {
     
     // Wait a bit to ensure app is fully initialized
     setTimeout(() => {
-      if (!isTestsRunning) {
+      if (!isTestsRunning && appPort) {
         isTestsRunning = true;
-        // Run Playwright tests
-        const tests = spawn('npm', ['run', 'test:e2e'], { 
+        // Run Playwright tests with correct port
+        const tests = spawn('npx', ['playwright', 'test', `--project-env=PORT=${appPort}`], { 
           stdio: 'inherit',
-          shell: true 
+          shell: true,
+          env: { ...process.env, APP_PORT: appPort }
         });
         
         tests.on('close', (code) => {

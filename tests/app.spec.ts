@@ -1,9 +1,13 @@
 import { test, expect } from '@playwright/test';
 
+// Use a porta fornecida pelo ambiente ou caia para 3000 como padrão
+const APP_PORT = process.env.APP_PORT || '3000';
+const BASE_URL = `http://localhost:${APP_PORT}`;
+
 test.describe('Application Loading', () => {
   test('should load the application successfully', async ({ page }) => {
     // Navigate to the application
-    await page.goto('http://localhost:3000');
+    await page.goto(BASE_URL);
 
     // Wait for the page to be loaded
     await page.waitForLoadState('domcontentloaded');

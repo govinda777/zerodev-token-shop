@@ -19,29 +19,41 @@ if (skipFlag) {
   process.exit(0);
 }
 
-// Verificar se a aplicação está rodando
-function isAppRunning() {
-  try {
-    // Tenta conexão com a porta 3001
-    const result = spawnSync('nc', ['-z', 'localhost', '3001']);
-    return result.status === 0;
-  } catch (error) {
-    return false;
+// Verificar portas comuns do Next.js
+function findRunningAppPort() {
+  const portsToCheck = [3000, 3001, 3002];
+  
+  for (const port of portsToCheck) {
+    try {
+      // Tenta conexão com a porta
+      const result = spawnSync('nc', ['-z', 'localhost', port.toString()]);
+      if (result.status === 0) {
+        console.log(`${colors.green}Detected application running on port ${port}${colors.reset}`);
+        return port;
+      }
+    } catch (error) {
+      // Ignora erros de verificação
+    }
   }
+  
+  return null;
 }
 
 // Quando executado como script principal
 if (require.main === module) {
   console.log(`${colors.blue}Pre-push hook: Preparing to run e2e tests...${colors.reset}`);
   
-  if (isAppRunning()) {
-    console.log(`${colors.green}Application is already running on port 3001${colors.reset}`);
+  const runningPort = findRunningAppPort();
+  
+  if (runningPort) {
+    console.log(`${colors.green}Application is already running on port ${runningPort}${colors.reset}`);
     console.log(`${colors.blue}Running tests only...${colors.reset}`);
     
-    // Executar apenas os testes
-    const testProcess = spawnSync('npm', ['run', 'test:e2e'], { 
+    // Executar apenas os testes, passando a porta detectada
+    const testProcess = spawnSync('npx', ['playwright', 'test'], { 
       stdio: 'inherit',
-      shell: true 
+      shell: true,
+      env: { ...process.env, APP_PORT: runningPort.toString() }
     });
     
     // Sair com o código de saída dos testes

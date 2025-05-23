@@ -1,12 +1,16 @@
 import { test, expect, devices } from '@playwright/test';
 
+// Use a porta fornecida pelo ambiente ou caia para 3000 como padrão
+const APP_PORT = process.env.APP_PORT || '3000';
+const BASE_URL = `http://localhost:${APP_PORT}`;
+
 test.describe('Responsive Design Tests', () => {
   test('desktop layout should display correctly', async ({ page }) => {
     // Set viewport to desktop size
     await page.setViewportSize({ width: 1280, height: 800 });
     
     // Navigate to the application
-    await page.goto('http://localhost:3001');
+    await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
     
     // Take screenshot for visual verification
@@ -26,7 +30,7 @@ test.describe('Responsive Design Tests', () => {
     await page.setViewportSize({ width: 768, height: 1024 });
     
     // Navigate to the application
-    await page.goto('http://localhost:3001');
+    await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
     
     // Take screenshot for visual verification
@@ -42,7 +46,7 @@ test.describe('Responsive Design Tests', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     
     // Navigate to the application
-    await page.goto('http://localhost:3001');
+    await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
     
     // Take screenshot for visual verification
@@ -71,7 +75,7 @@ test.describe('Responsive Design Tests', () => {
     const page = await context.newPage();
     
     // Navigate to the application
-    await page.goto('http://localhost:3001');
+    await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
     
     // Take screenshot for visual verification
