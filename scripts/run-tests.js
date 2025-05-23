@@ -51,7 +51,7 @@ rl.on('line', (line) => {
       if (!isTestsRunning && appPort) {
         isTestsRunning = true;
         // Run Playwright tests with correct port
-        const tests = spawn('npx', ['playwright', 'test', `--project-env=PORT=${appPort}`], { 
+        const tests = spawn('npx', ['playwright', 'test'], { 
           stdio: 'inherit',
           shell: true,
           env: { ...process.env, APP_PORT: appPort }
