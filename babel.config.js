@@ -1,9 +1,3 @@
-module.exports = {
-  presets: [
-    [
-      'next/babel',
-      { "preset-env": { "modules": "commonjs" } }
-    ]
-  ],
-  ignore: []
-}; 
+
+// Using Next.js built-in SWC compiler
+module.exports = {};
