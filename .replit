@@ -7,6 +7,8 @@ channel = "stable-24_05"
 [deployment]
 deploymentTarget = "static"
 publicDir = "public"
+run = ["sh", "-c", "npx serve out"]
+build = ["sh", "-c", "yarn build"]
 
 [[ports]]
 localPort = 3000
