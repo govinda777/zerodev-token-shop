@@ -16,12 +16,12 @@ test.describe('Responsive Design Tests', () => {
     // Take screenshot for visual verification
     await page.screenshot({ path: 'test-results/desktop-layout.png' });
     
-    // Check for desktop-specific elements
-    const navigation = page.locator('nav');
+    // Check for desktop-specific navigation element
+    const navigation = page.getByRole('navigation', { name: 'Navegação principal' });
     await expect(navigation).toBeVisible();
     
     // Verify tokens are displayed in a grid
-    const tokenGrid = page.locator('.token-grid, .tokens-container');
+    const tokenGrid = page.locator('.token-grid, .tokens-container, .card-grid');
     await expect(tokenGrid).toBeVisible();
   });
 
@@ -36,9 +36,15 @@ test.describe('Responsive Design Tests', () => {
     // Take screenshot for visual verification
     await page.screenshot({ path: 'test-results/tablet-layout.png' });
     
-    // Check that the navigation is still visible or has transformed to a tablet view
-    const navigation = page.locator('nav');
-    await expect(navigation).toBeVisible();
+    // Check that the main navigation is visible or mobile menu button is present
+    const mobileMenuButton = page.locator('button[aria-label*="menu"], .mobile-menu-button, button[aria-expanded]');
+    const desktopNav = page.getByRole('navigation', { name: 'Navegação principal' });
+    
+    // Either desktop nav should be visible OR mobile menu button should be present
+    const navigationVisible = await desktopNav.isVisible().catch(() => false);
+    const mobileButtonVisible = await mobileMenuButton.isVisible().catch(() => false);
+    
+    expect(navigationVisible || mobileButtonVisible).toBe(true);
   });
 
   test('mobile layout should display correctly', { tag: '@no-critical' }, async ({ page }) => {
@@ -53,15 +59,15 @@ test.describe('Responsive Design Tests', () => {
     await page.screenshot({ path: 'test-results/mobile-layout.png' });
     
     // Check for mobile menu button (hamburger)
-    const mobileMenuButton = page.locator('.mobile-menu-button, .hamburger-menu');
+    const mobileMenuButton = page.locator('button[aria-label*="menu"], .mobile-menu-button, button[aria-expanded]');
     await expect(mobileMenuButton).toBeVisible();
     
     // Click mobile menu to expand
     await mobileMenuButton.click();
     
-    // Verify that mobile menu expands
-    const expandedMenu = page.locator('.mobile-menu-expanded, .menu-items');
-    await expect(expandedMenu).toBeVisible();
+    // Verify that mobile navigation appears
+    const mobileNav = page.getByRole('navigation', { name: 'Navegação mobile' });
+    await expect(mobileNav).toBeVisible();
     
     // Take screenshot of expanded mobile menu
     await page.screenshot({ path: 'test-results/mobile-menu-expanded.png' });
@@ -81,12 +87,13 @@ test.describe('Responsive Design Tests', () => {
     // Take screenshot for visual verification
     await page.screenshot({ path: 'test-results/iphone-layout.png' });
     
-    // Test interaction on mobile
-    const mobileMenuButton = page.locator('.mobile-menu-button, .hamburger-menu');
+    // Test interaction on mobile - check for mobile menu button
+    const mobileMenuButton = page.locator('button[aria-label*="menu"], .mobile-menu-button, button[aria-expanded]');
+    await expect(mobileMenuButton).toBeVisible();
     await mobileMenuButton.click();
     
-    // Test a typical mobile user journey
-    const connectButton = page.getByRole('button', { name: /connect|login|sign in/i });
+    // Test a typical mobile user journey - look for connect button
+    const connectButton = page.getByRole('button', { name: /connect|login|sign in|conectar/i });
     await expect(connectButton).toBeVisible();
     
     // Close context after test
