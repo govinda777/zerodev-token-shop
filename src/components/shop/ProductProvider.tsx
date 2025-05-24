@@ -32,7 +32,7 @@ interface ProductContextType {
   buyProduct: (productId: string, installments?: number) => boolean;
 }
 
-const ProductContext = createContext<ProductContextType | undefined>(undefined);
+export const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
 export function ProductProvider({ children }: { children: React.ReactNode }) {
   const [purchases, setPurchases] = useState<Purchase[]>([]);

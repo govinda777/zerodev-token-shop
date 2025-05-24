@@ -1,6 +1,6 @@
 import { useProducts } from './ProductProvider';
 import { ProductCard } from './ProductCard';
-import { useAuth } from '@/components/auth/useAuth';
+import { useTokens } from '@/hooks/useTokens';
 import { Product } from '@/types/product';
 
 const PRODUCTS: Product[] = [
@@ -9,49 +9,50 @@ const PRODUCTS: Product[] = [
     name: 'Premium Access',
     description: 'Get exclusive access to premium content',
     price: 1,
-    image: '/products/premium.jpg'
+    image: '/products/premium.jpg',
+    type: 'product',
   },
   {
     id: '2',
     name: 'Pro Support',
     description: '24/7 priority support from our team',
     price: 1,
-    image: '/products/support.jpg'
+    image: '/products/support.jpg',
+    type: 'product',
   },
   {
     id: '3',
     name: 'Custom Badge',
     description: 'Unique profile badge for your account',
     price: 1,
-    image: '/products/badge.jpg'
+    image: '/products/badge.jpg',
+    type: 'product',
   },
   {
     id: '4',
     name: 'Analytics Dashboard',
     description: 'Advanced analytics and reporting tools',
     price: 1,
-    image: '/products/analytics.jpg'
+    image: '/products/analytics.jpg',
+    type: 'product',
   },
   {
     id: '5',
     name: 'API Access',
     description: 'Full access to our API endpoints',
     price: 1,
-    image: '/products/api.jpg'
+    image: '/products/api.jpg',
+    type: 'product',
   }
 ];
 
 export const ProductGrid = () => {
-  const { addPurchase } = useProducts();
-  const { tokens = 0 } = useAuth();
+  const { buyProduct } = useProducts();
+  const { balance } = useTokens();
 
   const handleBuy = (product: Product) => {
-    if (tokens >= product.price) {
-      addPurchase({
-        productId: product.id,
-        price: product.price,
-        timestamp: Date.now()
-      });
+    if (balance >= product.price) {
+      buyProduct(product.id);
     }
   };
 
@@ -62,7 +63,7 @@ export const ProductGrid = () => {
           key={product.id}
           product={product}
           onBuy={handleBuy}
-          disabled={tokens < product.price}
+          disabled={balance < product.price}
         />
       ))}
     </div>

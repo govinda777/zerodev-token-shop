@@ -7,6 +7,7 @@ export interface TokenContextType {
   balance: number;
   addTokens: (amount: number) => void;
   removeTokens: (amount: number) => void;
+  isLoading: boolean;
 }
 
 export const TokenContext = createContext<TokenContextType | undefined>(undefined);
@@ -80,7 +81,7 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <TokenContext.Provider value={{ balance, addTokens, removeTokens }}>
+    <TokenContext.Provider value={{ balance, addTokens, removeTokens, isLoading }}>
       {children}
     </TokenContext.Provider>
   );
