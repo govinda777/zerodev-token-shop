@@ -3,12 +3,14 @@
 import React, { createContext, useContext, useState } from 'react';
 import { Product, Purchase } from '@/types/product';
 import { useTokens } from '@/hooks/useTokens';
+import { useAuth } from '@/components/auth/useAuth';
+import JourneyLogger from '@/utils/journeyLogger';
 
 const PRODUCTS: Product[] = [
   {
     id: '1',
     name: 'Premium Service',
-    description: 'Access to premium features',
+    description: 'Access to premium features and priority support',
     price: 5,
     image: '/products/premium.jpg',
     type: 'service',
@@ -18,18 +20,74 @@ const PRODUCTS: Product[] = [
   {
     id: '2',
     name: 'API Access',
-    description: 'Full API access for developers',
+    description: 'Full API access for developers with unlimited requests',
     price: 3,
     image: '/products/api.jpg',
     type: 'service'
   },
-  // Add more products as needed
+  {
+    id: '3',
+    name: 'NFT Collection Pack',
+    description: 'Exclusive NFT collection with rare items',
+    price: 12,
+    image: '/products/nft-pack.jpg',
+    type: 'product',
+    installments: true,
+    requiredStake: 50
+  },
+  {
+    id: '4',
+    name: 'Governance Rights',
+    description: 'Extended voting rights in DAO decisions',
+    price: 8,
+    image: '/products/governance.jpg',
+    type: 'service',
+    installments: true
+  },
+  {
+    id: '5',
+    name: 'Trading Bot Access',
+    description: 'Access to automated trading bot with AI features',
+    price: 15,
+    image: '/products/trading-bot.jpg',
+    type: 'service',
+    installments: true,
+    requiredStake: 100
+  },
+  {
+    id: '6',
+    name: 'Private Pool Access',
+    description: 'Access to exclusive high-yield liquidity pools',
+    price: 6,
+    image: '/products/private-pool.jpg',
+    type: 'service'
+  },
+  {
+    id: '7',
+    name: 'Educational Course',
+    description: 'Complete DeFi and blockchain development course',
+    price: 4,
+    image: '/products/course.jpg',
+    type: 'service',
+    installments: true
+  },
+  {
+    id: '8',
+    name: 'VIP Membership',
+    description: 'VIP membership with exclusive benefits and rewards',
+    price: 20,
+    image: '/products/vip.jpg',
+    type: 'service',
+    installments: true,
+    requiredStake: 200
+  }
 ];
 
 interface ProductContextType {
   products: Product[];
   purchases: Purchase[];
   buyProduct: (productId: string, installments?: number) => boolean;
+  buyProductInstallment: (productId: string, installments: number) => boolean;
 }
 
 export const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -37,23 +95,57 @@ export const ProductContext = createContext<ProductContextType | undefined>(unde
 export function ProductProvider({ children }: { children: React.ReactNode }) {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const { balance, removeTokens } = useTokens();
+  const { address } = useAuth();
 
   const buyProduct = (productId: string, installments = 1) => {
     const product = PRODUCTS.find(p => p.id === productId);
-    if (!product || balance < product.price) return false;
+    if (!product || balance < product.price || !address) return false;
 
     removeTokens(product.price);
-    setPurchases(prev => [...prev, {
+    
+    const newPurchase = {
+      productId,
+      timestamp: Date.now(),
+      price: product.price,
+      installments: installments > 1 ? installments : undefined
+    };
+    
+    setPurchases(prev => [...prev, newPurchase]);
+    
+    // Log purchase
+    JourneyLogger.logPurchase(address, productId, product.price, installments > 1 ? installments : undefined);
+    
+    return true;
+  };
+
+  const buyProductInstallment = (productId: string, installments: number) => {
+    const product = PRODUCTS.find(p => p.id === productId);
+    if (!product || !product.installments || !address) return false;
+
+    // For installment purchases, we don't charge immediately
+    // This would be handled by the investment provider's installment system
+    const newPurchase = {
       productId,
       timestamp: Date.now(),
       price: product.price,
       installments
-    }]);
+    };
+    
+    setPurchases(prev => [...prev, newPurchase]);
+    
+    // Log installment purchase initiation
+    JourneyLogger.logPurchase(address, productId, product.price, installments);
+    
     return true;
   };
 
   return (
-    <ProductContext.Provider value={{ products: PRODUCTS, purchases, buyProduct }}>
+    <ProductContext.Provider value={{ 
+      products: PRODUCTS, 
+      purchases, 
+      buyProduct,
+      buyProductInstallment 
+    }}>
       {children}
     </ProductContext.Provider>
   );

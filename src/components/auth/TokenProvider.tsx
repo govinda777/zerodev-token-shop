@@ -2,6 +2,7 @@
 
 import { createContext, useEffect, useState } from 'react';
 import { useAuth } from './useAuth';
+import JourneyLogger from '@/utils/journeyLogger';
 
 export interface TokenContextType {
   balance: number;
@@ -25,21 +26,32 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (mounted && isConnected && address) {
       setIsLoading(true);
+      
       // Check if first login and grant initial tokens
       const hasInitialGrant = localStorage.getItem(`initial_grant_${address}`);
       if (!hasInitialGrant) {
-        setBalance(10);
+        const welcomeReward = 10;
+        setBalance(welcomeReward);
         localStorage.setItem(`initial_grant_${address}`, 'true');
+        localStorage.setItem(address, welcomeReward.toString());
+        
+        // Log first login with reward
+        JourneyLogger.logFirstLogin(address, welcomeReward);
+        JourneyLogger.logTokenReward(address, welcomeReward, 'welcome_bonus');
+        
+        console.log(`🎉 Welcome bonus of ${welcomeReward} tokens granted to ${address}`);
+      } else {
+        // Fetch current balance from storage
+        getTokenBalance(address).then((bal) => {
+          setBalance(bal);
+          setIsLoading(false);
+        }).catch(() => {
+          setBalance(0);
+          setIsLoading(false);
+        });
       }
-
-      // Fetch current balance from storage
-      getTokenBalance(address).then((bal) => {
-        setBalance(bal);
-        setIsLoading(false);
-      }).catch(() => {
-        setBalance(0);
-        setIsLoading(false);
-      });
+      
+      setIsLoading(false);
     } else if (mounted) {
       setBalance(0);
       setIsLoading(false);
@@ -50,6 +62,9 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     if (!address) return;
     addTokensToStorage(address, amount); // Persist to storage
     setBalance(prev => prev + amount);
+    
+    // Log token addition
+    JourneyLogger.logTokenReward(address, amount, 'manual_addition');
   };
 
   const removeTokens = (amount: number) => {

@@ -3,6 +3,7 @@
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { TokenProvider } from "@/components/auth/TokenProvider";
 import { ProductProvider } from "@/components/shop/ProductProvider";
+import { InvestmentProvider } from "@/components/investment/InvestmentProvider";
 import { WagmiProvider, createConfig, http } from "wagmi";
 import { mainnet, sepolia } from "wagmi/chains";
 import { injected } from "wagmi/connectors";
@@ -27,9 +28,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <WagmiProvider config={config}>
         <AuthProvider>
           <TokenProvider>
-            <ProductProvider>
-              {children}
-            </ProductProvider>
+            <InvestmentProvider>
+              <ProductProvider>
+                {children}
+              </ProductProvider>
+            </InvestmentProvider>
           </TokenProvider>
         </AuthProvider>
       </WagmiProvider>
