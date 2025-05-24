@@ -149,23 +149,23 @@ export function ProductGrid() {
   return (
     <section aria-labelledby="products-section-title">
       {/* Section Header */}
-      <div className="text-center mb-12 md:mb-16">
+      <div className="text-center space-content">
         <div className="inline-flex items-center gap-2 bg-purple-500/20 backdrop-blur-sm border border-purple-500/30 rounded-full px-4 py-2 mb-6">
           <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" aria-hidden="true"></div>
           <span className="text-purple-200 text-sm font-medium">Marketplace</span>
         </div>
         
-        <h2 id="products-section-title" className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 font-heading text-white neon-text">
+        <h2 id="products-section-title" className="text-responsive-3xl font-bold mb-4 md:mb-6 font-heading text-white neon-text">
           Produtos Disponíveis
         </h2>
         
-        <p className="text-base md:text-lg lg:text-xl text-white/80 max-w-2xl mx-auto mb-8 md:mb-12 leading-relaxed">
+        <p className="text-responsive-base text-white/80 max-w-2xl mx-auto mb-8 md:mb-12 leading-relaxed">
           Descubra tokens únicos e exclusivos. Cada item é verificado e autenticado.
         </p>
 
         {/* Filter/Sort Bar - Melhorado para mobile */}
-        <nav aria-label="Filtros de produtos" className="flex flex-wrap justify-center gap-3 md:gap-4 mb-8 md:mb-12">
-          <button className="glass-card px-4 md:px-6 py-2 md:py-3 rounded-full text-white hover:bg-purple-500/20 transition-all duration-300 border border-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black min-h-[44px] text-sm md:text-base" aria-current="page">
+        <nav aria-label="Filtros de produtos" className="flex flex-wrap justify-center gap-3 md:gap-4 space-items">
+          <button className="btn-secondary btn-sm focus-ring" aria-current="page">
             <span className="flex items-center">
               <svg className="w-3 h-3 md:w-4 md:h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
@@ -173,20 +173,20 @@ export function ProductGrid() {
               Todos
             </span>
           </button>
-          <button className="glass-card px-4 md:px-6 py-2 md:py-3 rounded-full text-white/80 hover:text-white hover:bg-purple-500/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black min-h-[44px] text-sm md:text-base">
+          <button className="btn-secondary btn-sm focus-ring text-white/80 hover:text-white">
             Trending
           </button>
-          <button className="glass-card px-4 md:px-6 py-2 md:py-3 rounded-full text-white/80 hover:text-white hover:bg-purple-500/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black min-h-[44px] text-sm md:text-base">
+          <button className="btn-secondary btn-sm focus-ring text-white/80 hover:text-white">
             Novos
           </button>
-          <button className="glass-card px-4 md:px-6 py-2 md:py-3 rounded-full text-white/80 hover:text-white hover:bg-purple-500/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black min-h-[44px] text-sm md:text-base">
+          <button className="btn-secondary btn-sm focus-ring text-white/80 hover:text-white">
             Preço ↑
           </button>
         </nav>
       </div>
 
       {/* Products Grid - Grid otimizado com melhor responsividade */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 mb-12 md:mb-16" role="grid" aria-label="Grade de produtos">
+      <div className="card-grid space-content" role="grid" aria-label="Grade de produtos">
         {products.map((product) => (
           <ProductCard 
             key={product.id} 
@@ -197,8 +197,8 @@ export function ProductGrid() {
       </div>
 
       {/* Load More Section - Melhorado */}
-      <div className="text-center">
-        <button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] min-h-[44px] text-sm md:text-base">
+      <div className="text-center space-items">
+        <button className="btn-primary btn-lg hover-lift focus-ring">
           <span className="flex items-center">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -207,7 +207,7 @@ export function ProductGrid() {
           </span>
         </button>
         
-        <p className="text-white/60 mt-4 text-sm">
+        <p className="text-white/60 mt-4 text-responsive-sm">
           Mostrando {products.length} produtos disponíveis
         </p>
       </div>

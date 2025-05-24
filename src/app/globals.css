@@ -342,6 +342,113 @@ textarea:focus-visible {
   .text-heading-lg {
     @apply text-3xl md:text-4xl lg:text-5xl font-bold leading-tight;
   }
+
+  /* Layout rápido */
+  .section-spacing {
+    @apply py-16 md:py-24;
+  }
+
+  .card-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8;
+  }
+
+  .card-grid-auto {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8;
+  }
+
+  /* Botões padronizados */
+  .btn-lg {
+    @apply px-8 py-4 text-lg min-h-[52px];
+  }
+
+  .btn-sm {
+    @apply px-4 py-2 text-sm min-h-[36px];
+  }
+
+  /* States padronizados */
+  .loading-spinner {
+    @apply animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full;
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:scale-105 hover:-translate-y-1;
+  }
+
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black;
+  }
+
+  /* Responsive text sizes rápidos */
+  .text-responsive-xs {
+    @apply text-xs md:text-sm;
+  }
+
+  .text-responsive-sm {
+    @apply text-sm md:text-base;
+  }
+
+  .text-responsive-base {
+    @apply text-base md:text-lg;
+  }
+
+  .text-responsive-lg {
+    @apply text-lg md:text-xl;
+  }
+
+  .text-responsive-xl {
+    @apply text-xl md:text-2xl;
+  }
+
+  .text-responsive-2xl {
+    @apply text-2xl md:text-3xl;
+  }
+
+  .text-responsive-3xl {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+
+  /* Spacing rápido */
+  .space-section {
+    @apply space-y-16 md:space-y-24;
+  }
+
+  .space-content {
+    @apply space-y-8 md:space-y-12;
+  }
+
+  .space-elements {
+    @apply space-y-6 md:space-y-8;
+  }
+
+  .space-items {
+    @apply space-y-4 md:space-y-6;
+  }
+
+  /* Padding rápido */
+  .padding-section {
+    @apply px-4 sm:px-6 lg:px-8 py-16 md:py-24;
+  }
+
+  .padding-content {
+    @apply px-4 sm:px-6 lg:px-8 py-8 md:py-12;
+  }
+
+  .padding-card {
+    @apply p-4 md:p-6 lg:p-8;
+  }
+
+  /* Aspect ratios rápidos */
+  .aspect-card {
+    @apply aspect-[4/3];
+  }
+
+  .aspect-video {
+    @apply aspect-[16/9];
+  }
+
+  .aspect-square {
+    @apply aspect-square;
+  }
 }
 
 /* Floating animation melhorada */
