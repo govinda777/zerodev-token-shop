@@ -21,5 +21,5 @@ test('renders ProductCard with product info', () => {
   render(<ProductCard product={product} onPurchase={jest.fn()} />);
   expect(screen.getByText('Produto Teste')).toBeInTheDocument();
   expect(screen.getByText('Descrição teste')).toBeInTheDocument();
-  expect(screen.getByText(/10 ETH/)).toBeInTheDocument();
+  expect(screen.getByText('Buy for 10 Token')).toBeInTheDocument();
 }); 

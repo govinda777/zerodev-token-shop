@@ -37,6 +37,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.27.1",
     "@playwright/test": "^1.52.0",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.1.2",
