@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -6,7 +7,8 @@ export interface Product {
   image: string;
 }
 
-export interface ProductPurchase extends Product {
-  purchaseDate: Date;
-  transactionHash?: string;
-} 
+export interface Purchase {
+  productId: string;
+  timestamp: number;
+  price: number;
+}

@@ -1,9 +1,9 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Product, Purchase } from '@/types/product';
 import { useAuth } from "@/components/auth/useAuth";
 import { useTokens } from "@/hooks/useTokens";
-import type { Product } from "@/types/product";
 
 // Mock data for development
 const MOCK_PRODUCTS: Product[] = [
@@ -15,7 +15,7 @@ const MOCK_PRODUCTS: Product[] = [
     image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop",
   },
   {
-    id: "2", 
+    id: "2",
     name: "Produto Digital 2",
     description: "Descrição do produto digital 2",
     price: 0.02,
@@ -23,7 +23,7 @@ const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: "3",
-    name: "Produto Digital 3", 
+    name: "Produto Digital 3",
     description: "Descrição do produto digital 3",
     price: 0.03,
     image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop",
@@ -36,6 +36,8 @@ interface ProductContextType {
   error: Error | null;
   purchaseProduct: (product: Product) => Promise<void>;
   purchaseHistory: Product[];
+  purchases: Purchase[];
+  addPurchase: (purchase: Purchase) => void;
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -43,11 +45,17 @@ const ProductContext = createContext<ProductContextType | undefined>(undefined);
 // Export the context so it can be used by the hook
 export { ProductContext };
 
-export function ProductProvider({ children }: { children: React.ReactNode }) {
+export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
   const [products] = useState<Product[]>(MOCK_PRODUCTS);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [purchaseHistory, setPurchaseHistory] = useState<Product[]>([]);
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
+
+  const addPurchase = (purchase: Purchase) => {
+    setPurchases((prev) => [...prev, purchase]);
+  };
+
   const { isConnected, address } = useAuth();
   const { balance, spendTokens } = useTokens();
   const [mounted, setMounted] = useState(false);
@@ -76,15 +84,15 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
       setError(null);
 
       const priceInTokens = Math.floor(product.price * 1000); // Convert ETH to tokens (1 ETH = 1000 tokens)
-      
+
       if (balance < priceInTokens) {
         throw new Error("Saldo insuficiente");
       }
 
       const success = await spendTokens(priceInTokens);
-      
+
       if (success) {
-        setPurchaseHistory(prev => [product, ...prev]);
+        setPurchaseHistory((prev) => [product, ...prev]);
         console.log(`Purchased ${product.name} for ${priceInTokens} tokens`);
       } else {
         throw new Error("Falha na transação");
@@ -108,12 +116,14 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
         error,
         purchaseProduct,
         purchaseHistory,
+        purchases,
+        addPurchase,
       }}
     >
       {children}
     </ProductContext.Provider>
   );
-}
+};
 
 export function useProducts() {
   const context = useContext(ProductContext);
@@ -121,4 +131,4 @@ export function useProducts() {
     throw new Error("useProducts must be used within a ProductProvider");
   }
   return context;
-} 
+}

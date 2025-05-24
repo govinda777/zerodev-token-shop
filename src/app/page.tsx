@@ -6,6 +6,8 @@ import { SkipLinks } from "@/components/common/SkipLinks";
 import { ProductGrid } from "@/components/shop/ProductGrid";
 import { useAuth } from '@/components/auth/useAuth';
 
+import { ProductProvider } from '@/components/shop/ProductProvider';
+
 export default function Home() {
   const { isConnected } = useAuth();
 
@@ -15,6 +17,7 @@ export default function Home() {
       <Header />
       
       <main id="main-content" className="flex-grow w-full">
+        <ProductProvider>
         {/* Hero Section */}
         <section className="relative section-spacing" aria-labelledby="hero-title">
           <div className="container-responsive">
@@ -101,6 +104,7 @@ export default function Home() {
             <ProductGrid />
           </div>
         </section>
+      </ProductProvider>
       </main>
       
       <Footer />
