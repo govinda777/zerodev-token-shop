@@ -1,4 +1,36 @@
-Crie uma interface simples usando ZeroDev para implementar um sistema de login com as seguintes funcionalidades:
+Crie uma interface simples usando ZeroDev para implementar um ecommerce simples onde o usuário irá se logar pela metamask ou login.
+
+O projeto é uma amostra do que o protocolo ERC-4337 pode fazer usando o ZeroDev como provider.
+
+## Fluxo
+
+1 - O usuário acessa a página e clica em "Login"
+2 - O usuário ganha 10 tokens
+3 - O usuário pode comprar serviços e produtos com os tokens
+4 - O usuário pode ver o histórico de compras
+5 - O usuário pode ver o saldo de tokens
+6 - Investimento
+    - Stacke tokens para ganhar tokens
+    - Comprar tokens de governança (dividendos / ...)
+    - NFT participação nas taxas de transação
+    - Pool de tokens para ganhar tokens
+7 - Pagamento
+    
+    * Os produtos e serviços podem ser comprados a vista ou parcelados.
+
+    * Para parvelamento o usuário tem que ter X tokens em stacke.
+
+8 - NFTs
+    - Membros da comunidade
+    - Airdrop de tokens
+    - Airdrop de tokens de governança
+    - Airdrop de tokens de stacke
+    - Airdrop de tokens de pool
+    - Airdrop de tokens de investimento
+    - Airdrop de tokens de pagamento
+    - Airdrop de tokens de investimento
+
+
 
 npm_config_loglevel=silly NPM_CONFIG_REGISTRY=https://registry.npmjs.org/ npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias "@/*" --verbose
 
