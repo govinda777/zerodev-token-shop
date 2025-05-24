@@ -34,7 +34,7 @@ export function Header() {
   };
 
   return (
-    <header className="glass z-20 sticky top-0 backdrop-blur-md border-b border-white/10">
+    <header id="navigation" className="glass z-20 sticky top-0 backdrop-blur-md border-b border-white/10">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
@@ -62,7 +62,7 @@ export function Header() {
               </svg>
               Início
             </Link>
-            <Link href="/marketplace" className="text-white/90 hover:text-white transition-colors duration-300 flex items-center text-sm font-medium">
+            <Link href="#products" className="text-white/90 hover:text-white transition-colors duration-300 flex items-center text-sm font-medium">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
@@ -177,7 +177,7 @@ export function Header() {
                 Início
               </Link>
               <Link 
-                href="/marketplace" 
+                href="#products" 
                 className="block text-white/90 hover:text-white transition-colors duration-300 flex items-center py-3 px-2 rounded-lg hover:bg-white/5 text-base font-medium min-h-[44px]"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

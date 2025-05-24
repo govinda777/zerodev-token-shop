@@ -127,6 +127,22 @@ svg[style*="width"] {
   border: 0;
 }
 
+/* Skip links visíveis quando focados */
+.focus-within\:not-sr-only:focus-within .sr-only {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+.focus-within\:not-sr-only:focus-within {
+  position: relative;
+}
+
 /* Estilo de gradiente melhorado */
 .gradient-background {
   background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460, #533a71);

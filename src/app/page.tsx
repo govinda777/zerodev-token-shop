@@ -2,6 +2,7 @@
 
 import { Header } from "@/components/common/Header";
 import { Footer } from "@/components/common/Footer";
+import { SkipLinks } from "@/components/common/SkipLinks";
 import { ProductGrid } from "@/components/shop/ProductGrid";
 import { useAuth } from '@/components/auth/useAuth';
 
@@ -10,9 +11,10 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen gradient-background">
+      <SkipLinks />
       <Header />
       
-      <main className="flex-grow w-full">
+      <main id="main-content" className="flex-grow w-full">
         {/* Hero Section */}
         <section className="relative py-16 md:py-24 lg:py-32" aria-labelledby="hero-title">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -93,7 +95,7 @@ export default function Home() {
         </section>
 
         {/* Products Section */}
-        <section className="py-16 md:py-24" aria-labelledby="products-title">
+        <section id="products" className="py-16 md:py-24" aria-labelledby="products-title">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 id="products-title" className="sr-only">Produtos disponíveis</h2>
             <ProductGrid />
