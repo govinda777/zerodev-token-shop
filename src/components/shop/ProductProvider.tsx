@@ -1,134 +1,66 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { Product, Purchase } from '@/types/product';
-import { useAuth } from "@/components/auth/useAuth";
-import { useTokens } from "@/hooks/useTokens";
+import { useTokens } from '@/hooks/useTokens';
 
-// Mock data for development
-const MOCK_PRODUCTS: Product[] = [
+const PRODUCTS: Product[] = [
   {
-    id: "1",
-    name: "Produto Digital 1",
-    description: "Descrição do produto digital 1",
-    price: 0.01,
-    image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop",
+    id: '1',
+    name: 'Premium Service',
+    description: 'Access to premium features',
+    price: 5,
+    image: '/products/premium.jpg',
+    type: 'service',
+    installments: true,
+    requiredStake: 20
   },
   {
-    id: "2",
-    name: "Produto Digital 2",
-    description: "Descrição do produto digital 2",
-    price: 0.02,
-    image: "https://images.unsplash.com/photo-1515378791036-0648a814c963?w=400&h=300&fit=crop",
+    id: '2',
+    name: 'API Access',
+    description: 'Full API access for developers',
+    price: 3,
+    image: '/products/api.jpg',
+    type: 'service'
   },
-  {
-    id: "3",
-    name: "Produto Digital 3",
-    description: "Descrição do produto digital 3",
-    price: 0.03,
-    image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop",
-  },
+  // Add more products as needed
 ];
 
 interface ProductContextType {
   products: Product[];
-  isLoading: boolean;
-  error: Error | null;
-  purchaseProduct: (product: Product) => Promise<void>;
-  purchaseHistory: Product[];
   purchases: Purchase[];
-  addPurchase: (purchase: Purchase) => void;
+  buyProduct: (productId: string, installments?: number) => boolean;
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
-// Export the context so it can be used by the hook
-export { ProductContext };
-
-export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
-  const [products] = useState<Product[]>(MOCK_PRODUCTS);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [purchaseHistory, setPurchaseHistory] = useState<Product[]>([]);
+export function ProductProvider({ children }: { children: React.ReactNode }) {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const { balance, removeTokens } = useTokens();
 
-  const addPurchase = (purchase: Purchase) => {
-    setPurchases((prev) => [...prev, purchase]);
+  const buyProduct = (productId: string, installments = 1) => {
+    const product = PRODUCTS.find(p => p.id === productId);
+    if (!product || balance < product.price) return false;
+
+    removeTokens(product.price);
+    setPurchases(prev => [...prev, {
+      productId,
+      timestamp: Date.now(),
+      price: product.price,
+      installments
+    }]);
+    return true;
   };
-
-  const { isConnected, address } = useAuth();
-  const { balance, spendTokens } = useTokens();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (isConnected && address) {
-      // In a real app, we would fetch purchase history from an API
-      setPurchaseHistory([]);
-    } else {
-      setPurchaseHistory([]);
-    }
-  }, [isConnected, address]);
-
-  const purchaseProduct = async (product: Product) => {
-    if (!isConnected || !address) {
-      setError(new Error("Conecte sua carteira primeiro"));
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const priceInTokens = Math.floor(product.price * 1000); // Convert ETH to tokens (1 ETH = 1000 tokens)
-
-      if (balance < priceInTokens) {
-        throw new Error("Saldo insuficiente");
-      }
-
-      const success = await spendTokens(priceInTokens);
-
-      if (success) {
-        setPurchaseHistory((prev) => [product, ...prev]);
-        console.log(`Purchased ${product.name} for ${priceInTokens} tokens`);
-      } else {
-        throw new Error("Falha na transação");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Erro desconhecido"));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
-    <ProductContext.Provider
-      value={{
-        products,
-        isLoading,
-        error,
-        purchaseProduct,
-        purchaseHistory,
-        purchases,
-        addPurchase,
-      }}
-    >
+    <ProductContext.Provider value={{ products: PRODUCTS, purchases, buyProduct }}>
       {children}
     </ProductContext.Provider>
   );
-};
+}
 
 export function useProducts() {
   const context = useContext(ProductContext);
-  if (context === undefined) {
-    throw new Error("useProducts must be used within a ProductProvider");
-  }
+  if (!context) throw new Error('useProducts must be used within ProductProvider');
   return context;
 }
