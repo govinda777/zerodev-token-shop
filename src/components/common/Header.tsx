@@ -35,7 +35,7 @@ export function Header() {
 
   return (
     <header className="glass z-20 sticky top-0 backdrop-blur-md border-b border-white/10">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <div className="flex items-center">
@@ -46,94 +46,99 @@ export function Header() {
                 </svg>
               </div>
               <div>
-                <h1 className="text-2xl font-bold font-heading text-white neon-text">
+                <h1 className="text-lg md:text-xl lg:text-2xl font-bold font-heading text-white neon-text">
                   ZeroDev
                 </h1>
-                <p className="text-xs text-purple-300 -mt-1">Token Shop</p>
+                <p className="text-xs text-purple-300 -mt-1 hidden sm:block">Token Shop</p>
               </div>
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8" aria-label="Navegação principal">
-            <Link href="/marketplace" className="text-white/90 hover:text-white transition-colors duration-300 flex items-center">
-              <svg className="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v3H8V5z" />
+          {/* Desktop Navigation - Simplificado */}
+          <nav className="hidden lg:flex items-center space-x-6" aria-label="Navegação principal">
+            <Link href="/" className="text-white/90 hover:text-white transition-colors duration-300 flex items-center text-sm font-medium">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              Início
+            </Link>
+            <Link href="/marketplace" className="text-white/90 hover:text-white transition-colors duration-300 flex items-center text-sm font-medium">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
               Marketplace
             </Link>
-            <Link href="/wallet" className="text-white/90 hover:text-white transition-colors duration-300 flex items-center">
-              <svg className="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <Link href="/wallet" className="text-white/90 hover:text-white transition-colors duration-300 flex items-center text-sm font-medium">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
               </svg>
               Carteira
             </Link>
-            <Link href="/history" className="text-white/90 hover:text-white transition-colors duration-300 flex items-center">
-              <svg className="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              Histórico
-            </Link>
           </nav>
           
           {/* User Section */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {isConnected ? (
               <div className="flex items-center space-x-3">
-                {/* Balance Display */}
-                <TokenBalance address={address} />
+                {/* Balance Display - Escondido em telas muito pequenas */}
+                <div className="hidden sm:block">
+                  <TokenBalance address={address} />
+                </div>
 
-                {/* Address Display */}
-                <div className="glass-card px-4 py-2 rounded-full border border-purple-500/30 neon-box">
+                {/* Address Display - Melhorado */}
+                <div className="glass-card px-3 py-2 rounded-full border border-purple-500/30 neon-box">
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" aria-hidden="true"></div>
-                    <span className="text-white font-medium text-sm">{displayAddress}</span>
+                    <span className="text-white font-medium text-xs md:text-sm">{displayAddress}</span>
                   </div>
-                </div>
-                
-                {/* User Menu */}
-                <div className="relative">
-                  <button 
-                    className="glass-card p-2 rounded-full border border-purple-500/30 hover:border-purple-500/50 transition-all duration-300"
-                    aria-label="Menu do usuário"
-                  >
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </button>
                 </div>
 
                 <button
                   onClick={handleLogout}
                   disabled={isLoading}
-                  className="hidden sm:block bg-red-600/20 hover:bg-red-600/30 text-red-300 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 border border-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="hidden md:flex bg-red-600/20 hover:bg-red-600/30 text-red-300 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 border border-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed items-center min-h-[44px]"
                   aria-label="Desconectar carteira"
                 >
-                  {isLoading ? "Desconectando..." : "Desconectar"}
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-red-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="hidden lg:inline">Desconectando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span className="hidden lg:inline">Sair</span>
+                    </>
+                  )}
                 </button>
               </div>
             ) : (
               <button
                 onClick={handleLogin}
                 disabled={isLoading}
-                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-4 md:px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none min-h-[44px] flex items-center text-sm md:text-base"
                 aria-label="Conectar carteira digital"
               >
                 {isLoading ? (
                   <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Conectando...
+                    <span className="hidden sm:inline">Conectando...</span>
                   </span>
                 ) : (
                   <span className="flex items-center">
-                    <svg className="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
                     </svg>
-                    Conectar Carteira
+                    <span className="hidden sm:inline">Conectar</span>
+                    <span className="sm:hidden">Login</span>
                   </span>
                 )}
               </button>
@@ -142,49 +147,85 @@ export function Header() {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden glass-card p-2 rounded-lg border border-purple-500/30"
+              className="lg:hidden glass-card p-2 rounded-lg border border-purple-500/30 min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu"}
               aria-expanded={isMobileMenuOpen}
             >
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
               </svg>
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation - Melhorado */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-white/10 py-4">
-            <nav className="space-y-4" aria-label="Navegação mobile">
-              <Link href="/marketplace" className="block text-white/90 hover:text-white transition-colors duration-300 flex items-center py-2">
-                <svg className="w-3.5 h-3.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+          <div className="lg:hidden border-t border-white/10 py-4">
+            <nav className="space-y-3" aria-label="Navegação mobile">
+              <Link 
+                href="/" 
+                className="block text-white/90 hover:text-white transition-colors duration-300 flex items-center py-3 px-2 rounded-lg hover:bg-white/5 text-base font-medium min-h-[44px]"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Início
+              </Link>
+              <Link 
+                href="/marketplace" 
+                className="block text-white/90 hover:text-white transition-colors duration-300 flex items-center py-3 px-2 rounded-lg hover:bg-white/5 text-base font-medium min-h-[44px]"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
                 Marketplace
               </Link>
-              <Link href="/wallet" className="block text-white/90 hover:text-white transition-colors duration-300 flex items-center py-2">
-                <svg className="w-3.5 h-3.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <Link 
+                href="/wallet" 
+                className="block text-white/90 hover:text-white transition-colors duration-300 flex items-center py-3 px-2 rounded-lg hover:bg-white/5 text-base font-medium min-h-[44px]"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
                 </svg>
                 Carteira
               </Link>
-              <Link href="/history" className="block text-white/90 hover:text-white transition-colors duration-300 flex items-center py-2">
-                <svg className="w-3.5 h-3.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                Histórico
-              </Link>
               
               {isConnected && (
-                <div className="pt-4 border-t border-white/10">
-                  <TokenBalance address={address} />
+                <div className="pt-4 border-t border-white/10 space-y-3">
+                  <div className="px-2">
+                    <TokenBalance address={address} />
+                  </div>
                   <button
-                    onClick={handleLogout}
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
                     disabled={isLoading}
-                    className="w-full bg-red-600/20 hover:bg-red-600/30 text-red-300 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 border border-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                    className="w-full bg-red-600/20 hover:bg-red-600/30 text-red-300 px-4 py-3 rounded-lg text-base font-medium transition-all duration-300 border border-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-h-[44px]"
                   >
-                    {isLoading ? "Desconectando..." : "Desconectar"}
+                    {isLoading ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-red-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Desconectando...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Desconectar
+                      </>
+                    )}
                   </button>
                 </div>
               )}
