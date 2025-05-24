@@ -1,3 +1,7 @@
 
-// Using Next.js built-in SWC compiler
-module.exports = {};
+module.exports = {
+  presets: [
+    ['next/babel'],
+    ['@babel/preset-typescript', { isTSX: true, allExtensions: true }]
+  ]
+};
