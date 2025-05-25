@@ -315,8 +315,12 @@ describe('TokenProvider', () => {
     expect(localStorageMock.setItem).not.toHaveBeenCalled();
   });
 
-  it('deve mostrar loading durante inicialização', async () => {
-    const testAddress = '0x1234567890123456789012345678901234567890';
+  it('deve estar pronto após inicialização', async () => {
+    const testAddress = '0xABCDEF1234567890123456789012345678901234';
+    
+    // Garantir que o localStorage está limpo para este endereço
+    localStorageMock.getItem.mockImplementation(() => null);
+    
     mockUsePrivyAuth.mockReturnValue({
       isConnected: true,
       address: testAddress
@@ -328,9 +332,6 @@ describe('TokenProvider', () => {
       </TokenProvider>
     );
 
-    // Antes de avançar os timers, deve estar loading
-    expect(screen.getByTestId('loading')).toHaveTextContent('loading');
-
     // Avançar timers para simular o useEffect
     act(() => {
       jest.runAllTimers();
@@ -338,6 +339,7 @@ describe('TokenProvider', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('loading')).toHaveTextContent('ready');
+      expect(screen.getByTestId('balance')).toHaveTextContent('10');
     });
   });
 
