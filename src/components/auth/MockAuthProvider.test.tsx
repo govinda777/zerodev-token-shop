@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MockAuthProvider, useMockAuth } from './MockAuthProvider';
 import React from 'react';
 
@@ -23,6 +23,14 @@ function TestComponent() {
 }
 
 describe('MockAuthProvider', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('deve renderizar children corretamente', () => {
     render(
       <MockAuthProvider>
@@ -53,18 +61,22 @@ describe('MockAuthProvider', () => {
     );
 
     const connectBtn = screen.getByTestId('connect-btn');
-    fireEvent.click(connectBtn);
+    
+    act(() => {
+      fireEvent.click(connectBtn);
+    });
 
     // Deve mostrar estado de connecting
     expect(screen.getByTestId('status')).toHaveTextContent('connecting');
 
-    // Aguardar a conexão completar
-    await waitFor(
-      () => {
-        expect(screen.getByTestId('status')).toHaveTextContent('connected');
-      },
-      { timeout: 3000 }
-    );
+    // Avançar o tempo para completar a conexão
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('status')).toHaveTextContent('connected');
+    });
 
     expect(screen.getByTestId('address')).toHaveTextContent('0x1234567890123456789012345678901234567890');
   });
@@ -78,7 +90,15 @@ describe('MockAuthProvider', () => {
 
     // Primeiro conecta
     const connectBtn = screen.getByTestId('connect-btn');
-    fireEvent.click(connectBtn);
+    
+    act(() => {
+      fireEvent.click(connectBtn);
+    });
+
+    // Avançar o tempo para completar a conexão
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId('status')).toHaveTextContent('connected');
@@ -114,7 +134,14 @@ describe('MockAuthProvider', () => {
     const disconnectBtn = screen.getByTestId('disconnect-btn');
 
     // Primeira conexão
-    fireEvent.click(connectBtn);
+    act(() => {
+      fireEvent.click(connectBtn);
+    });
+    
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+    
     await waitFor(() => {
       expect(screen.getByTestId('status')).toHaveTextContent('connected');
     });
@@ -124,7 +151,14 @@ describe('MockAuthProvider', () => {
     expect(screen.getByTestId('status')).toHaveTextContent('disconnected');
 
     // Segunda conexão
-    fireEvent.click(connectBtn);
+    act(() => {
+      fireEvent.click(connectBtn);
+    });
+    
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+    
     await waitFor(() => {
       expect(screen.getByTestId('status')).toHaveTextContent('connected');
     });
