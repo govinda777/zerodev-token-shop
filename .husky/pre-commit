@@ -1,6 +1,3 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 echo "🧪 Executando testes de unidade..."
 
 # Executar testes de unidade

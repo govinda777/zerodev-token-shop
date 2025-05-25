@@ -245,3 +245,177 @@ Se você encontrar problemas ou tiver sugestões:
 ---
 
 **Feito com ❤️ by ZeroDev Team**
+
+## 🧪 Testes e Qualidade
+
+### Pre-commit Hook
+O projeto utiliza **Husky** para executar automaticamente testes de unidade antes de cada commit:
+
+```bash
+# Commit normal - testes executam automaticamente
+git commit -m "feat: nova funcionalidade"
+🧪 Executando testes de unidade...
+✅ Testes de unidade passaram!
+
+# Em caso de falha - commit é cancelado
+❌ Testes de unidade falharam. Commit cancelado.
+```
+
+### Scripts de Teste
+```bash
+# Testes de unidade (44 testes passando)
+npm run test:unit
+
+# Testes em modo watch
+npm run test:unit:watch
+
+# Testes com cobertura
+npm run test:unit:coverage
+
+# Todos os testes
+npm run test:all
+
+# Testes e2e
+npm run test:e2e
+```
+
+### Documentação
+- 📋 [**TESTS_README.md**](./TESTS_README.md) - Documentação completa dos testes
+- 🔧 [**PRE_COMMIT_GUIDE.md**](./PRE_COMMIT_GUIDE.md) - Guia do pre-commit hook
+
+## 🛠️ Tecnologias
+
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **Autenticação**: Privy (Web3 Auth)
+- **Blockchain**: ZeroDev (Account Abstraction)
+- **Testes**: Jest, React Testing Library
+- **CI/CD**: Husky (pre-commit hooks)
+- **E2E**: Playwright
+
+## 📦 Instalação
+
+```bash
+# Clonar repositório
+git clone <repository-url>
+cd zerodev-token-shop
+
+# Instalar dependências
+npm install
+
+# Configurar variáveis de ambiente
+cp .env.example .env.local
+# Editar .env.local com suas chaves
+
+# Executar em desenvolvimento
+npm run dev
+```
+
+## 🔧 Configuração
+
+### Variáveis de Ambiente
+
+```env
+NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id
+NEXT_PUBLIC_ZERODEV_PROJECT_ID=your_zerodev_project_id
+```
+
+### Privy Setup
+Consulte [PRIVY_SETUP.md](./PRIVY_SETUP.md) para configuração detalhada.
+
+## 🚀 Scripts Disponíveis
+
+```bash
+# Desenvolvimento
+npm run dev          # Servidor de desenvolvimento
+npm run build        # Build de produção
+npm run start        # Servidor de produção
+
+# Testes
+npm run test:unit    # Testes de unidade
+npm run test:e2e     # Testes end-to-end
+npm run test:all     # Todos os testes
+
+# Qualidade
+npm run lint         # ESLint
+npm run type-check   # TypeScript check
+
+# Git
+npm run push:skip-tests     # Push sem testes (emergência)
+npm run push:all-tests      # Push com todos os testes
+```
+
+## 📁 Estrutura do Projeto
+
+```
+src/
+├── app/                    # App Router (Next.js 14)
+├── components/
+│   ├── auth/              # Componentes de autenticação
+│   ├── shop/              # Componentes do marketplace
+│   └── ui/                # Componentes de UI
+├── hooks/                 # Custom hooks
+├── types/                 # Definições TypeScript
+├── utils/                 # Utilitários
+└── __tests__/            # Testes globais
+```
+
+## 🔄 Workflow de Desenvolvimento
+
+1. **Desenvolvimento**:
+   ```bash
+   npm run test:unit:watch  # Executar testes em paralelo
+   ```
+
+2. **Antes do commit**:
+   ```bash
+   npm run test:unit        # Verificar se tudo passa
+   npm run lint             # Verificar código
+   ```
+
+3. **Commit**:
+   ```bash
+   git add .
+   git commit -m "feat: nova funcionalidade"  # Pre-commit executa automaticamente
+   ```
+
+4. **Push**:
+   ```bash
+   git push                 # Push normal
+   # ou
+   npm run push:all-tests   # Push com testes completos
+   ```
+
+## 🤝 Contribuição
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'feat: Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+### Padrões de Commit
+- `feat:` Nova funcionalidade
+- `fix:` Correção de bug
+- `docs:` Documentação
+- `test:` Testes
+- `refactor:` Refatoração
+- `style:` Formatação
+
+## 📊 Status do Projeto
+
+- ✅ **Testes de Unidade**: 44 testes passando (100%)
+- ✅ **Pre-commit Hook**: Configurado e funcionando
+- ✅ **Autenticação**: Privy integrado
+- ✅ **Marketplace**: Funcional com parcelamento
+- 🔄 **Account Abstraction**: Em desenvolvimento
+- 🔄 **Testes E2E**: Em desenvolvimento
+
+## 📞 Suporte
+
+- 📋 [Documentação de Testes](./TESTS_README.md)
+- 🔧 [Guia do Pre-commit](./PRE_COMMIT_GUIDE.md)
+- 🔐 [Setup do Privy](./PRIVY_SETUP.md)
+
+---
+
+**Desenvolvido com ❤️ usando ZeroDev e Privy**
