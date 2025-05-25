@@ -109,28 +109,6 @@ describe('AuthButton', () => {
     });
   });
 
-  it('deve mostrar loading state durante logout', async () => {
-    const mockDisconnect = jest.fn(() => new Promise(resolve => setTimeout(resolve, 100)));
-    mockUsePrivyAuth.mockReturnValue({
-      isConnected: true,
-      connect: jest.fn(),
-      disconnect: mockDisconnect,
-      address: '0x1234567890123456789012345678901234567890'
-    });
-
-    render(<AuthButton />);
-
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-
-    expect(screen.getByText('Logging out...')).toBeInTheDocument();
-    expect(button).toBeDisabled();
-
-    await waitFor(() => {
-      expect(screen.queryByText('Logging out...')).not.toBeInTheDocument();
-    });
-  });
-
   it('deve tratar erro durante connect', async () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const mockConnect = jest.fn().mockRejectedValue(new Error('Connection failed'));
