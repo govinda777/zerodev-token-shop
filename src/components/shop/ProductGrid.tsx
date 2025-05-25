@@ -41,28 +41,31 @@ export const ProductGrid = () => {
   if (!products || products.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-white/60 text-lg">Carregando produtos...</p>
+        <div className="loading-spinner mx-auto mb-4"></div>
+        <p className="text-white/60 text-body-lg">Carregando produtos...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-responsive-2xl font-bold text-white mb-4">
+    <div className="space-content">
+      {/* Header Section */}
+      <div className="text-center space-elements">
+        <h2 className="text-h1 font-bold text-white mb-4 neon-subtle">
           Marketplace de Tokens
         </h2>
-        <p className="text-white/80 max-w-2xl mx-auto">
+        <p className="text-body-lg text-white/80 max-w-2xl mx-auto">
           Explore nossa seleção de produtos e serviços exclusivos. 
           {hasStakeForInstallments ? (
-            <span className="text-green-400"> ✅ Você tem acesso a compras parceladas!</span>
+            <span className="text-success font-medium"> ✅ Você tem acesso a compras parceladas!</span>
           ) : (
-            <span className="text-yellow-400"> 💡 Faça stake de 50+ tokens para habilitar parcelamento.</span>
+            <span className="text-warning font-medium"> 💡 Faça stake de 50+ tokens para habilitar parcelamento.</span>
           )}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+      {/* Products Grid */}
+      <div className="grid-responsive">
         {products.map((product) => (
           <ProductCard
             key={product.id}
@@ -76,31 +79,33 @@ export const ProductGrid = () => {
       </div>
 
       {/* Additional Info */}
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="card text-center">
+      <section className="grid-features space-elements" aria-labelledby="info-title">
+        <h3 id="info-title" className="sr-only">Informações adicionais sobre compras</h3>
+        
+        <div className="card card-hover text-center">
           <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <span className="text-2xl">🛡️</span>
+            <span className="text-2xl" role="img" aria-label="Escudo">🛡️</span>
           </div>
-          <h3 className="text-white font-bold mb-2">Compra Segura</h3>
-          <p className="text-white/60 text-sm">Todas as transações são protegidas por smart contracts</p>
+          <h4 className="text-h3 text-white font-bold mb-2">Compra Segura</h4>
+          <p className="text-white/60 text-body-sm">Todas as transações são protegidas por smart contracts</p>
         </div>
 
-        <div className="card text-center">
+        <div className="card card-hover text-center">
           <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <span className="text-2xl">💳</span>
+            <span className="text-2xl" role="img" aria-label="Cartão">💳</span>
           </div>
-          <h3 className="text-white font-bold mb-2">Parcelamento</h3>
-          <p className="text-white/60 text-sm">Compre parcelado com staking ativo</p>
+          <h4 className="text-h3 text-white font-bold mb-2">Parcelamento</h4>
+          <p className="text-white/60 text-body-sm">Compre parcelado com staking ativo</p>
         </div>
 
-        <div className="card text-center">
+        <div className="card card-hover text-center">
           <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <span className="text-2xl">⚡</span>
+            <span className="text-2xl" role="img" aria-label="Raio">⚡</span>
           </div>
-          <h3 className="text-white font-bold mb-2">Instantâneo</h3>
-          <p className="text-white/60 text-sm">Acesso imediato após a compra</p>
+          <h4 className="text-h3 text-white font-bold mb-2">Instantâneo</h4>
+          <p className="text-white/60 text-body-sm">Acesso imediato após a compra</p>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

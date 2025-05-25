@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useProducts } from "./ProductProvider";
-import { useAuth } from "@/components/auth/useAuth";
+import { usePrivyAuth } from "@/hooks/usePrivyAuth";
 import type { Product } from "@/types/product";
 import Image from "next/image";
 
@@ -25,7 +26,7 @@ export function PurchaseHistory() {
   
   // Implementação real para ambiente de produção
   const { purchases } = useProducts();
-  const { isConnected } = useAuth();
+  const { isConnected } = usePrivyAuth();
   
   if (!isConnected) {
     return null;

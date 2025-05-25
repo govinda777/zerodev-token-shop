@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from '@/components/auth/useAuth';
+import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import { useTokens } from '@/components/auth/TokenProvider';
 import JourneyLogger from '@/utils/journeyLogger';
 import type { 
@@ -144,7 +144,7 @@ const mockNFTs: NFT[] = [
 ];
 
 export function InvestmentProvider({ children }: { children: React.ReactNode }) {
-  const { isConnected, address } = useAuth();
+  const { isConnected, address } = usePrivyAuth();
   const { balance, removeTokens, addTokens } = useTokens();
   const [isLoading, setIsLoading] = useState(false);
   

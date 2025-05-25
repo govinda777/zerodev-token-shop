@@ -1,1 +1,15 @@
-npm test
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🧪 Executando testes de unidade..."
+
+# Executar testes de unidade
+npm run test:unit -- --silent
+
+if [ $? -ne 0 ]; then
+  echo "❌ Testes de unidade falharam. Commit cancelado."
+  echo "💡 Execute 'npm run test:unit' para ver os detalhes dos erros."
+  exit 1
+fi
+
+echo "✅ Testes de unidade passaram!"

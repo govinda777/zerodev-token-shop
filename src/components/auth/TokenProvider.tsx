@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useEffect, useState } from 'react';
-import { useAuth } from './useAuth';
+import { createContext, useEffect, useState, useContext } from 'react';
+import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import JourneyLogger from '@/utils/journeyLogger';
 
 export interface TokenContextType {
@@ -15,7 +15,7 @@ export const TokenContext = createContext<TokenContextType | undefined>(undefine
 
 export function TokenProvider({ children }: { children: React.ReactNode }) {
   const [balance, setBalance] = useState(0);
-  const { isConnected, address } = useAuth();
+  const { isConnected, address } = usePrivyAuth();
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,13 +42,8 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
         console.log(`🎉 Welcome bonus of ${welcomeReward} tokens granted to ${address}`);
       } else {
         // Fetch current balance from storage
-        getTokenBalance(address).then((bal) => {
-          setBalance(bal);
-          setIsLoading(false);
-        }).catch(() => {
-          setBalance(0);
-          setIsLoading(false);
-        });
+        const currentBalance = parseInt(localStorage.getItem(address) || "0");
+        setBalance(currentBalance);
       }
       
       setIsLoading(false);
@@ -60,8 +55,11 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
 
   const addTokens = (amount: number) => {
     if (!address) return;
-    addTokensToStorage(address, amount); // Persist to storage
-    setBalance(prev => prev + amount);
+    
+    const currentBalance = parseInt(localStorage.getItem(address) || "0");
+    const newBalance = currentBalance + amount;
+    localStorage.setItem(address, newBalance.toString());
+    setBalance(newBalance);
     
     // Log token addition
     JourneyLogger.logTokenReward(address, amount, 'manual_addition');
@@ -69,30 +67,17 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
 
   const removeTokens = (amount: number) => {
     if (!address) return;
-    spendTokensFromStorage(address, amount).then(success => {
-      if (success) {
-        setBalance(prev => Math.max(0, prev - amount));
-      }
-    });
+    
+    const currentBalance = parseInt(localStorage.getItem(address) || "0");
+    if (currentBalance >= amount) {
+      const newBalance = currentBalance - amount;
+      localStorage.setItem(address, newBalance.toString());
+      setBalance(newBalance);
+    }
   };
 
-  // Mock functions for storage interaction
-  const addTokensToStorage = (address: string, amount: number) => {
-    let currentBalance = parseInt(localStorage.getItem(address) || "0");
-    localStorage.setItem(address, (currentBalance + amount).toString());
-  }
-
-  const spendTokensFromStorage = async (address: string, amount: number): Promise<boolean> => {
-    let currentBalance = parseInt(localStorage.getItem(address) || "0");
-    if (currentBalance >= amount) {
-      localStorage.setItem(address, (currentBalance - amount).toString());
-      return true;
-    }
-    return false;
-  }
-
   if (!mounted) {
-    return null; // Return null instead of loading message to avoid nested loading
+    return null;
   }
 
   return (
@@ -100,29 +85,6 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
       {children}
     </TokenContext.Provider>
   );
-}
-
-import { useContext } from "react";
-
-function getTokenBalance(address: string): Promise<number> {
-  return new Promise((resolve) => {
-    const balance = parseInt(localStorage.getItem(address) || "0");
-    resolve(balance);
-  });
-}
-
-function addTokens(address: string, amount: number) {
-  let currentBalance = parseInt(localStorage.getItem(address) || "0");
-  localStorage.setItem(address, (currentBalance + amount).toString());
-}
-
-async function spendTokens(address: string, amount: number): Promise<boolean> {
-  let currentBalance = parseInt(localStorage.getItem(address) || "0");
-  if (currentBalance >= amount) {
-    localStorage.setItem(address, (currentBalance - amount).toString());
-    return true;
-  }
-  return false;
 }
 
 export function useTokens() {

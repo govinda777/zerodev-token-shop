@@ -9,7 +9,7 @@ const customJestConfig = {
   testEnvironmentOptions: {
     customExportConditions: [''],
   },
-  setupFilesAfterEnv: ['@testing-library/jest-dom'],
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },

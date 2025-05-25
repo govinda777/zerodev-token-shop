@@ -1,8 +1,8 @@
-import { useAuth } from './useAuth';
+import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import { useState } from 'react';
 
 export const LoginButton = () => {
-  const { isConnected, connect, disconnect, address } = useAuth();
+  const { isConnected, connect, disconnect, address } = usePrivyAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAuth = async () => {

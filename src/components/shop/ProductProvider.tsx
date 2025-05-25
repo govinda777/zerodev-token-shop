@@ -1,9 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Product, Purchase } from '@/types/product';
 import { useTokens } from '@/hooks/useTokens';
-import { useAuth } from '@/components/auth/useAuth';
+import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import JourneyLogger from '@/utils/journeyLogger';
 
 const PRODUCTS: Product[] = [
@@ -95,7 +95,7 @@ export const ProductContext = createContext<ProductContextType | undefined>(unde
 export function ProductProvider({ children }: { children: React.ReactNode }) {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const { balance, removeTokens } = useTokens();
-  const { address } = useAuth();
+  const { address } = usePrivyAuth();
 
   const buyProduct = (productId: string, installments = 1) => {
     const product = PRODUCTS.find(p => p.id === productId);

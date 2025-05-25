@@ -1,0 +1,54 @@
+import '@testing-library/jest-dom';
+
+// Mock do console.error para evitar poluição nos testes
+const originalError = console.error;
+beforeAll(() => {
+  console.error = (...args: any[]) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('Warning: An update to')
+    ) {
+      return;
+    }
+    originalError.call(console, ...args);
+  };
+});
+
+afterAll(() => {
+  console.error = originalError;
+});
+
+// Mock do localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: jest.fn((key: string) => store[key] || null),
+    setItem: jest.fn((key: string, value: string) => {
+      store[key] = value;
+    }),
+    removeItem: jest.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: jest.fn(() => {
+      store = {};
+    })
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock
+});
+
+// Mock do window.location
+Object.defineProperty(window, 'location', {
+  writable: true,
+  value: {
+    reload: jest.fn()
+  }
+});
+
+// Mock do window.open
+Object.defineProperty(window, 'open', {
+  writable: true,
+  value: jest.fn()
+}); 

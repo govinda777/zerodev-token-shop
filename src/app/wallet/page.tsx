@@ -4,14 +4,15 @@ import { useState } from "react";
 import { Header } from "@/components/common/Header";
 import { Footer } from "@/components/common/Footer";
 import { SkipLinks } from "@/components/common/SkipLinks";
-import { useAuth } from '@/components/auth/useAuth';
+import { TokenBalance } from "@/components/common/TokenBalance";
+import { PurchaseHistory } from "@/components/shop/PurchaseHistory";
+import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import { useTokens } from '@/components/auth/TokenProvider';
 import { useInvestment } from '@/components/investment/InvestmentProvider';
-import { PurchaseHistory } from '@/components/shop/PurchaseHistory';
 import { UserAnalytics } from '@/components/analytics/UserAnalytics';
 
 export default function WalletPage() {
-  const { isConnected, address } = useAuth();
+  const { isConnected, address } = usePrivyAuth();
   const { balance } = useTokens();
   const {
     stakeOptions,

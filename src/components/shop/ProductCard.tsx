@@ -31,32 +31,67 @@ export const ProductCard = ({
   };
 
   return (
-    <div className="card padding-card hover-lift">
-      <div className="aspect-card relative mb-4">
+    <article className="card card-hover group">
+      {/* Product Image */}
+      <div className="aspect-card relative mb-4 overflow-hidden rounded-lg">
         <Image
           src={product.image}
           alt={product.name}
           fill
-          className="object-cover rounded-lg"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
         />
         {product.installments && (
-          <div className="absolute top-2 right-2 bg-blue-500/80 text-white text-xs px-2 py-1 rounded">
+          <div className="absolute top-3 right-3 bg-info/90 backdrop-blur-sm text-white text-caption px-2 py-1 rounded-md font-medium">
             Parcelável
           </div>
         )}
       </div>
       
-      <h3 className="text-responsive-lg font-bold text-white mb-2">{product.name}</h3>
-      <p className="text-white/80 text-responsive-sm mb-4">{product.description}</p>
-      
-      <div className="space-y-2">
+      {/* Product Info */}
+      <div className="space-items">
+        <h3 className="text-h3 font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">
+          {product.name}
+        </h3>
+        <p className="text-white/80 text-body mb-4 line-clamp-2">
+          {product.description}
+        </p>
+        
+        {/* Price */}
+        <div className="mb-4">
+          <span className="text-h2 font-bold text-purple-400">
+            {product.price}
+          </span>
+          <span className="text-body text-white/60 ml-1">
+            Token{product.price !== 1 ? 's' : ''}
+          </span>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="space-items mt-auto">
         {/* Regular Purchase Button */}
         <button
           onClick={() => onBuy(product)}
           disabled={disabled}
-          className="w-full bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed focus-ring transition-colors"
+          className="btn btn-primary w-full focus-ring"
+          aria-label={`Comprar ${product.name} por ${product.price} token${product.price !== 1 ? 's' : ''}`}
         >
-          Comprar por {product.price} Token{product.price !== 1 ? 's' : ''}
+          {disabled ? (
+            <>
+              <svg className="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Saldo Insuficiente
+            </>
+          ) : (
+            <>
+              <svg className="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              Comprar Agora
+            </>
+          )}
         </button>
 
         {/* Installment Purchase Option */}
@@ -65,60 +100,68 @@ export const ProductCard = ({
             {!showInstallmentOptions ? (
               <button
                 onClick={() => setShowInstallmentOptions(true)}
-                className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                className="btn btn-secondary w-full focus-ring"
+                aria-label={`Opções de parcelamento para ${product.name}`}
               >
-                💳 Comprar Parcelado
+                <svg className="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Comprar Parcelado
               </button>
             ) : (
-              <div className="bg-white/5 p-3 rounded-lg space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-white/80 text-sm">Parcelas:</span>
+              <div className="space-items">
+                {/* Installment Options */}
+                <div className="bg-black/20 rounded-lg p-3">
+                  <label htmlFor={`installments-${product.id}`} className="block text-body-sm text-white/80 mb-2">
+                    Escolha o parcelamento:
+                  </label>
                   <select
+                    id={`installments-${product.id}`}
                     value={selectedInstallments}
                     onChange={(e) => setSelectedInstallments(Number(e.target.value))}
-                    className="bg-white/10 border border-white/20 rounded px-2 py-1 text-white text-sm"
+                    className="w-full bg-black/40 border border-white/20 rounded-md px-3 py-2 text-white text-body focus-ring"
                   >
-                    {installmentOptions.map(option => (
-                      <option key={option} value={option} className="text-black">
+                    {installmentOptions.map((option) => (
+                      <option key={option} value={option} className="bg-black">
                         {option}x de {(product.price / option).toFixed(1)} tokens
                       </option>
                     ))}
                   </select>
                 </div>
-                
-                <div className="flex gap-2">
+
+                {/* Installment Action Buttons */}
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setShowInstallmentOptions(false)}
-                    className="flex-1 bg-gray-500 text-white py-2 px-3 rounded text-sm hover:bg-gray-600 transition-colors"
+                    className="btn btn-secondary btn-sm focus-ring"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleInstallmentPurchase}
-                    disabled={disabled}
-                    className="flex-1 bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                    className="btn btn-primary btn-sm focus-ring"
+                    aria-label={`Confirmar parcelamento em ${selectedInstallments}x`}
                   >
-                    Parcelar
+                    Confirmar
                   </button>
                 </div>
               </div>
             )}
           </>
         )}
-
-        {/* Installment requirement message */}
-        {product.installments && !hasStakeForInstallments && (
-          <p className="text-yellow-400 text-xs text-center">
-            💡 Faça stake de 50+ tokens para habilitar parcelamento
-          </p>
-        )}
       </div>
 
+      {/* Required Stake Info */}
       {product.requiredStake && (
-        <p className="text-blue-400 text-xs mt-2 text-center">
-          ⚡ Requer {product.requiredStake} tokens em stake
-        </p>
+        <div className="mt-3 pt-3 border-t border-white/10">
+          <p className="text-info text-caption text-center flex items-center justify-center gap-1">
+            <svg className="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Requer {product.requiredStake} tokens em stake
+          </p>
+        </div>
       )}
-    </div>
+    </article>
   );
 };

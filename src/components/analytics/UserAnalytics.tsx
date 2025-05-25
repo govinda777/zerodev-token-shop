@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/components/auth/useAuth';
+import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import JourneyLogger from '@/utils/journeyLogger';
 
 interface UserStats {
@@ -22,7 +22,7 @@ interface JourneyEvent {
 }
 
 export function UserAnalytics() {
-  const { address, isConnected } = useAuth();
+  const { address, isConnected } = usePrivyAuth();
   const [stats, setStats] = useState<UserStats>({
     totalPurchases: 0,
     totalStaked: 0,
