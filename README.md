@@ -1,6 +1,11 @@
 # 🚀 ZeroDev Token Shop
 
+
+
 Um marketplace moderno e acessível para tokens digitais únicos, construído com Next.js, TypeScript e Tailwind CSS.
+
+![Account Abstraction Hero](./public/images/docs/account-abstraction-hero.jpg)
+*Account Abstraction: A evolução da experiência Web3 - simplificando a interação do usuário com blockchain*
 
 ## ✨ Características Principais
 
@@ -36,8 +41,6 @@ Com Account Abstraction, essas complexidades são **abstraídas**, permitindo:
 - 🛡️ **Recuperação de conta** sem seed phrases
 - 🔄 **Transações em lote** e automação
 
-![Account Abstraction Hero](./public/images/docs/account-abstraction-hero.jpg)
-*Account Abstraction: A evolução da experiência Web3 - simplificando a interação do usuário com blockchain*
 
 ### 🏗️ ERC-4337: O Padrão Técnico
 

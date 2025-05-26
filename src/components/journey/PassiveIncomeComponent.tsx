@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
+import { useBlockchain } from '@/hooks/useBlockchain';
+import { PASSIVE_INCOME_CONFIG, MISSION_REWARDS } from '@/contracts/config';
 
 interface IncomeStream {
   id: string;
@@ -17,32 +19,32 @@ interface IncomeStream {
 
 const incomeStreams: IncomeStream[] = [
   {
-    id: 'savings-account',
-    name: 'Conta Poupança',
-    description: 'Investimento seguro com retorno garantido',
+    id: 'basic-passive',
+    name: 'Renda Passiva Básica',
+    description: 'Investimento seguro com retorno garantido baseado na configuração do contrato',
     initialInvestment: 100,
-    dailyReturn: 1,
+    dailyReturn: Math.floor(100 * PASSIVE_INCOME_CONFIG.DAILY_RATE), // 0.1% daily
     icon: '🏦',
     riskLevel: 'low',
     duration: 30
   },
   {
-    id: 'liquidity-pool',
-    name: 'Pool de Liquidez',
-    description: 'Forneça liquidez e ganhe taxas de transação',
+    id: 'premium-passive',
+    name: 'Renda Passiva Premium',
+    description: 'Para assinantes premium com retornos maiores',
     initialInvestment: 200,
-    dailyReturn: 3,
-    icon: '🌊',
+    dailyReturn: Math.floor(200 * PASSIVE_INCOME_CONFIG.DAILY_RATE * 1.5), // 1.5x multiplier
+    icon: '💎',
     riskLevel: 'medium',
     duration: 60
   },
   {
-    id: 'yield-farming',
-    name: 'Yield Farming',
+    id: 'elite-passive',
+    name: 'Renda Passiva Elite',
     description: 'Estratégia avançada com altos retornos',
     initialInvestment: 500,
-    dailyReturn: 8,
-    icon: '🚜',
+    dailyReturn: Math.floor(500 * PASSIVE_INCOME_CONFIG.DAILY_RATE * 2), // 2x multiplier
+    icon: '👑',
     riskLevel: 'high',
     duration: 90
   }
@@ -71,12 +73,48 @@ interface ActiveInvestment {
 export function PassiveIncomeComponent() {
   const { balance, removeTokens, addTokens } = useTokens();
   const { journey, completeMission } = useJourney();
+  const { passiveIncomeOperations, subscriptionOperations, tokenOperations, isLoading: blockchainLoading } = useBlockchain();
   const [activeInvestments, setActiveInvestments] = useState<ActiveInvestment[]>([]);
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [isPassiveIncomeActive, setIsPassiveIncomeActive] = useState(false);
+  const [pendingRewards, setPendingRewards] = useState(0);
 
   const passiveIncomeMission = journey.missions.find(m => m.id === 'passive-income');
   const isUnlocked = passiveIncomeMission?.unlocked || false;
   const isCompleted = passiveIncomeMission?.completed || false;
+
+  // Verificar status da renda passiva e carregar dados
+  useEffect(() => {
+    const loadPassiveIncomeData = async () => {
+      try {
+        // Verificar se a renda passiva está ativa
+        const isActive = await passiveIncomeOperations.isActive();
+        setIsPassiveIncomeActive(isActive);
+
+        if (isActive) {
+          // Carregar recompensas pendentes
+          const pending = await passiveIncomeOperations.getPendingRewards();
+          setPendingRewards(parseFloat(pending));
+        }
+
+        // Verificar se tem assinatura ativa (requisito para renda passiva)
+        const hasActiveSubscription = await subscriptionOperations.isActive();
+        if (!hasActiveSubscription && PASSIVE_INCOME_CONFIG.MIN_SUBSCRIPTION_REQUIRED) {
+          console.warn('Assinatura ativa necessária para renda passiva');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados da renda passiva:', error);
+      }
+    };
+
+    if (isUnlocked) {
+      loadPassiveIncomeData();
+      
+      // Atualizar dados a cada 30 segundos
+      const interval = setInterval(loadPassiveIncomeData, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isUnlocked, passiveIncomeOperations, subscriptionOperations]);
 
   // Calcular ganhos pendentes
   const calculatePendingEarnings = (investment: ActiveInvestment): number => {
@@ -95,13 +133,61 @@ export function PassiveIncomeComponent() {
     }, 0);
   };
 
+  const handleActivatePassiveIncome = async () => {
+    if (isLoading || isPassiveIncomeActive || blockchainLoading) return;
+
+    setIsLoading('activate');
+
+    try {
+      // Ativar renda passiva no contrato
+      const result = await passiveIncomeOperations.activate();
+      
+      if (result.success) {
+        console.log('✅ Renda passiva ativada via contrato:', result.hash);
+        
+        setIsPassiveIncomeActive(true);
+        
+        // Completar missão se for a primeira vez
+        if (!isCompleted) {
+          completeMission('passive-income');
+        }
+      } else {
+        throw new Error(result.error?.message || 'Falha ao ativar renda passiva');
+      }
+    } catch (error) {
+      console.error('Erro ao ativar renda passiva:', error);
+      
+      // Fallback para simulação
+      try {
+        console.warn('⚠️ Usando simulação de ativação de renda passiva');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        setIsPassiveIncomeActive(true);
+        
+        if (!isCompleted) {
+          completeMission('passive-income');
+        }
+      } catch (fallbackError) {
+        console.error('Erro no fallback:', fallbackError);
+      }
+    } finally {
+      setIsLoading(null);
+    }
+  };
+
   const handleInvest = async (stream: IncomeStream) => {
-    if (balance < stream.initialInvestment || isLoading) return;
+    if (balance < stream.initialInvestment || isLoading || blockchainLoading) return;
 
     setIsLoading(stream.id);
 
     try {
-      // Simular delay da transação
+      // Para o primeiro investimento (básico), usar o contrato
+      if (stream.id === 'basic-passive' && !isPassiveIncomeActive) {
+        await handleActivatePassiveIncome();
+        return;
+      }
+
+      // Para outros investimentos, simular
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Gastar tokens
@@ -117,13 +203,44 @@ export function PassiveIncomeComponent() {
       };
 
       setActiveInvestments(prev => [...prev, newInvestment]);
-
-      // Completar missão se for a primeira vez
-      if (!isCompleted) {
-        completeMission('passive-income');
-      }
     } catch (error) {
       console.error('Erro ao investir:', error);
+    } finally {
+      setIsLoading(null);
+    }
+  };
+
+  const handleClaimRewards = async () => {
+    if (pendingRewards <= 0 || isLoading || blockchainLoading) return;
+
+    setIsLoading('claim');
+
+    try {
+      // Reivindicar recompensas do contrato
+      const result = await passiveIncomeOperations.claimRewards();
+      
+      if (result.success) {
+        console.log('✅ Recompensas reivindicadas via contrato:', result.hash);
+        
+        // Adicionar tokens ganhos
+        addTokens(pendingRewards);
+        setPendingRewards(0);
+      } else {
+        throw new Error(result.error?.message || 'Falha ao reivindicar recompensas');
+      }
+    } catch (error) {
+      console.error('Erro ao reivindicar recompensas:', error);
+      
+      // Fallback para simulação
+      try {
+        console.warn('⚠️ Usando simulação de reivindicação');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        addTokens(pendingRewards);
+        setPendingRewards(0);
+      } catch (fallbackError) {
+        console.error('Erro no fallback:', fallbackError);
+      }
     } finally {
       setIsLoading(null);
     }

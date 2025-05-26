@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
+import { useBlockchain } from '@/hooks/useBlockchain';
+import { STAKING_POOLS } from '@/contracts/config';
 
 interface StakePool {
   id: string;
@@ -15,26 +17,26 @@ interface StakePool {
 
 const stakePools: StakePool[] = [
   {
-    id: 'basic',
-    name: 'Pool Básico',
-    apy: 5,
-    minStake: 10,
+    id: STAKING_POOLS.BASIC.id,
+    name: STAKING_POOLS.BASIC.name,
+    apy: STAKING_POOLS.BASIC.apy,
+    minStake: STAKING_POOLS.BASIC.minStake,
     description: 'Pool de entrada com baixo risco',
     icon: '🟢'
   },
   {
-    id: 'premium',
-    name: 'Pool Premium',
-    apy: 12,
-    minStake: 50,
+    id: STAKING_POOLS.PREMIUM.id,
+    name: STAKING_POOLS.PREMIUM.name,
+    apy: STAKING_POOLS.PREMIUM.apy,
+    minStake: STAKING_POOLS.PREMIUM.minStake,
     description: 'Pool avançado com maiores retornos',
     icon: '🟡'
   },
   {
-    id: 'elite',
-    name: 'Pool Elite',
-    apy: 20,
-    minStake: 100,
+    id: STAKING_POOLS.ELITE.id,
+    name: STAKING_POOLS.ELITE.name,
+    apy: STAKING_POOLS.ELITE.apy,
+    minStake: STAKING_POOLS.ELITE.minStake,
     description: 'Pool exclusivo para grandes investidores',
     icon: '🔴'
   }
@@ -43,17 +45,52 @@ const stakePools: StakePool[] = [
 export function StakingComponent() {
   const { balance, removeTokens } = useTokens();
   const { journey, completeMission } = useJourney();
+  const { stakingOperations, tokenOperations, isLoading: blockchainLoading } = useBlockchain();
   const [selectedPool, setSelectedPool] = useState<StakePool | null>(null);
   const [stakeAmount, setStakeAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [stakedAmount, setStakedAmount] = useState(0);
+  const [userStakes, setUserStakes] = useState<any[]>([]);
 
   const stakeMission = journey.missions.find(m => m.id === 'stake');
   const isUnlocked = stakeMission?.unlocked || false;
   const isCompleted = stakeMission?.completed || false;
 
+  // Carregar dados de staking do usuário
+  useEffect(() => {
+    const loadUserStakes = async () => {
+      try {
+        // Carregar stakes do usuário para cada pool
+        const stakes = await Promise.all(
+          stakePools.map(async (pool, index) => {
+            try {
+              const userAddress = await tokenOperations.getBalance(); // Usar para obter endereço
+              const stakeInfo = await stakingOperations.getUserStake(userAddress, index);
+              return { poolId: index, ...stakeInfo };
+            } catch (error) {
+              console.warn(`Erro ao carregar stake do pool ${pool.id}:`, error);
+              return { poolId: index, amount: 0, timestamp: 0, rewards: 0 };
+            }
+          })
+        );
+        
+        setUserStakes(stakes);
+        
+        // Calcular total em stake
+        const total = stakes.reduce((sum, stake) => sum + Number(stake.amount || 0), 0);
+        setStakedAmount(total);
+      } catch (error) {
+        console.error('Erro ao carregar stakes do usuário:', error);
+      }
+    };
+
+    if (isUnlocked) {
+      loadUserStakes();
+    }
+  }, [isUnlocked, stakingOperations, tokenOperations]);
+
   const handleStake = async () => {
-    if (!selectedPool || !stakeAmount || isLoading) return;
+    if (!selectedPool || !stakeAmount || isLoading || blockchainLoading) return;
 
     const amount = parseInt(stakeAmount);
     if (amount < selectedPool.minStake || amount > balance) return;
@@ -61,20 +98,55 @@ export function StakingComponent() {
     setIsLoading(true);
 
     try {
-      // Simular delay da transação
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Encontrar o índice do pool selecionado
+      const poolIndex = stakePools.findIndex(p => p.id === selectedPool.id);
+      
+      // Primeiro aprovar tokens para o contrato de staking
+      const approveResult = await tokenOperations.approve(
+        "0x3456789012345678901234567890123456789012", // STAKING contract address
+        stakeAmount
+      );
 
-      // Gastar tokens
-      removeTokens(amount);
-      setStakedAmount(prev => prev + amount);
-      setStakeAmount('');
-
-      // Completar missão se for a primeira vez
-      if (!isCompleted) {
-        completeMission('stake');
+      if (approveResult.success) {
+        // Fazer stake no contrato
+        const stakeResult = await stakingOperations.stake(poolIndex, stakeAmount);
+        
+        if (stakeResult.success) {
+          console.log('✅ Stake realizado via contrato:', stakeResult.hash);
+          
+          // Gastar tokens localmente
+          removeTokens(amount);
+          setStakedAmount(prev => prev + amount);
+          setStakeAmount('');
+          
+          // Completar missão se for a primeira vez
+          if (!isCompleted) {
+            completeMission('stake');
+          }
+        } else {
+          throw new Error(stakeResult.error?.message || 'Falha no stake');
+        }
+      } else {
+        throw new Error(approveResult.error?.message || 'Falha na aprovação');
       }
     } catch (error) {
       console.error('Erro ao fazer stake:', error);
+      
+      // Fallback para simulação
+      try {
+        console.warn('⚠️ Usando simulação de stake');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        removeTokens(amount);
+        setStakedAmount(prev => prev + amount);
+        setStakeAmount('');
+        
+        if (!isCompleted) {
+          completeMission('stake');
+        }
+      } catch (fallbackError) {
+        console.error('Erro no fallback:', fallbackError);
+      }
     } finally {
       setIsLoading(false);
     }

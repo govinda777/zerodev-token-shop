@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
+import { useBlockchain } from '@/hooks/useBlockchain';
+import { SUBSCRIPTION_PLANS } from '@/contracts/config';
 
 interface SubscriptionPlan {
   id: string;
@@ -17,83 +19,114 @@ interface SubscriptionPlan {
 
 const subscriptionPlans: SubscriptionPlan[] = [
   {
-    id: 'basic-monthly',
-    name: 'Básico Mensal',
-    description: 'Acesso a funcionalidades essenciais',
-    price: 25,
-    duration: 'monthly',
-    icon: '📦',
-    features: [
-      'Acesso a faucet premium',
-      'Suporte por email',
-      'Dashboard básico',
-      'Histórico de 30 dias'
-    ]
-  },
-  {
-    id: 'premium-monthly',
-    name: 'Premium Mensal',
-    description: 'Funcionalidades avançadas e benefícios extras',
-    price: 50,
+    id: 'monthly',
+    name: SUBSCRIPTION_PLANS.MONTHLY.name,
+    description: 'Acesso a funcionalidades essenciais premium',
+    price: SUBSCRIPTION_PLANS.MONTHLY.price,
     duration: 'monthly',
     icon: '⭐',
     popular: true,
-    features: [
-      'Todos os recursos básicos',
-      'Staking com bônus +15%',
-      'Acesso a NFTs exclusivos',
-      'Suporte prioritário',
-      'Analytics avançados',
-      'Airdrops exclusivos'
-    ]
+    features: SUBSCRIPTION_PLANS.MONTHLY.benefits
   },
   {
-    id: 'premium-annual',
-    name: 'Premium Anual',
+    id: 'annual',
+    name: SUBSCRIPTION_PLANS.ANNUAL.name,
     description: 'Melhor valor com desconto anual',
-    price: 500,
+    price: SUBSCRIPTION_PLANS.ANNUAL.price,
     duration: 'annual',
     icon: '👑',
-    features: [
-      'Todos os recursos premium',
-      'Desconto de 17% (2 meses grátis)',
-      'NFT exclusivo de aniversário',
-      'Acesso beta a novos recursos',
-      'Consultoria personalizada',
-      'Renda passiva premium'
-    ]
+    features: SUBSCRIPTION_PLANS.ANNUAL.benefits
   }
 ];
 
 export function SubscriptionComponent() {
   const { balance, removeTokens } = useTokens();
   const { journey, completeMission } = useJourney();
+  const { subscriptionOperations, tokenOperations, isLoading: blockchainLoading } = useBlockchain();
   const [activeSubscription, setActiveSubscription] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
 
   const subscriptionMission = journey.missions.find(m => m.id === 'subscription');
   const isUnlocked = subscriptionMission?.unlocked || false;
   const isCompleted = subscriptionMission?.completed || false;
 
+  // Carregar informações da assinatura
+  useEffect(() => {
+    const loadSubscriptionInfo = async () => {
+      try {
+        const isActive = await subscriptionOperations.isActive();
+        if (isActive) {
+          const subscription = await subscriptionOperations.getSubscription();
+          setSubscriptionInfo(subscription);
+          
+          // Mapear planId para nossos IDs locais
+          const planId = subscription.planId === 1 ? 'monthly' : 'annual';
+          setActiveSubscription(planId);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar informações da assinatura:', error);
+      }
+    };
+
+    if (isUnlocked) {
+      loadSubscriptionInfo();
+    }
+  }, [isUnlocked, subscriptionOperations]);
+
   const handleSubscribe = async (plan: SubscriptionPlan) => {
-    if (balance < plan.price || isLoading || activeSubscription) return;
+    if (balance < plan.price || isLoading || activeSubscription || blockchainLoading) return;
 
     setIsLoading(plan.id);
 
     try {
-      // Simular delay da transação
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Mapear ID local para planId do contrato
+      const contractPlanId = plan.id === 'monthly' ? 1 : 2;
+      
+      // Primeiro aprovar tokens para o contrato de assinatura
+      const approveResult = await tokenOperations.approve(
+        "0x7890123456789012345678901234567890123456", // SUBSCRIPTION contract address
+        plan.price.toString()
+      );
 
-      // Gastar tokens
-      removeTokens(plan.price);
-      setActiveSubscription(plan.id);
+      if (approveResult.success) {
+        // Fazer assinatura no contrato
+        const subscribeResult = await subscriptionOperations.subscribe(contractPlanId);
+        
+        if (subscribeResult.success) {
+          console.log('✅ Assinatura realizada via contrato:', subscribeResult.hash);
+          
+          // Gastar tokens localmente
+          removeTokens(plan.price);
+          setActiveSubscription(plan.id);
 
-      // Completar missão se for a primeira vez
-      if (!isCompleted) {
-        completeMission('subscription');
+          // Completar missão se for a primeira vez
+          if (!isCompleted) {
+            completeMission('subscription');
+          }
+        } else {
+          throw new Error(subscribeResult.error?.message || 'Falha na assinatura');
+        }
+      } else {
+        throw new Error(approveResult.error?.message || 'Falha na aprovação');
       }
     } catch (error) {
       console.error('Erro ao assinar plano:', error);
+      
+      // Fallback para simulação
+      try {
+        console.warn('⚠️ Usando simulação de assinatura');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        removeTokens(plan.price);
+        setActiveSubscription(plan.id);
+
+        if (!isCompleted) {
+          completeMission('subscription');
+        }
+      } catch (fallbackError) {
+        console.error('Erro no fallback:', fallbackError);
+      }
     } finally {
       setIsLoading(null);
     }

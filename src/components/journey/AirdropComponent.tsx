@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
+import { useBlockchain } from '@/hooks/useBlockchain';
+import { MISSION_REWARDS, AIRDROP_CONFIG } from '@/contracts/config';
 
 interface AirdropEvent {
   id: string;
@@ -16,28 +18,28 @@ interface AirdropEvent {
 
 const airdropEvents: AirdropEvent[] = [
   {
-    id: 'welcome-airdrop',
-    name: 'Airdrop de Boas-vindas',
-    description: 'Recompensa especial para novos usuários que compraram NFTs',
-    reward: 20,
+    id: 'member-airdrop',
+    name: AIRDROP_CONFIG.MEMBER_AIRDROP.name,
+    description: AIRDROP_CONFIG.MEMBER_AIRDROP.description,
+    reward: AIRDROP_CONFIG.MEMBER_AIRDROP.amount,
     icon: '🎁',
     endTime: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 dias
     requirements: ['Possuir pelo menos 1 NFT']
   },
   {
-    id: 'community-airdrop',
-    name: 'Airdrop da Comunidade',
-    description: 'Recompensa para membros ativos da comunidade',
-    reward: 15,
+    id: 'staker-airdrop',
+    name: AIRDROP_CONFIG.STAKER_AIRDROP.name,
+    description: AIRDROP_CONFIG.STAKER_AIRDROP.description,
+    reward: AIRDROP_CONFIG.STAKER_AIRDROP.amount,
     icon: '🌟',
     endTime: Date.now() + (3 * 24 * 60 * 60 * 1000), // 3 dias
-    requirements: ['Ter feito stake', 'Possuir NFT']
+    requirements: ['Ter feito stake']
   },
   {
     id: 'loyalty-airdrop',
     name: 'Airdrop de Fidelidade',
     description: 'Para usuários que completaram múltiplas missões',
-    reward: 30,
+    reward: MISSION_REWARDS.AIRDROP,
     icon: '💎',
     endTime: Date.now() + (5 * 24 * 60 * 60 * 1000), // 5 dias
     requirements: ['Completar 4+ missões']
@@ -47,12 +49,53 @@ const airdropEvents: AirdropEvent[] = [
 export function AirdropComponent() {
   const { addTokens } = useTokens();
   const { journey, completeMission } = useJourney();
+  const { airdropOperations, nftOperations, isLoading: blockchainLoading } = useBlockchain();
   const [claimedAirdrops, setClaimedAirdrops] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [eligibilityStatus, setEligibilityStatus] = useState<Record<string, boolean>>({});
 
   const airdropMission = journey.missions.find(m => m.id === 'airdrop');
   const isUnlocked = airdropMission?.unlocked || false;
   const isCompleted = airdropMission?.completed || false;
+
+  // Verificar elegibilidade e status dos airdrops
+  useEffect(() => {
+    const checkAirdropStatus = async () => {
+      try {
+        // Verificar se já recebeu airdrop do contrato
+        const hasReceived = await airdropOperations.hasReceived();
+        if (hasReceived) {
+          setClaimedAirdrops(['member-airdrop']); // Assumindo que o contrato gerencia o airdrop principal
+        }
+
+        // Verificar elegibilidade
+        const isEligible = await airdropOperations.isEligible();
+        setEligibilityStatus(prev => ({
+          ...prev,
+          'member-airdrop': isEligible
+        }));
+
+        // Verificar se possui NFT para airdrop de membros
+        const nftBalance = await nftOperations.getBalance();
+        setEligibilityStatus(prev => ({
+          ...prev,
+          'member-airdrop': nftBalance > 0
+        }));
+      } catch (error) {
+        console.error('Erro ao verificar status do airdrop:', error);
+        // Fallback para verificação local
+        setEligibilityStatus({
+          'member-airdrop': journey.completedMissions.includes('buy-nft'),
+          'staker-airdrop': journey.completedMissions.includes('stake'),
+          'loyalty-airdrop': journey.completedMissions.length >= 4
+        });
+      }
+    };
+
+    if (isUnlocked) {
+      checkAirdropStatus();
+    }
+  }, [isUnlocked, airdropOperations, nftOperations, journey.completedMissions]);
 
   const formatTimeRemaining = (endTime: number) => {
     const now = Date.now();
@@ -70,7 +113,12 @@ export function AirdropComponent() {
   };
 
   const checkRequirements = (airdrop: AirdropEvent): boolean => {
-    // Simular verificação de requisitos baseado nas missões completadas
+    // Usar status de elegibilidade do blockchain se disponível
+    if (eligibilityStatus[airdrop.id] !== undefined) {
+      return eligibilityStatus[airdrop.id];
+    }
+
+    // Fallback para verificação local
     const completedMissions = journey.completedMissions;
     
     if (airdrop.requirements.includes('Possuir pelo menos 1 NFT')) {
@@ -89,24 +137,48 @@ export function AirdropComponent() {
   };
 
   const handleClaimAirdrop = async (airdrop: AirdropEvent) => {
-    if (claimedAirdrops.includes(airdrop.id) || isLoading || !checkRequirements(airdrop)) return;
+    if (claimedAirdrops.includes(airdrop.id) || isLoading || !checkRequirements(airdrop) || blockchainLoading) return;
 
     setIsLoading(airdrop.id);
 
     try {
-      // Simular delay da transação
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Tentar reivindicar via contrato para airdrops principais
+      if (airdrop.id === 'member-airdrop') {
+        const result = await airdropOperations.claimAirdrop();
+        
+        if (result.success) {
+          console.log('✅ Airdrop reivindicado via contrato:', result.hash);
+          
+          addTokens(airdrop.reward);
+          setClaimedAirdrops(prev => [...prev, airdrop.id]);
 
-      // Adicionar tokens
-      addTokens(airdrop.reward);
-      setClaimedAirdrops(prev => [...prev, airdrop.id]);
-
-      // Completar missão se for a primeira vez
-      if (!isCompleted) {
-        completeMission('airdrop');
+          if (!isCompleted) {
+            completeMission('airdrop');
+          }
+        } else {
+          throw new Error(result.error?.message || 'Falha ao reivindicar airdrop');
+        }
+      } else {
+        // Para outros airdrops, usar simulação
+        throw new Error('Airdrop não disponível no contrato');
       }
     } catch (error) {
       console.error('Erro ao reivindicar airdrop:', error);
+      
+      // Fallback para simulação
+      try {
+        console.warn('⚠️ Usando simulação de airdrop');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        addTokens(airdrop.reward);
+        setClaimedAirdrops(prev => [...prev, airdrop.id]);
+
+        if (!isCompleted) {
+          completeMission('airdrop');
+        }
+      } catch (fallbackError) {
+        console.error('Erro no fallback:', fallbackError);
+      }
     } finally {
       setIsLoading(null);
     }

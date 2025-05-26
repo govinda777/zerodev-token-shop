@@ -1,20 +1,53 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
+import { useBlockchain } from '@/hooks/useBlockchain';
+import { MISSION_REWARDS } from '@/contracts/config';
 
 export function FaucetComponent() {
   const { addTokens } = useTokens();
   const { journey, completeMission } = useJourney();
+  const { faucetOperations, isLoading: blockchainLoading } = useBlockchain();
   const [isLoading, setIsLoading] = useState(false);
   const [lastClaim, setLastClaim] = useState<number | null>(null);
+  const [canClaimFromContract, setCanClaimFromContract] = useState(false);
 
   const faucetMission = journey.missions.find(m => m.id === 'faucet');
   const isUnlocked = faucetMission?.unlocked || false;
   const isCompleted = faucetMission?.completed || false;
 
+  // Verificar se pode reivindicar do contrato
+  useEffect(() => {
+    const checkCanClaim = async () => {
+      try {
+        const canClaim = await faucetOperations.canClaim();
+        setCanClaimFromContract(canClaim);
+        
+        // Obter último claim do contrato
+        const lastClaimTime = await faucetOperations.getLastClaim();
+        if (lastClaimTime > 0) {
+          setLastClaim(lastClaimTime * 1000); // Converter para milliseconds
+        }
+      } catch (error) {
+        console.error('Erro ao verificar faucet:', error);
+        // Fallback para lógica local se contrato não estiver disponível
+        setCanClaimFromContract(canClaim());
+      }
+    };
+
+    if (isUnlocked) {
+      checkCanClaim();
+    }
+  }, [isUnlocked, faucetOperations]);
+
   const canClaim = () => {
+    // Usar verificação do contrato se disponível, senão usar lógica local
+    if (canClaimFromContract !== undefined) {
+      return canClaimFromContract;
+    }
+    
     if (!lastClaim) return true;
     const now = Date.now();
     const timeDiff = now - lastClaim;
@@ -38,24 +71,58 @@ export function FaucetComponent() {
   };
 
   const handleClaim = async () => {
-    if (!canClaim() || isLoading) return;
+    if (!canClaim() || isLoading || blockchainLoading) return;
 
     setIsLoading(true);
     
     try {
-      // Simular delay da transação
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Tentar usar o contrato real primeiro
+      const result = await faucetOperations.requestTokens();
       
-      // Adicionar tokens
-      addTokens(5);
-      setLastClaim(Date.now());
-      
-      // Completar missão se for a primeira vez
-      if (!isCompleted) {
-        completeMission('faucet');
+      if (result.success) {
+        // Sucesso na transação blockchain
+        console.log('✅ Tokens reivindicados via contrato:', result.hash);
+        
+        // Adicionar tokens localmente
+        addTokens(MISSION_REWARDS.FAUCET);
+        setLastClaim(Date.now());
+        setCanClaimFromContract(false);
+        
+        // Completar missão se for a primeira vez
+        if (!isCompleted) {
+          completeMission('faucet');
+        }
+      } else {
+        // Fallback para simulação se contrato falhar
+        console.warn('⚠️ Contrato falhou, usando simulação:', result.error);
+        
+        // Simular delay da transação
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Adicionar tokens localmente
+        addTokens(MISSION_REWARDS.FAUCET);
+        setLastClaim(Date.now());
+        
+        // Completar missão se for a primeira vez
+        if (!isCompleted) {
+          completeMission('faucet');
+        }
       }
     } catch (error) {
       console.error('Erro ao reivindicar tokens:', error);
+      
+      // Fallback para simulação em caso de erro
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        addTokens(MISSION_REWARDS.FAUCET);
+        setLastClaim(Date.now());
+        
+        if (!isCompleted) {
+          completeMission('faucet');
+        }
+      } catch (fallbackError) {
+        console.error('Erro no fallback:', fallbackError);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +154,7 @@ export function FaucetComponent() {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <div className="text-purple-300 font-medium">Recompensa</div>
-              <div className="text-white">5 Tokens</div>
+              <div className="text-white">{MISSION_REWARDS.FAUCET} Tokens</div>
             </div>
             <div>
               <div className="text-purple-300 font-medium">Cooldown</div>

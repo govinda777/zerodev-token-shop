@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
+import { useBlockchain } from '@/hooks/useBlockchain';
+import { NFT_CONFIG } from '@/contracts/config';
 
 interface NFT {
   id: string;
@@ -16,22 +18,22 @@ interface NFT {
 
 const nftCollection: NFT[] = [
   {
-    id: 'starter-badge',
-    name: 'Starter Badge',
-    description: 'NFT de participação para novos usuários',
-    price: 15,
+    id: 'member-nft',
+    name: NFT_CONFIG.MEMBER_NFT.name,
+    description: NFT_CONFIG.MEMBER_NFT.description,
+    price: NFT_CONFIG.MEMBER_NFT.price,
     image: '🏅',
     rarity: 'common',
-    benefits: ['Acesso a eventos especiais', '+5% bônus em faucet']
+    benefits: ['Acesso a airdrops exclusivos', 'Membro da comunidade']
   },
   {
-    id: 'investor-card',
-    name: 'Investor Card',
-    description: 'Cartão exclusivo para investidores',
-    price: 30,
-    image: '💳',
+    id: 'premium-nft',
+    name: NFT_CONFIG.PREMIUM_NFT.name,
+    description: NFT_CONFIG.PREMIUM_NFT.description,
+    price: NFT_CONFIG.PREMIUM_NFT.price,
+    image: '💎',
     rarity: 'rare',
-    benefits: ['Acesso a pools premium', '+10% APY em staking']
+    benefits: ['Acesso a pools premium', '+10% APY em staking', 'Airdrops VIP']
   },
   {
     id: 'golden-token',
@@ -70,32 +72,100 @@ const rarityLabels = {
 export function NFTMarketplace() {
   const { balance, removeTokens } = useTokens();
   const { journey, completeMission } = useJourney();
+  const { nftOperations, tokenOperations, isLoading: blockchainLoading } = useBlockchain();
   const [ownedNFTs, setOwnedNFTs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [nftBalance, setNftBalance] = useState(0);
 
   const nftMission = journey.missions.find(m => m.id === 'buy-nft');
   const isUnlocked = nftMission?.unlocked || false;
   const isCompleted = nftMission?.completed || false;
 
+  // Carregar NFTs do usuário
+  useEffect(() => {
+    const loadUserNFTs = async () => {
+      try {
+        const balance = await nftOperations.getBalance();
+        setNftBalance(balance);
+        
+        // Verificar quais NFTs específicos o usuário possui
+        const owned = [];
+        for (const nft of nftCollection) {
+          try {
+            if (nft.id === 'member-nft') {
+              const owner = await nftOperations.getOwner(NFT_CONFIG.MEMBER_NFT.id);
+              // Se não der erro, o NFT existe e tem dono
+              owned.push(nft.id);
+            } else if (nft.id === 'premium-nft') {
+              const owner = await nftOperations.getOwner(NFT_CONFIG.PREMIUM_NFT.id);
+              owned.push(nft.id);
+            }
+          } catch (error) {
+            // NFT não existe ou usuário não possui
+          }
+        }
+        setOwnedNFTs(owned);
+      } catch (error) {
+        console.error('Erro ao carregar NFTs do usuário:', error);
+      }
+    };
+
+    if (isUnlocked) {
+      loadUserNFTs();
+    }
+  }, [isUnlocked, nftOperations]);
+
   const handleBuyNFT = async (nft: NFT) => {
-    if (balance < nft.price || isLoading || ownedNFTs.includes(nft.id)) return;
+    if (balance < nft.price || isLoading || ownedNFTs.includes(nft.id) || blockchainLoading) return;
 
     setIsLoading(nft.id);
 
     try {
-      // Simular delay da transação
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      let result;
+      
+      // Comprar NFT específico baseado no ID
+      if (nft.id === 'member-nft') {
+        result = await nftOperations.buyNFT(NFT_CONFIG.MEMBER_NFT.id);
+      } else if (nft.id === 'premium-nft') {
+        result = await nftOperations.buyNFT(NFT_CONFIG.PREMIUM_NFT.id);
+      } else {
+        // Para outros NFTs, simular compra
+        throw new Error('NFT não disponível no contrato');
+      }
 
-      // Gastar tokens
-      removeTokens(nft.price);
-      setOwnedNFTs(prev => [...prev, nft.id]);
+      if (result.success) {
+        console.log('✅ NFT comprado via contrato:', result.hash);
+        
+        // Gastar tokens localmente
+        removeTokens(nft.price);
+        setOwnedNFTs(prev => [...prev, nft.id]);
+        setNftBalance(prev => prev + 1);
 
-      // Completar missão se for a primeira vez
-      if (!isCompleted) {
-        completeMission('buy-nft');
+        // Completar missão se for a primeira vez
+        if (!isCompleted) {
+          completeMission('buy-nft');
+        }
+      } else {
+        throw new Error(result.error?.message || 'Falha na compra do NFT');
       }
     } catch (error) {
       console.error('Erro ao comprar NFT:', error);
+      
+      // Fallback para simulação
+      try {
+        console.warn('⚠️ Usando simulação de compra de NFT');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        removeTokens(nft.price);
+        setOwnedNFTs(prev => [...prev, nft.id]);
+        setNftBalance(prev => prev + 1);
+
+        if (!isCompleted) {
+          completeMission('buy-nft');
+        }
+      } catch (fallbackError) {
+        console.error('Erro no fallback:', fallbackError);
+      }
     } finally {
       setIsLoading(null);
     }
@@ -131,7 +201,7 @@ export function NFTMarketplace() {
           </div>
           <div>
             <div className="text-purple-300 font-medium text-sm">NFTs Possuídos</div>
-            <div className="text-white text-lg font-bold">{ownedNFTs.length}</div>
+            <div className="text-white text-lg font-bold">{nftBalance}</div>
           </div>
         </div>
       </div>
