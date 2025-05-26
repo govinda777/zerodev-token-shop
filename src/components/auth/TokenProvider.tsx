@@ -9,6 +9,10 @@ export interface TokenContextType {
   addTokens: (amount: number) => void;
   removeTokens: (amount: number) => void;
   isLoading: boolean;
+  isFirstLogin: boolean;
+  welcomeReward: number | null;
+  showWelcomeNotification: boolean;
+  dismissWelcomeNotification: () => void;
 }
 
 export const TokenContext = createContext<TokenContextType | undefined>(undefined);
@@ -18,6 +22,9 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
   const { isConnected, address } = usePrivyAuth();
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFirstLogin, setIsFirstLogin] = useState(false);
+  const [welcomeReward, setWelcomeReward] = useState<number | null>(null);
+  const [showWelcomeNotification, setShowWelcomeNotification] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -30,25 +37,39 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
       // Check if first login and grant initial tokens
       const hasInitialGrant = localStorage.getItem(`initial_grant_${address}`);
       if (!hasInitialGrant) {
-        const welcomeReward = 10;
-        setBalance(welcomeReward);
+        const welcomeRewardAmount = 10;
+        setBalance(welcomeRewardAmount);
+        setIsFirstLogin(true);
+        setWelcomeReward(welcomeRewardAmount);
+        setShowWelcomeNotification(true);
+        
         localStorage.setItem(`initial_grant_${address}`, 'true');
-        localStorage.setItem(address, welcomeReward.toString());
+        localStorage.setItem(address, welcomeRewardAmount.toString());
         
         // Log first login with reward
-        JourneyLogger.logFirstLogin(address, welcomeReward);
-        JourneyLogger.logTokenReward(address, welcomeReward, 'welcome_bonus');
+        JourneyLogger.logFirstLogin(address, welcomeRewardAmount);
+        JourneyLogger.logTokenReward(address, welcomeRewardAmount, 'welcome_bonus');
         
-        console.log(`🎉 Welcome bonus of ${welcomeReward} tokens granted to ${address}`);
+        console.log(`🎉 Welcome bonus of ${welcomeRewardAmount} tokens granted to ${address}`);
+        
+        // Auto-dismiss notification after 10 seconds
+        setTimeout(() => {
+          setShowWelcomeNotification(false);
+        }, 10000);
       } else {
         // Fetch current balance from storage
         const currentBalance = parseInt(localStorage.getItem(address) || "0");
         setBalance(currentBalance);
+        setIsFirstLogin(false);
+        setWelcomeReward(null);
       }
       
       setIsLoading(false);
     } else if (mounted) {
       setBalance(0);
+      setIsFirstLogin(false);
+      setWelcomeReward(null);
+      setShowWelcomeNotification(false);
       setIsLoading(false);
     }
   }, [isConnected, address, mounted]);
@@ -66,14 +87,28 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeTokens = (amount: number) => {
-    if (!address) return;
+    console.log('🔍 TokenProvider.removeTokens chamado:', { amount, address, currentBalance: balance });
+    
+    if (!address) {
+      console.error('❌ Endereço não disponível para remoção de tokens');
+      return;
+    }
     
     const currentBalance = parseInt(localStorage.getItem(address) || "0");
+    console.log('🔍 Saldo atual no localStorage:', currentBalance);
+    
     if (currentBalance >= amount) {
       const newBalance = currentBalance - amount;
       localStorage.setItem(address, newBalance.toString());
       setBalance(newBalance);
+      console.log('✅ Tokens removidos com sucesso:', { oldBalance: currentBalance, newBalance, amount });
+    } else {
+      console.error('❌ Saldo insuficiente para remoção:', { currentBalance, amount });
     }
+  };
+
+  const dismissWelcomeNotification = () => {
+    setShowWelcomeNotification(false);
   };
 
   if (!mounted) {
@@ -81,7 +116,16 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <TokenContext.Provider value={{ balance, addTokens, removeTokens, isLoading }}>
+    <TokenContext.Provider value={{ 
+      balance, 
+      addTokens, 
+      removeTokens, 
+      isLoading,
+      isFirstLogin,
+      welcomeReward,
+      showWelcomeNotification,
+      dismissWelcomeNotification
+    }}>
       {children}
     </TokenContext.Provider>
   );

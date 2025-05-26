@@ -3,6 +3,7 @@
 import { PrivyProvider, usePrivy } from '@privy-io/react-auth';
 import { createContext, useContext, useEffect, useState } from "react";
 import { MockAuthProvider } from './MockAuthProvider';
+import { sepolia } from 'viem/chains';
 
 interface AuthContextType {
   isConnected: boolean;
@@ -78,10 +79,6 @@ function PrivyWrapper({ children }: { children: React.ReactNode }) {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 
-  console.log('Environment check:');
-  console.log('- App ID:', appId);
-  console.log('- NODE_ENV:', process.env.NODE_ENV);
-
   if (!appId) {
     console.error('NEXT_PUBLIC_PRIVY_APP_ID is not set - using fallback auth');
     return (
@@ -104,6 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         appearance: {
           theme: 'dark',
         },
+        // Configurar apenas Sepolia como rede suportada
+        supportedChains: [sepolia],
+        defaultChain: sepolia,
       }}
     >
       <PrivyWrapper>

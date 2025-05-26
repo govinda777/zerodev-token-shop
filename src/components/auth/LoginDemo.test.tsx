@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { LoginDemo } from './LoginDemo';
 import { MockAuthProvider } from './MockAuthProvider';
+import { TokenProvider } from './TokenProvider';
 import React from 'react';
 
 // Mock do hook usePrivyAuth
@@ -9,6 +10,13 @@ jest.mock('@/hooks/usePrivyAuth', () => ({
 }));
 
 const mockUsePrivyAuth = require('@/hooks/usePrivyAuth').usePrivyAuth as jest.Mock;
+
+// Wrapper component with TokenProvider
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <TokenProvider>
+    {children}
+  </TokenProvider>
+);
 
 // Mock do window.open
 Object.defineProperty(window, 'open', {
@@ -35,7 +43,7 @@ describe('LoginDemo', () => {
       connectWallet: jest.fn()
     });
 
-    render(<LoginDemo />);
+    render(<LoginDemo />, { wrapper: TestWrapper });
 
     expect(screen.getByText('Carregando Privy...')).toBeInTheDocument();
   });
@@ -54,7 +62,7 @@ describe('LoginDemo', () => {
       connectWallet: jest.fn()
     });
 
-    render(<LoginDemo />);
+    render(<LoginDemo />, { wrapper: TestWrapper });
 
     expect(screen.getByText('Demonstração do Privy')).toBeInTheDocument();
     expect(screen.getByText('Faça login para acessar o marketplace')).toBeInTheDocument();
@@ -75,7 +83,7 @@ describe('LoginDemo', () => {
       connectWallet: jest.fn()
     });
 
-    render(<LoginDemo />);
+    render(<LoginDemo />, { wrapper: TestWrapper });
 
     expect(screen.getByText('Conectando...')).toBeInTheDocument();
     expect(screen.getByRole('button')).toBeDisabled();
@@ -96,7 +104,7 @@ describe('LoginDemo', () => {
       connectWallet: jest.fn()
     });
 
-    render(<LoginDemo />);
+    render(<LoginDemo />, { wrapper: TestWrapper });
 
     const connectButton = screen.getByRole('button', { name: /conectar carteira/i });
     fireEvent.click(connectButton);
@@ -125,7 +133,7 @@ describe('LoginDemo', () => {
       connectWallet: jest.fn()
     });
 
-    render(<LoginDemo />);
+    render(<LoginDemo />, { wrapper: TestWrapper });
 
     expect(screen.getByText('Conectado com sucesso!')).toBeInTheDocument();
     expect(screen.getByText('user-123')).toBeInTheDocument();
@@ -151,7 +159,7 @@ describe('LoginDemo', () => {
       connectWallet: jest.fn()
     });
 
-    render(<LoginDemo />);
+    render(<LoginDemo />, { wrapper: TestWrapper });
 
     expect(screen.getByRole('button', { name: /desconectar/i })).toBeInTheDocument();
   });
@@ -175,7 +183,7 @@ describe('LoginDemo', () => {
       connectWallet: jest.fn()
     });
 
-    render(<LoginDemo />);
+    render(<LoginDemo />, { wrapper: TestWrapper });
 
     const disconnectButton = screen.getByRole('button', { name: /desconectar/i });
     fireEvent.click(disconnectButton);
@@ -201,7 +209,7 @@ describe('LoginDemo', () => {
       connectWallet: jest.fn()
     });
 
-    render(<LoginDemo />);
+    render(<LoginDemo />, { wrapper: TestWrapper });
 
     expect(screen.getByRole('button', { name: /ver no etherscan/i })).toBeInTheDocument();
   });
@@ -227,7 +235,7 @@ describe('LoginDemo', () => {
       connectWallet: jest.fn()
     });
 
-    render(<LoginDemo />);
+    render(<LoginDemo />, { wrapper: TestWrapper });
 
     const etherscanButton = screen.getByRole('button', { name: /ver no etherscan/i });
     fireEvent.click(etherscanButton);
@@ -255,7 +263,7 @@ describe('LoginDemo', () => {
       connectWallet: jest.fn()
     });
 
-    render(<LoginDemo />);
+    render(<LoginDemo />, { wrapper: TestWrapper });
 
     expect(screen.getByRole('button', { name: /conectar carteira adicional/i })).toBeInTheDocument();
   });
@@ -278,7 +286,7 @@ describe('LoginDemo', () => {
       connectWallet: mockConnectWallet
     });
 
-    render(<LoginDemo />);
+    render(<LoginDemo />, { wrapper: TestWrapper });
 
     const connectWalletButton = screen.getByRole('button', { name: /conectar carteira adicional/i });
     fireEvent.click(connectWalletButton);

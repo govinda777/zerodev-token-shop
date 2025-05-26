@@ -4,9 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { TokenBalance } from "@/components/common/TokenBalance";
 import { usePrivyAuth } from "@/hooks/usePrivyAuth";
+import { useNetworkValidation, getNetworkName } from "@/hooks/useNetworkValidation";
 
 export function Header() {
   const { address, isConnected, isConnecting, connect, disconnect } = usePrivyAuth();
+  const { isCorrectNetwork, currentChainId, switchToSepolia } = useNetworkValidation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Criar um displayAddress a partir do address
@@ -75,8 +77,30 @@ export function Header() {
           <div className="flex items-center space-x-3">
             {isConnected ? (
               <div className="flex items-center space-x-3">
-                {/* Balance Display - Escondido em telas muito pequenas */}
-                <div className="hidden sm:block">
+                {/* Network Indicator */}
+                <div className={`hidden md:flex items-center px-3 py-2 rounded-full text-xs font-medium ${
+                  isCorrectNetwork 
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                    : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full mr-2 ${
+                    isCorrectNetwork ? 'bg-green-400' : 'bg-red-400'
+                  }`}></div>
+                  <span className="hidden lg:inline">
+                    {isCorrectNetwork ? 'Sepolia' : getNetworkName(currentChainId)}
+                  </span>
+                  {!isCorrectNetwork && (
+                    <button
+                      onClick={switchToSepolia}
+                      className="ml-2 text-xs underline hover:no-underline"
+                    >
+                      Trocar
+                    </button>
+                  )}
+                </div>
+
+                {/* Balance Display */}
+                <div className="hidden lg:block">
                   <TokenBalance address={address} />
                 </div>
 
@@ -188,6 +212,32 @@ export function Header() {
               
               {isConnected && (
                 <div className="pt-4 border-t border-white/10 space-y-3">
+                  {/* Network Status Mobile */}
+                  <div className={`mx-3 px-3 py-2 rounded-lg text-sm ${
+                    isCorrectNetwork 
+                      ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                      : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className={`w-2 h-2 rounded-full mr-2 ${
+                          isCorrectNetwork ? 'bg-green-400' : 'bg-red-400'
+                        }`}></div>
+                        <span>
+                          Rede: {isCorrectNetwork ? 'Sepolia' : getNetworkName(currentChainId)}
+                        </span>
+                      </div>
+                      {!isCorrectNetwork && (
+                        <button
+                          onClick={switchToSepolia}
+                          className="text-xs underline hover:no-underline"
+                        >
+                          Trocar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  
                   <div className="px-3">
                     <TokenBalance address={address} />
                   </div>

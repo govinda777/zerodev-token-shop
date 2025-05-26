@@ -1,5 +1,21 @@
 import '@testing-library/jest-dom';
 
+// Polyfills para ambiente Node.js
+if (typeof global.TextEncoder === 'undefined') {
+  const { TextEncoder, TextDecoder } = require('util');
+  global.TextEncoder = TextEncoder;
+  global.TextDecoder = TextDecoder;
+}
+
+// Mock do fetch
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({}),
+    text: () => Promise.resolve(''),
+  })
+) as jest.Mock;
+
 // Mock do console.error para evitar poluição nos testes
 const originalError = console.error;
 beforeAll(() => {

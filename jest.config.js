@@ -20,6 +20,10 @@ const customJestConfig = {
   },
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'mjs'],
+  globals: {
+    TextEncoder: TextEncoder,
+    TextDecoder: TextDecoder,
+  },
 };
 
 module.exports = createJestConfig(customJestConfig);

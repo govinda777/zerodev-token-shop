@@ -5,6 +5,7 @@ import { Footer } from "@/components/common/Footer";
 import { SkipLinks } from "@/components/common/SkipLinks";
 import { ProductGrid } from "@/components/shop/ProductGrid";
 import { LoginDemo } from "@/components/auth/LoginDemo";
+import { NetworkGuard } from "@/components/common/NetworkGuard";
 import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import { ProductProvider } from '@/components/shop/ProductProvider';
 
@@ -25,7 +26,7 @@ export default function Home() {
                 {/* Status Badge */}
                 <div className="inline-flex items-center gap-2 bg-purple-500/20 backdrop-blur-sm border border-purple-500/30 rounded-full px-4 py-2 mb-8">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" aria-hidden="true"></div>
-                  <span className="text-purple-200 text-body-sm font-medium">Marketplace Ativo</span>
+                  <span className="text-purple-200 text-body-sm font-medium">Marketplace Ativo - Apenas Sepolia Testnet</span>
                 </div>
                 
                 {/* Main Title */}
@@ -39,8 +40,22 @@ export default function Home() {
                 {/* Subtitle */}
                 <p className="text-body-lg text-white/90 max-w-3xl mx-auto leading-relaxed space-elements">
                   Explore e adquira tokens únicos usando sua carteira digital. 
-                  <span className="text-purple-300 font-medium"> Conecte-se agora</span> e descubra um mundo de possibilidades.
+                  <span className="text-purple-300 font-medium"> Conecte-se na rede Sepolia</span> e descubra um mundo de possibilidades.
                 </p>
+
+                {/* Network Info */}
+                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 max-w-2xl mx-auto space-elements">
+                  <div className="flex items-center justify-center mb-2">
+                    <svg className="w-5 h-5 text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-blue-400 font-medium text-sm">Projeto em Fase de Teste</span>
+                  </div>
+                  <p className="text-blue-300 text-sm">
+                    Este marketplace funciona exclusivamente na <strong>Sepolia Testnet</strong>. 
+                    Certifique-se de estar conectado à rede correta para acessar todas as funcionalidades.
+                  </p>
+                </div>
 
                 {/* Stats Section */}
                 <section aria-labelledby="stats-title" className="grid-stats max-w-5xl mx-auto space-elements">
@@ -109,11 +124,13 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Products Section */}
+          {/* Products Section - Protected by NetworkGuard */}
           <section id="products" className="section-spacing bg-black/20" aria-labelledby="products-title">
             <div className="container-responsive">
               <h2 id="products-title" className="sr-only">Produtos disponíveis</h2>
-              <ProductGrid />
+              <NetworkGuard>
+                <ProductGrid />
+              </NetworkGuard>
             </div>
           </section>
         </ProductProvider>

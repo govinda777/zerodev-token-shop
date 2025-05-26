@@ -1,5 +1,20 @@
 # Jornadas do Usuário
 
+O layout da home não está fazendo muito sentido.
+
+A ideia era criar uma página onde conforme o usuário faça as missões ele seja capaz de esperimentar novas funcionalidades.
+
+Exemplo:
+
+1 - Login
+2 - Faucets
+3 - Stacke
+4 - By NFE 
+5 - Get Air Drop
+6 - Fazer assinatura, pagamento mensal ou anual
+7 - Renda Passiva
+
+
 ## 1. Login e Recompensa Inicial
 
 **Objetivo:** Permitir que o usuário acesse a plataforma e receba tokens de boas-vindas.

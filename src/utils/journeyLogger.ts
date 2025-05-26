@@ -74,7 +74,10 @@ class JourneyLogger {
       timestamp: Date.now(),
       details: {
         isFirstTime: true,
-        welcomeReward: rewardAmount
+        welcomeReward: rewardAmount,
+        userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'unknown',
+        timestamp: new Date().toISOString(),
+        sessionId: Date.now() + Math.random().toString(36).substr(2, 9)
       }
     });
   }

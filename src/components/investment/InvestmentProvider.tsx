@@ -85,7 +85,8 @@ const mockGovernanceTokens: GovernanceToken[] = [
     symbol: 'DAO',
     price: 5,
     description: 'Token de governança para participar das decisões da DAO',
-    votingPower: 1
+    votingPower: 1,
+    available: 1000
   },
   {
     id: 'gov-2',
@@ -93,7 +94,8 @@ const mockGovernanceTokens: GovernanceToken[] = [
     symbol: 'COUNCIL',
     price: 25,
     description: 'Token de conselho com maior poder de voto',
-    votingPower: 5
+    votingPower: 5,
+    available: 500
   }
 ];
 
@@ -123,7 +125,9 @@ const mockNFTs: NFT[] = [
     description: 'Badge para primeiros usuários da plataforma',
     image: '/nft-pioneer.png',
     rarity: 'common',
-    benefits: ['5% discount on all purchases', 'Early access to new features']
+    benefits: ['5% discount on all purchases', 'Early access to new features'],
+    price: 0,
+    available: true
   },
   {
     id: 'nft-2',
@@ -131,7 +135,9 @@ const mockNFTs: NFT[] = [
     description: 'NFT de membro ouro com benefícios exclusivos',
     image: '/nft-gold.png',
     rarity: 'rare',
-    benefits: ['10% discount', 'Priority support', 'Exclusive events access']
+    benefits: ['10% discount', 'Priority support', 'Exclusive events access'],
+    price: 100,
+    available: true
   },
   {
     id: 'nft-3',
@@ -139,7 +145,9 @@ const mockNFTs: NFT[] = [
     description: 'Status diamante para grandes investidores',
     image: '/nft-diamond.png',
     rarity: 'legendary',
-    benefits: ['20% discount', 'Personal advisor', 'VIP access', 'Monthly airdrops']
+    benefits: ['20% discount', 'Personal advisor', 'VIP access', 'Monthly airdrops'],
+    price: 500,
+    available: true
   }
 ];
 
@@ -159,19 +167,25 @@ export function InvestmentProvider({ children }: { children: React.ReactNode }) 
       const mockAirdrops: Airdrop[] = [
         {
           id: 'airdrop-1',
+          name: 'Welcome Airdrop',
           tokenType: 'governance',
           amount: 5,
           description: 'Airdrop de boas-vindas - Tokens de Governança',
           timestamp: Date.now() - 86400000, // 1 day ago
-          claimed: false
+          claimed: false,
+          isEligible: true,
+          expiryDate: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days from now
         },
         {
           id: 'airdrop-2',
+          name: 'Participation Reward',
           tokenType: 'stake',
           amount: 10,
           description: 'Tokens de recompensa por participação',
           timestamp: Date.now() - 172800000, // 2 days ago
-          claimed: true
+          claimed: true,
+          isEligible: true,
+          expiryDate: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days from now
         }
       ];
       setAirdrops(mockAirdrops);
@@ -202,10 +216,12 @@ export function InvestmentProvider({ children }: { children: React.ReactNode }) 
       const newPosition: StakePosition = {
         id: `position-${Date.now()}`,
         stakeOptionId: optionId,
+        optionName: option.name,
         amount,
         startDate: Date.now(),
         endDate: Date.now() + (option.duration * 24 * 60 * 60 * 1000),
         rewards: (amount * option.apy / 100 / 365) * option.duration,
+        apy: option.apy,
         status: 'active'
       };
       
@@ -332,8 +348,10 @@ export function InvestmentProvider({ children }: { children: React.ReactNode }) 
       const newPurchase: InstallmentPurchase = {
         id: `installment-${Date.now()}`,
         productId,
+        productName: `Product ${productId}`,
         totalAmount,
         installments,
+        totalInstallments: installments,
         paidInstallments: 0,
         installmentAmount,
         nextPaymentDate: Date.now() + (30 * 24 * 60 * 60 * 1000), // 30 days

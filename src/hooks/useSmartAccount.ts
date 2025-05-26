@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import { usePrivyAuth } from "./usePrivyAuth";
 
 export function useSmartAccount() {
-  const { address } = useAccount();
+  const { address } = usePrivyAuth();
   const [smartAccountAddress, setSmartAccountAddress] = useState<string | undefined>();
 
   useEffect(() => {

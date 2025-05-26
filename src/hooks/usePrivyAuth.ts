@@ -74,7 +74,7 @@ export function usePrivyAuth() {
     id: user.id,
     email: user.email?.address,
     wallet: user.wallet?.address,
-    createdAt: user.createdAt
+    createdAt: user.createdAt ? new Date(user.createdAt).getTime() : Date.now()
   } : null;
 
   // Verificações

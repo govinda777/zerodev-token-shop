@@ -3,22 +3,43 @@ import { ProductCard } from './ProductCard';
 import { useTokens } from '@/hooks/useTokens';
 import { useInvestment } from '@/components/investment/InvestmentProvider';
 import { Product } from '@/types/product';
+import { useState } from 'react';
+import { DebugPanel } from './DebugPanel';
 
 export const ProductGrid = () => {
   const { products, buyProduct, buyProductInstallment } = useProducts();
   const { balance } = useTokens();
   const { stakePositions, createInstallmentPurchase, isLoading } = useInvestment();
+  const [purchaseLoading, setPurchaseLoading] = useState<string | null>(null);
 
   // Check if user has sufficient stake for installment purchases
   const hasStakeForInstallments = stakePositions.some(p => p.status === 'active' && p.amount >= 50);
 
-  const handleBuy = (product: Product) => {
-    if (balance >= product.price) {
+  const handleBuy = async (product: Product) => {
+    console.log('🛒 Tentando comprar produto:', product.name, 'Preço:', product.price, 'Saldo:', balance);
+    
+    if (balance < product.price) {
+      alert(`Saldo insuficiente! Você tem ${balance} tokens, mas precisa de ${product.price} tokens.`);
+      return;
+    }
+
+    setPurchaseLoading(product.id);
+    
+    try {
       const success = buyProduct(product.id);
+      
       if (success) {
-        // Show success message or feedback
-        console.log(`Successfully purchased ${product.name}`);
+        alert(`✅ Compra realizada com sucesso! Você comprou ${product.name} por ${product.price} token${product.price !== 1 ? 's' : ''}.`);
+        console.log(`✅ Compra bem-sucedida: ${product.name}`);
+      } else {
+        alert('❌ Erro ao processar a compra. Tente novamente.');
+        console.error('❌ Falha na compra:', product.name);
       }
+    } catch (error) {
+      console.error('❌ Erro durante a compra:', error);
+      alert('❌ Erro inesperado durante a compra. Tente novamente.');
+    } finally {
+      setPurchaseLoading(null);
     }
   };
 
@@ -73,6 +94,7 @@ export const ProductGrid = () => {
             onBuy={handleBuy}
             onBuyInstallment={handleBuyInstallment}
             disabled={balance < product.price || isLoading}
+            isLoading={purchaseLoading === product.id}
             hasStakeForInstallments={hasStakeForInstallments}
           />
         ))}
@@ -106,6 +128,9 @@ export const ProductGrid = () => {
           <p className="text-white/60 text-body-sm">Acesso imediato após a compra</p>
         </div>
       </section>
+
+      {/* Debug Panel - only in development */}
+      <DebugPanel />
     </div>
   );
 };

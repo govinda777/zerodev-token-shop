@@ -98,9 +98,27 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
   const { address } = usePrivyAuth();
 
   const buyProduct = (productId: string, installments = 1) => {
+    console.log('🔍 ProductProvider.buyProduct chamado:', { productId, installments, balance, address });
+    
     const product = PRODUCTS.find(p => p.id === productId);
-    if (!product || balance < product.price || !address) return false;
+    console.log('🔍 Produto encontrado:', product);
+    
+    if (!product) {
+      console.error('❌ Produto não encontrado:', productId);
+      return false;
+    }
+    
+    if (balance < product.price) {
+      console.error('❌ Saldo insuficiente:', { balance, price: product.price });
+      return false;
+    }
+    
+    if (!address) {
+      console.error('❌ Endereço não conectado');
+      return false;
+    }
 
+    console.log('✅ Removendo tokens:', product.price);
     removeTokens(product.price);
     
     const newPurchase = {
@@ -110,11 +128,13 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
       installments: installments > 1 ? installments : undefined
     };
     
+    console.log('✅ Adicionando compra:', newPurchase);
     setPurchases(prev => [...prev, newPurchase]);
     
     // Log purchase
     JourneyLogger.logPurchase(address, productId, product.price, installments > 1 ? installments : undefined);
     
+    console.log('✅ Compra finalizada com sucesso');
     return true;
   };
 

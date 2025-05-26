@@ -19,9 +19,9 @@ jest.mock('@/hooks/useProducts', () => ({
   })
 }));
 
-jest.mock('@/components/auth/useAuth', () => ({
-  useAuth: () => ({
-    isConnected: true
+jest.mock('@/hooks/usePrivyAuth', () => ({
+  usePrivyAuth: () => ({
+    isAuthenticated: true
   })
 }));
 

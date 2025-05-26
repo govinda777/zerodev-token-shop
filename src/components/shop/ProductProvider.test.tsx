@@ -4,9 +4,9 @@ import { render, screen } from '@testing-library/react';
 const ProductProvider = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
 
 // Mock dos hooks
-jest.mock('../../components/auth/useAuth', () => ({
-  useAuth: () => ({
-    isConnected: true,
+jest.mock('@/hooks/usePrivyAuth', () => ({
+  usePrivyAuth: () => ({
+    isAuthenticated: true,
     address: '0x123'
   })
 }));
