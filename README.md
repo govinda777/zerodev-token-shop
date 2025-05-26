@@ -17,31 +17,131 @@ Um marketplace moderno e acessível para tokens digitais únicos, construído co
 - **Linguagem**: TypeScript
 - **Styling**: Tailwind CSS
 - **Web3**: MetaMask integration
+   - ERC-4337
+   - Account Abstraction
+   - ZeroDev
+   - Privy
 - **Testes**: Jest + React Testing Library
 - **Lint**: ESLint + Prettier
+
+## 📸 Uma breve explicação sobre Account Abstraction, ERC-4337 e ZeroDev
+
+### 🎯 Account Abstraction: A Revolução da UX Web3
+
+**Account Abstraction** é uma evolução fundamental na experiência Web3 que elimina as barreiras técnicas entre usuários e blockchain. Tradicionalmente, interagir com blockchains requer gerenciamento complexo de chaves privadas, posse de tokens nativos para gas fees e compreensão técnica profunda.
+
+Com Account Abstraction, essas complexidades são **abstraídas**, permitindo:
+- ✨ **Login social** (Google, Apple, Email)
+- 💳 **Pagamento de gas com qualquer token** ou patrocinado
+- 🛡️ **Recuperação de conta** sem seed phrases
+- 🔄 **Transações em lote** e automação
+
+![Account Abstraction Hero](./public/images/docs/account-abstraction-hero.jpg)
+*Account Abstraction: A evolução da experiência Web3 - simplificando a interação do usuário com blockchain*
+
+### 🏗️ ERC-4337: O Padrão Técnico
+
+O **ERC-4337** é o padrão Ethereum que implementa Account Abstraction sem modificar o protocolo base. Define componentes como Smart Accounts, UserOperations, Bundlers, Paymasters e Entry Point.
+
+**Benefícios práticos:**
+- **Gas Abstraction**: Pague gas com USDC, DAI ou tenha patrocinado
+- **Batch Transactions**: Execute múltiplas ações em uma transação
+- **Social Recovery**: Recupere sua conta através de guardiões confiáveis
+- **Session Keys**: Autorize aplicações por tempo limitado
+
+![ERC-4337 Standard](./public/images/docs/ERC-4337.png)
+*ERC-4337: O padrão que define como implementar Account Abstraction de forma padronizada*
+
+### 🚀 ZeroDev: Infraestrutura Completa
+
+**ZeroDev** é a plataforma que simplifica a implementação de Account Abstraction para desenvolvedores, oferecendo SDKs prontos, Paymaster-as-a-Service, infraestrutura de Bundlers e módulos de segurança pré-auditados.
+
+**Casos de uso reais:**
+- 🎮 **Gaming**: Onboarding sem friction para jogadores
+- 🛒 **E-commerce**: Checkout Web3 simples como Web2
+- 💰 **DeFi**: Automação de estratégias de investimento
+- 🏢 **Enterprise**: Carteiras corporativas com controles avançados
+
+![ZeroDev Support](./public/images/docs/ZeroDev-Support-Both.webp)
+*ZeroDev: Plataforma completa que oferece suporte tanto para Smart Accounts quanto para implementações customizadas*
+
+### 📊 Ecossistema e Arquitetura
+
+#### Desconstruindo a Arquitetura
+
+![Deconstructing Account Abstraction](./public/images/docs/Deconstructing-Account-Abstraction.png)
+*Desconstruindo Account Abstraction: componentes técnicos e arquitetura do sistema*
+
+#### Chain Abstraction e UX
+
+![Chain Abstraction in Web3 UX](./public/images/docs/Chain-Abstraction--Account-Abstraction-in-Web3-UX.jpg)
+*Chain Abstraction: Como eliminar a complexidade de múltiplas blockchains para o usuário final*
+
+#### Panorama do Mercado
+
+![Account Abstraction Projects Landscape](./public/images/docs/Account_Abstraction_Projects_Landscape.png)
+*Landscape de Projetos: Panorama completo dos projetos e soluções no ecossistema Account Abstraction*
+
+![Account Abstraction Market Map](./public/images/docs/Account_Abstraction_Market_Map.jpg)
+*Market Map: Mapeamento dos principais players e categorias no mercado de Account Abstraction*
+
+#### Fundamentos Técnicos
+
+![Deconstructing Account Abstraction](./public/images/docs/Deconstructing-Account-Abstraction.png)
+*Desconstruindo Account Abstraction: componentes técnicos e arquitetura do sistema*
+
+![ERC-4337 Standard](./public/images/docs/ERC-4337.png)
+*ERC-4337: O padrão que define como implementar Account Abstraction de forma padronizada*
+
+#### UX e Chain Abstraction
+
+![Chain Abstraction in Web3 UX](./public/images/docs/Chain-Abstraction--Account-Abstraction-in-Web3-UX.jpg)
+*Chain Abstraction: Como eliminar a complexidade de múltiplas blockchains para o usuário final*
+
+#### Ecossistema e Mercado
+
+![Account Abstraction Projects Landscape](./public/images/docs/Account_Abstraction_Projects_Landscape.png)
+*Landscape de Projetos: Panorama completo dos projetos e soluções no ecossistema Account Abstraction*
+
+![Account Abstraction Market Map](./public/images/docs/Account_Abstraction_Market_Map.jpg)
+*Market Map: Mapeamento dos principais players e categorias no mercado de Account Abstraction*
+
+#### Implementação ZeroDev
+
+![ZeroDev Support](./public/images/docs/ZeroDev-Support-Both.webp)
+*ZeroDev: Plataforma completa que oferece suporte tanto para Smart Accounts quanto para implementações customizadas*
+
+## 📝 Configuração
+
+### Variáveis de Ambiente
+
+```env
+NEXT_PUBLIC_ZERODEV_RPC=
+NEXT_PUBLIC_CHAIN=
+NEXT_PUBLIC_ZERODEV_PROJECT_ID=
+NEXT_PUBLIC_PRIVY_APP_ID=
+```
+
+### Como configurar o ZeroDev
+
+Acesse o site https://zerodev.com/ e crie uma conta.
+
+1 - Crie um projeto no ZeroDev
+2 - Crie um app no ZeroDev
+
+#### Como configurar o Privy
+
+Acesse o site https://privy.io/ e crie uma conta.
+
+1 - Crie um app no Privy
+
 
 ## 📁 Estrutura do Projeto
 
 ```
 src/
 ├── app/                    # App Router (Next.js 14)
-│   ├── globals.css        # Estilos globais e sistema de design
-│   ├── layout.tsx         # Layout principal
-│   └── page.tsx           # Página inicial
-├── components/
-│   ├── auth/              # Componentes de autenticação
-│   ├── common/            # Componentes reutilizáveis
-│   │   ├── Header.tsx     # Cabeçalho responsivo
-│   │   ├── Footer.tsx     # Rodapé
-│   │   ├── SkipLinks.tsx  # Links de navegação acessível
-│   │   └── TokenBalance.tsx
-│   └── shop/              # Componentes do marketplace
-│       ├── ProductCard.tsx # Card de produto otimizado
-│       ├── ProductGrid.tsx # Grid responsivo
-│       └── ...
-├── hooks/                 # React Hooks customizados
-├── types/                 # Definições TypeScript
-└── utils/                 # Funções utilitárias
+
 ```
 
 ## 🎨 Sistema de Design
@@ -156,7 +256,15 @@ npm run test:watch   # Testes em modo watch
 - [x] **Estados de Carregamento**: UX otimizada
 - [x] **Navegação por Teclado**: Skip links e focus management
 
-### 🚧 Em Desenvolvimento
+### 🚧 Em Desenvolvimento (User Journeys)
+- [ ] **Login**: Login com Privy
+- [ ] **Faucets**: Faucets de tokens
+- [ ] **Stacke**: Stacke de tokens
+- [ ] **By NFE**: By NFE 
+- [ ] **Get Air Drop**: Get Air Drop
+- [ ] **Fazer assinatura, pagamento mensal ou anual**: Fazer assinatura, pagamento mensal ou anual
+- [ ] **Renda Passiva**: Renda Passiva
+
 - [ ] **Carrinho de Compras**: Sistema de carrinho persistente
 - [ ] **Histórico de Transações**: Visualização de compras
 - [ ] **Filtros Avançados**: Busca e categorização
@@ -197,23 +305,6 @@ npm run test:watch
 # Coverage report
 npm run test:coverage
 ```
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
-3. Commit suas mudanças (`git commit -m 'Add: nova feature'`)
-4. Push para a branch (`git push origin feature/nova-feature`)
-5. Abra um Pull Request
-
-### Padrões de Commit
-- `feat:` Nova funcionalidade
-- `fix:` Correção de bug
-- `docs:` Documentação
-- `style:` Formatação
-- `refactor:` Refatoração
-- `test:` Testes
-- `chore:` Configuração
 
 ## 📝 Changelog
 
@@ -344,20 +435,6 @@ npm run push:skip-tests     # Push sem testes (emergência)
 npm run push:all-tests      # Push com todos os testes
 ```
 
-## 📁 Estrutura do Projeto
-
-```
-src/
-├── app/                    # App Router (Next.js 14)
-├── components/
-│   ├── auth/              # Componentes de autenticação
-│   ├── shop/              # Componentes do marketplace
-│   └── ui/                # Componentes de UI
-├── hooks/                 # Custom hooks
-├── types/                 # Definições TypeScript
-├── utils/                 # Utilitários
-└── __tests__/            # Testes globais
-```
 
 ## 🔄 Workflow de Desenvolvimento
 

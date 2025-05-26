@@ -8,6 +8,15 @@ import { LoginDemo } from "@/components/auth/LoginDemo";
 import { NetworkGuard } from "@/components/common/NetworkGuard";
 import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import { ProductProvider } from '@/components/shop/ProductProvider';
+import { JourneyProvider } from '@/components/journey/JourneyProvider';
+import { JourneyDashboard } from '@/components/journey/JourneyDashboard';
+import { JourneyPOC } from '@/components/journey/JourneyPOC';
+import { FaucetComponent } from '@/components/journey/FaucetComponent';
+import { StakingComponent } from '@/components/journey/StakingComponent';
+import { NFTMarketplace } from '@/components/journey/NFTMarketplace';
+import { AirdropComponent } from '@/components/journey/AirdropComponent';
+import { SubscriptionComponent } from '@/components/journey/SubscriptionComponent';
+import { PassiveIncomeComponent } from '@/components/journey/PassiveIncomeComponent';
 
 export default function Home() {
   const { isConnected } = usePrivyAuth();
@@ -19,6 +28,7 @@ export default function Home() {
       
       <main id="main-content" className="flex-grow w-full">
         <ProductProvider>
+          <JourneyProvider>
           {/* Hero Section */}
           <section className="relative section-spacing" aria-labelledby="hero-title">
             <div className="container-responsive">
@@ -124,6 +134,69 @@ export default function Home() {
             </div>
           </section>
 
+          {/* Journey Section - POC */}
+          <JourneyPOC />
+
+          {/* Faucet Section */}
+          <section className="section-spacing bg-black/10" aria-labelledby="faucet-title">
+            <div className="container-responsive">
+              <h2 id="faucet-title" className="sr-only">Faucet de tokens</h2>
+              <NetworkGuard>
+                <FaucetComponent />
+              </NetworkGuard>
+            </div>
+          </section>
+
+          {/* Staking Section */}
+          <section className="section-spacing bg-black/20" aria-labelledby="staking-title">
+            <div className="container-responsive">
+              <h2 id="staking-title" className="sr-only">Staking de tokens</h2>
+              <NetworkGuard>
+                <StakingComponent />
+              </NetworkGuard>
+            </div>
+          </section>
+
+          {/* NFT Marketplace Section */}
+          <section className="section-spacing bg-black/10" aria-labelledby="nft-title">
+            <div className="container-responsive">
+              <h2 id="nft-title" className="sr-only">Marketplace de NFTs</h2>
+              <NetworkGuard>
+                <NFTMarketplace />
+              </NetworkGuard>
+            </div>
+          </section>
+
+          {/* Airdrop Section */}
+          <section className="section-spacing bg-black/20" aria-labelledby="airdrop-title">
+            <div className="container-responsive">
+              <h2 id="airdrop-title" className="sr-only">Airdrops</h2>
+              <NetworkGuard>
+                <AirdropComponent />
+              </NetworkGuard>
+            </div>
+          </section>
+
+          {/* Subscription Section */}
+          <section className="section-spacing bg-black/10" aria-labelledby="subscription-title">
+            <div className="container-responsive">
+              <h2 id="subscription-title" className="sr-only">Assinaturas Premium</h2>
+              <NetworkGuard>
+                <SubscriptionComponent />
+              </NetworkGuard>
+            </div>
+          </section>
+
+          {/* Passive Income Section */}
+          <section className="section-spacing bg-black/20" aria-labelledby="passive-income-title">
+            <div className="container-responsive">
+              <h2 id="passive-income-title" className="sr-only">Renda Passiva</h2>
+              <NetworkGuard>
+                <PassiveIncomeComponent />
+              </NetworkGuard>
+            </div>
+          </section>
+
           {/* Products Section - Protected by NetworkGuard */}
           <section id="products" className="section-spacing bg-black/20" aria-labelledby="products-title">
             <div className="container-responsive">
@@ -133,6 +206,7 @@ export default function Home() {
               </NetworkGuard>
             </div>
           </section>
+          </JourneyProvider>
         </ProductProvider>
       </main>
       
