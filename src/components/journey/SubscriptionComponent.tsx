@@ -26,7 +26,7 @@ const subscriptionPlans: SubscriptionPlan[] = [
     duration: 'monthly',
     icon: '⭐',
     popular: true,
-    features: SUBSCRIPTION_PLANS.MONTHLY.benefits
+    features: [...SUBSCRIPTION_PLANS.MONTHLY.benefits]
   },
   {
     id: 'annual',
@@ -35,7 +35,7 @@ const subscriptionPlans: SubscriptionPlan[] = [
     price: SUBSCRIPTION_PLANS.ANNUAL.price,
     duration: 'annual',
     icon: '👑',
-    features: SUBSCRIPTION_PLANS.ANNUAL.benefits
+    features: [...SUBSCRIPTION_PLANS.ANNUAL.benefits]
   }
 ];
 

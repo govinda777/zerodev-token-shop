@@ -8,9 +8,7 @@ import { LoginDemo } from "@/components/auth/LoginDemo";
 import { NetworkGuard } from "@/components/common/NetworkGuard";
 import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import { ProductProvider } from '@/components/shop/ProductProvider';
-import { JourneyProvider } from '@/components/journey/JourneyProvider';
-import { JourneyDashboard } from '@/components/journey/JourneyDashboard';
-import { JourneyPOC } from '@/components/journey/JourneyPOC';
+import { JourneyProvider, useJourney } from '@/components/journey/JourneyProvider';
 import { FaucetComponent } from '@/components/journey/FaucetComponent';
 import { StakingComponent } from '@/components/journey/StakingComponent';
 import { NFTMarketplace } from '@/components/journey/NFTMarketplace';
@@ -18,8 +16,218 @@ import { AirdropComponent } from '@/components/journey/AirdropComponent';
 import { SubscriptionComponent } from '@/components/journey/SubscriptionComponent';
 import { PassiveIncomeComponent } from '@/components/journey/PassiveIncomeComponent';
 
-export default function Home() {
+// Componente interno que usa o hook useJourney
+function HomeContent() {
   const { isConnected } = usePrivyAuth();
+  const { journey, getNextAvailableMission } = useJourney();
+
+  const nextMission = getNextAvailableMission();
+  const progressPercentage = (journey.completedMissions.length / journey.missions.length) * 100;
+  const isJourneyComplete = journey.completedMissions.length === journey.missions.length;
+
+  // Função para renderizar o componente da etapa atual
+  const renderCurrentStep = () => {
+    if (!isConnected) {
+      return (
+        <section className="section-spacing bg-black/10" aria-labelledby="auth-demo-title">
+          <div className="container-responsive">
+            <h2 id="auth-demo-title" className="sr-only">Demonstração de autenticação</h2>
+            <LoginDemo />
+          </div>
+        </section>
+      );
+    }
+
+    if (!nextMission) {
+      // Jornada completa - mostrar produtos
+      return (
+        <section id="products" className="section-spacing bg-black/20" aria-labelledby="products-title">
+          <div className="container-responsive">
+            <div className="text-center mb-8">
+              <div className="text-6xl mb-4">🎉</div>
+              <h2 id="products-title" className="text-h2 font-bold text-white mb-4">
+                Parabéns! Jornada Completa!
+              </h2>
+              <p className="text-white/80 text-body-lg mb-8">
+                Você desbloqueou todas as funcionalidades. Agora explore nossos produtos!
+              </p>
+            </div>
+            <NetworkGuard>
+              <ProductGrid />
+            </NetworkGuard>
+          </div>
+        </section>
+      );
+    }
+
+    // Renderizar componente baseado na missão atual
+    switch (nextMission.id) {
+      case 'faucet':
+        return (
+          <section className="section-spacing bg-black/10" aria-labelledby="faucet-title">
+            <div className="container-responsive">
+              <div className="text-center mb-8">
+                <div className="text-4xl mb-4">{nextMission.icon}</div>
+                <h2 id="faucet-title" className="text-h2 font-bold text-white mb-4">
+                  {nextMission.title}
+                </h2>
+                <p className="text-white/80 text-body-lg mb-4">
+                  {nextMission.description}
+                </p>
+                {nextMission.reward && (
+                  <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-4 max-w-md mx-auto mb-8">
+                    <div className="text-purple-300 text-sm font-medium">
+                      🎁 {nextMission.reward.description}
+                    </div>
+                  </div>
+                )}
+              </div>
+                             <NetworkGuard>
+                 <FaucetComponent />
+               </NetworkGuard>
+            </div>
+          </section>
+        );
+
+      case 'stake':
+        return (
+          <section className="section-spacing bg-black/20" aria-labelledby="staking-title">
+            <div className="container-responsive">
+              <div className="text-center mb-8">
+                <div className="text-4xl mb-4">{nextMission.icon}</div>
+                <h2 id="staking-title" className="text-h2 font-bold text-white mb-4">
+                  {nextMission.title}
+                </h2>
+                <p className="text-white/80 text-body-lg mb-4">
+                  {nextMission.description}
+                </p>
+                {nextMission.reward && (
+                  <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-4 max-w-md mx-auto mb-8">
+                    <div className="text-purple-300 text-sm font-medium">
+                      🎁 {nextMission.reward.description}
+                    </div>
+                  </div>
+                )}
+              </div>
+                             <NetworkGuard>
+                 <StakingComponent />
+               </NetworkGuard>
+            </div>
+          </section>
+        );
+
+      case 'buy-nft':
+        return (
+          <section className="section-spacing bg-black/10" aria-labelledby="nft-title">
+            <div className="container-responsive">
+              <div className="text-center mb-8">
+                <div className="text-4xl mb-4">{nextMission.icon}</div>
+                <h2 id="nft-title" className="text-h2 font-bold text-white mb-4">
+                  {nextMission.title}
+                </h2>
+                <p className="text-white/80 text-body-lg mb-4">
+                  {nextMission.description}
+                </p>
+                {nextMission.reward && (
+                  <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-4 max-w-md mx-auto mb-8">
+                    <div className="text-purple-300 text-sm font-medium">
+                      🎁 {nextMission.reward.description}
+                    </div>
+                  </div>
+                )}
+              </div>
+                             <NetworkGuard>
+                 <NFTMarketplace />
+               </NetworkGuard>
+            </div>
+          </section>
+        );
+
+      case 'airdrop':
+        return (
+          <section className="section-spacing bg-black/20" aria-labelledby="airdrop-title">
+            <div className="container-responsive">
+              <div className="text-center mb-8">
+                <div className="text-4xl mb-4">{nextMission.icon}</div>
+                <h2 id="airdrop-title" className="text-h2 font-bold text-white mb-4">
+                  {nextMission.title}
+                </h2>
+                <p className="text-white/80 text-body-lg mb-4">
+                  {nextMission.description}
+                </p>
+                {nextMission.reward && (
+                  <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-4 max-w-md mx-auto mb-8">
+                    <div className="text-purple-300 text-sm font-medium">
+                      🎁 {nextMission.reward.description}
+                    </div>
+                  </div>
+                )}
+              </div>
+                             <NetworkGuard>
+                 <AirdropComponent />
+               </NetworkGuard>
+            </div>
+          </section>
+        );
+
+      case 'subscription':
+        return (
+          <section className="section-spacing bg-black/10" aria-labelledby="subscription-title">
+            <div className="container-responsive">
+              <div className="text-center mb-8">
+                <div className="text-4xl mb-4">{nextMission.icon}</div>
+                <h2 id="subscription-title" className="text-h2 font-bold text-white mb-4">
+                  {nextMission.title}
+                </h2>
+                <p className="text-white/80 text-body-lg mb-4">
+                  {nextMission.description}
+                </p>
+                {nextMission.reward && (
+                  <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-4 max-w-md mx-auto mb-8">
+                    <div className="text-purple-300 text-sm font-medium">
+                      🎁 {nextMission.reward.description}
+                    </div>
+                  </div>
+                )}
+              </div>
+                             <NetworkGuard>
+                 <SubscriptionComponent />
+               </NetworkGuard>
+            </div>
+          </section>
+        );
+
+      case 'passive-income':
+        return (
+          <section className="section-spacing bg-black/20" aria-labelledby="passive-income-title">
+            <div className="container-responsive">
+              <div className="text-center mb-8">
+                <div className="text-4xl mb-4">{nextMission.icon}</div>
+                <h2 id="passive-income-title" className="text-h2 font-bold text-white mb-4">
+                  {nextMission.title}
+                </h2>
+                <p className="text-white/80 text-body-lg mb-4">
+                  {nextMission.description}
+                </p>
+                {nextMission.reward && (
+                  <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-4 max-w-md mx-auto mb-8">
+                    <div className="text-purple-300 text-sm font-medium">
+                      🎁 {nextMission.reward.description}
+                    </div>
+                  </div>
+                )}
+              </div>
+                             <NetworkGuard>
+                 <PassiveIncomeComponent />
+               </NetworkGuard>
+            </div>
+          </section>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen gradient-background">
@@ -28,7 +236,6 @@ export default function Home() {
       
       <main id="main-content" className="flex-grow w-full">
         <ProductProvider>
-          <JourneyProvider>
           {/* Hero Section */}
           <section className="relative section-spacing" aria-labelledby="hero-title">
             <div className="container-responsive">
@@ -53,6 +260,48 @@ export default function Home() {
                   <span className="text-purple-300 font-medium"> Conecte-se na rede Sepolia</span> e descubra um mundo de possibilidades.
                 </p>
 
+                {/* Progress Section - só mostra se conectado */}
+                {isConnected && (
+                  <div className="bg-black/20 border border-white/20 rounded-lg p-6 max-w-2xl mx-auto space-elements">
+                    <div className="flex items-center justify-center mb-4">
+                      <svg className="w-5 h-5 text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                      </svg>
+                      <span className="text-purple-400 font-medium">Progresso da Jornada</span>
+                    </div>
+                    
+                    {/* Progress Bar */}
+                    <div className="mb-4">
+                      <div className="bg-gray-700 rounded-full h-3 overflow-hidden">
+                        <div 
+                          className="bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-500 ease-out"
+                          style={{ width: `${progressPercentage}%` }}
+                        />
+                      </div>
+                      <div className="text-white/60 text-sm mt-2">
+                        {journey.completedMissions.length} de {journey.missions.length} etapas concluídas
+                      </div>
+                    </div>
+
+                    {/* Next Mission Info */}
+                    {nextMission && (
+                      <div className="text-center">
+                        <div className="text-2xl mb-2">{nextMission.icon}</div>
+                        <div className="text-white font-medium">Próxima Etapa: {nextMission.title}</div>
+                        <div className="text-white/70 text-sm">{nextMission.description}</div>
+                      </div>
+                    )}
+
+                    {isJourneyComplete && (
+                      <div className="text-center">
+                        <div className="text-4xl mb-2">🏆</div>
+                        <div className="text-green-400 font-medium">Jornada Completa!</div>
+                        <div className="text-white/70 text-sm">Todas as funcionalidades desbloqueadas</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Network Info */}
                 <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 max-w-2xl mx-auto space-elements">
                   <div className="flex items-center justify-center mb-2">
@@ -66,27 +315,6 @@ export default function Home() {
                     Certifique-se de estar conectado à rede correta para acessar todas as funcionalidades.
                   </p>
                 </div>
-
-                {/* Stats Section */}
-                <section aria-labelledby="stats-title" className="grid-stats max-w-5xl mx-auto space-elements">
-                  <h2 id="stats-title" className="sr-only">Estatísticas da plataforma</h2>
-                  <div className="card card-hover text-center">
-                    <div className="text-h2 font-bold text-purple-400 mb-2">500+</div>
-                    <div className="text-white/80 text-body-sm">Tokens Únicos</div>
-                  </div>
-                  <div className="card card-hover text-center">
-                    <div className="text-h2 font-bold text-purple-400 mb-2">24/7</div>
-                    <div className="text-white/80 text-body-sm">Disponível</div>
-                  </div>
-                  <div className="card card-hover text-center">
-                    <div className="text-h2 font-bold text-purple-400 mb-2">1.2K</div>
-                    <div className="text-white/80 text-body-sm">Usuários Ativos</div>
-                  </div>
-                  <div className="card card-hover text-center">
-                    <div className="text-h2 font-bold text-purple-400 mb-2">98%</div>
-                    <div className="text-white/80 text-body-sm">Satisfação</div>
-                  </div>
-                </section>
 
                 {/* Features */}
                 <section aria-labelledby="features-title" className="grid-features max-w-6xl mx-auto">
@@ -126,91 +354,20 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Privy Demo Section */}
-          <section className="section-spacing bg-black/10" aria-labelledby="auth-demo-title">
-            <div className="container-responsive">
-              <h2 id="auth-demo-title" className="sr-only">Demonstração de autenticação</h2>
-              <LoginDemo />
-            </div>
-          </section>
-
-          {/* Journey Section - POC */}
-          <JourneyPOC />
-
-          {/* Faucet Section */}
-          <section className="section-spacing bg-black/10" aria-labelledby="faucet-title">
-            <div className="container-responsive">
-              <h2 id="faucet-title" className="sr-only">Faucet de tokens</h2>
-              <NetworkGuard>
-                <FaucetComponent />
-              </NetworkGuard>
-            </div>
-          </section>
-
-          {/* Staking Section */}
-          <section className="section-spacing bg-black/20" aria-labelledby="staking-title">
-            <div className="container-responsive">
-              <h2 id="staking-title" className="sr-only">Staking de tokens</h2>
-              <NetworkGuard>
-                <StakingComponent />
-              </NetworkGuard>
-            </div>
-          </section>
-
-          {/* NFT Marketplace Section */}
-          <section className="section-spacing bg-black/10" aria-labelledby="nft-title">
-            <div className="container-responsive">
-              <h2 id="nft-title" className="sr-only">Marketplace de NFTs</h2>
-              <NetworkGuard>
-                <NFTMarketplace />
-              </NetworkGuard>
-            </div>
-          </section>
-
-          {/* Airdrop Section */}
-          <section className="section-spacing bg-black/20" aria-labelledby="airdrop-title">
-            <div className="container-responsive">
-              <h2 id="airdrop-title" className="sr-only">Airdrops</h2>
-              <NetworkGuard>
-                <AirdropComponent />
-              </NetworkGuard>
-            </div>
-          </section>
-
-          {/* Subscription Section */}
-          <section className="section-spacing bg-black/10" aria-labelledby="subscription-title">
-            <div className="container-responsive">
-              <h2 id="subscription-title" className="sr-only">Assinaturas Premium</h2>
-              <NetworkGuard>
-                <SubscriptionComponent />
-              </NetworkGuard>
-            </div>
-          </section>
-
-          {/* Passive Income Section */}
-          <section className="section-spacing bg-black/20" aria-labelledby="passive-income-title">
-            <div className="container-responsive">
-              <h2 id="passive-income-title" className="sr-only">Renda Passiva</h2>
-              <NetworkGuard>
-                <PassiveIncomeComponent />
-              </NetworkGuard>
-            </div>
-          </section>
-
-          {/* Products Section - Protected by NetworkGuard */}
-          <section id="products" className="section-spacing bg-black/20" aria-labelledby="products-title">
-            <div className="container-responsive">
-              <h2 id="products-title" className="sr-only">Produtos disponíveis</h2>
-              <NetworkGuard>
-                <ProductGrid />
-              </NetworkGuard>
-            </div>
-          </section>
-          </JourneyProvider>
+          {/* Current Step Section */}
+          {renderCurrentStep()}
         </ProductProvider>
       </main>
       
       <Footer />
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <JourneyProvider>
+      <HomeContent />
+    </JourneyProvider>
   );
 }
