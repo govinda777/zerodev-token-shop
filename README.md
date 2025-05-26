@@ -88,32 +88,6 @@ O **ERC-4337** é o padrão Ethereum que implementa Account Abstraction sem modi
 ![Account Abstraction Market Map](./public/images/docs/Account_Abstraction_Market_Map.jpg)
 *Market Map: Mapeamento dos principais players e categorias no mercado de Account Abstraction*
 
-#### Fundamentos Técnicos
-
-![Deconstructing Account Abstraction](./public/images/docs/Deconstructing-Account-Abstraction.png)
-*Desconstruindo Account Abstraction: componentes técnicos e arquitetura do sistema*
-
-![ERC-4337 Standard](./public/images/docs/ERC-4337.png)
-*ERC-4337: O padrão que define como implementar Account Abstraction de forma padronizada*
-
-#### UX e Chain Abstraction
-
-![Chain Abstraction in Web3 UX](./public/images/docs/Chain-Abstraction--Account-Abstraction-in-Web3-UX.jpg)
-*Chain Abstraction: Como eliminar a complexidade de múltiplas blockchains para o usuário final*
-
-#### Ecossistema e Mercado
-
-![Account Abstraction Projects Landscape](./public/images/docs/Account_Abstraction_Projects_Landscape.png)
-*Landscape de Projetos: Panorama completo dos projetos e soluções no ecossistema Account Abstraction*
-
-![Account Abstraction Market Map](./public/images/docs/Account_Abstraction_Market_Map.jpg)
-*Market Map: Mapeamento dos principais players e categorias no mercado de Account Abstraction*
-
-#### Implementação ZeroDev
-
-![ZeroDev Support](./public/images/docs/ZeroDev-Support-Both.webp)
-*ZeroDev: Plataforma completa que oferece suporte tanto para Smart Accounts quanto para implementações customizadas*
-
 ## 📝 Configuração
 
 ### Variáveis de Ambiente
