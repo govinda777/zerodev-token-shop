@@ -1,5 +1,9 @@
 # STACK
 
+https://github.com/govinda777/zerodev-token-shop/blob/main/STACK.md
+
+The project leverages a modern Web3 stack that integrates Alchemy’s infrastructure and ZeroDev’s account abstraction features for a seamless user experience. While the core account abstraction (ERC-4337/EIP-7702) is powered by ZeroDev Kernel—enabling smart accounts, social authentication, batch transactions, and gas sponsorship—the project also utilizes the Alchemy RPC endpoint for reliable blockchain data access and advanced APIs
+
 Stack do projeto com Alchemy
 
 ---
