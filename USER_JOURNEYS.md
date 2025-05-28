@@ -6,13 +6,13 @@ A ideia era criar uma página onde conforme o usuário faça as missões ele sej
 
 Exemplo:
 
-1 - Login
-2 - Faucets
-3 - Stacke
-4 - By NFE 
-5 - Get Air Drop
-6 - Fazer assinatura, pagamento mensal ou anual
-7 - Renda Passiva
+1 - Login (Metamask, Gmail)
+2 - Faucets (validar se o usuario esta hapto a coletar tokens, criterios seguir no x, ter mais de 24h da ultima recopensa)
+3 - Stacke (Fazer stacke de 5 tokens)
+4 - By NFE (comprar uma nft a vista, comprar uma nft a prazo)
+5 - Get Air Drop (se inscrever para receber air drop, sorteios diarios, participantes recebem % das taxas)
+6 - Fazer assinatura, pagamento mensal ou anual (pagamento recorrente)
+7 - Renda Passiva (NFE que gera dividendos)
 
 
 ## 1. Login e Recompensa Inicial
