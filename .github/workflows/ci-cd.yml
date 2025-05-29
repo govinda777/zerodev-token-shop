@@ -9,6 +9,8 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    # Reminder: Configure NEXT_PUBLIC_ZERODEV_PROJECT_ID and NEXT_PUBLIC_PRIVY_APP_ID as GitHub Secrets
+    # for use in build, test, or deployment steps as needed.
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
@@ -16,9 +18,39 @@ jobs:
         with:
           node-version: 18
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --force
       - name: Lint
         run: npm run lint
       - name: Type Check
         run: npm run type-check
-      # Other steps will follow
+      - name: Unit Tests
+        run: npm run test:unit
+      - name: Build
+        run: npm run build
+
+      # --- Deployment Steps ---
+      # The following are placeholders for deployment.
+      # Actual deployment will depend on the chosen platform (e.g., Vercel, Netlify).
+      # Ensure necessary API keys and tokens are stored as GitHub Secrets.
+
+      # - name: Deploy to Staging (e.g., Vercel)
+      #   if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop'
+      #   run: |
+      #     echo "Deploying to staging environment..."
+      #     # Add your Vercel deployment command here
+      #     # Example: vercel --token $VERCEL_TOKEN --prod (for production on specific branches) or vercel --token $VERCEL_TOKEN
+      #   env:
+      #     VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }} # Example secret
+      #     NEXT_PUBLIC_ZERODEV_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_ZERODEV_PROJECT_ID }}
+      #     NEXT_PUBLIC_PRIVY_APP_ID: ${{ secrets.NEXT_PUBLIC_PRIVY_APP_ID }}
+
+      # - name: Deploy to Production (e.g., Vercel)
+      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push' # Example: deploy on push to main
+      #   run: |
+      #     echo "Deploying to production environment..."
+      #     # Add your Vercel deployment command here for production
+      #     # Example: vercel --prod --token $VERCEL_TOKEN
+      #   env:
+      #     VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }} # Example secret
+      #     NEXT_PUBLIC_ZERODEV_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_ZERODEV_PROJECT_ID_PROD }} # Consider separate secrets for prod
+      #     NEXT_PUBLIC_PRIVY_APP_ID: ${{ secrets.NEXT_PUBLIC_PRIVY_APP_ID_PROD }}
