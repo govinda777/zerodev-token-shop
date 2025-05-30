@@ -2,14 +2,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { LoginDemo } from './LoginDemo';
 import { TokenProvider } from './TokenProvider';
 import React from 'react';
-import { usePrivyAuth } from '@/hooks/usePrivyAuth';
+import { usePrivyAuth as mockUsePrivyAuth } from '@/hooks/usePrivyAuth';
 
 // Mock do hook usePrivyAuth
 jest.mock('@/hooks/usePrivyAuth', () => ({
   usePrivyAuth: jest.fn()
 }));
-
-const mockUsePrivyAuth = require('@/hooks/usePrivyAuth').usePrivyAuth;
 
 // Wrapper component with TokenProvider
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (

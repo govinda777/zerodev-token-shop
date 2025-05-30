@@ -15,6 +15,14 @@ interface StakePool {
   icon: string;
 }
 
+interface StakeInfo {
+  poolId: number;
+  amount?: number;
+  timestamp?: number;
+  rewards?: number;
+  [key: string]: unknown;
+}
+
 const stakePools: StakePool[] = [
   {
     id: STAKING_POOLS.BASIC.id,
@@ -74,7 +82,7 @@ export function StakingComponent() {
         );
         
         // Calcular total em stake
-        const total = stakes.reduce((sum: number, stake: any) => sum + Number(stake.amount || 0), 0);
+        const total = stakes.reduce((sum: number, stake: StakeInfo) => sum + Number(stake.amount || 0), 0);
         setStakedAmount(total);
       } catch (error) {
         console.error('Erro ao carregar stakes do usuário:', error);
@@ -106,10 +114,10 @@ export function StakingComponent() {
 
       if (approveResult.success) {
         // Fazer stake no contrato
-        const stakeResult = await stakingOperations.stake(poolIndex, stakeAmount);
+        const tx: unknown = await stakingOperations.stake(poolIndex, stakeAmount);
         
-        if (stakeResult.success) {
-          console.log('✅ Stake realizado via contrato:', stakeResult.hash);
+        if (tx) {
+          console.log('✅ Stake realizado via contrato:', tx);
           
           // Gastar tokens localmente
           removeTokens(amount);
@@ -121,7 +129,7 @@ export function StakingComponent() {
             completeMission('stake');
           }
         } else {
-          throw new Error(stakeResult.error?.message || 'Falha no stake');
+          throw new Error('Falha no stake');
         }
       } else {
         throw new Error(approveResult.error?.message || 'Falha na aprovação');

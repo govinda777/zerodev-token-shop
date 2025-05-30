@@ -2,6 +2,7 @@ import { renderHook, act } from '@testing-library/react';
 import { usePrivyAuth } from './usePrivyAuth';
 import { MockAuthProvider } from '@/components/auth/MockAuthProvider';
 import React from 'react';
+import { usePrivy } from '@privy-io/react-auth';
 
 // Mock do Privy
 jest.mock('@privy-io/react-auth', () => ({
@@ -9,7 +10,7 @@ jest.mock('@privy-io/react-auth', () => ({
 }));
 
 // Definir mockUsePrivy para uso nos testes
-const mockUsePrivy = require('@privy-io/react-auth').usePrivy;
+const mockUsePrivy = usePrivy;
 
 describe('usePrivyAuth', () => {
   beforeEach(() => {

@@ -17,6 +17,11 @@ interface SubscriptionPlan {
   popular?: boolean;
 }
 
+interface SubscriptionInfo {
+  planId: number;
+  [key: string]: unknown;
+}
+
 const subscriptionPlans: SubscriptionPlan[] = [
   {
     id: 'monthly',
@@ -57,7 +62,7 @@ export function SubscriptionComponent() {
         const isActive = await subscriptionOperations.isActive();
         if (isActive) {
           const subscription = await subscriptionOperations.getSubscription();
-          const sub = subscription as any;
+          const sub = subscription as SubscriptionInfo;
           setActiveSubscription(sub.planId === 1 ? 'monthly' : 'annual');
         }
       } catch (error) {

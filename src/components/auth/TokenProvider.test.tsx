@@ -3,14 +3,12 @@ import { TokenProvider, useTokens } from './TokenProvider';
 import React from 'react';
 import { MockAuthProvider } from './MockAuthProvider';
 // import JourneyLogger from '@/utils/journeyLogger';
-// import { usePrivyAuth } from '@/hooks/usePrivyAuth';
+import { usePrivyAuth as mockUsePrivyAuth } from '@/hooks/usePrivyAuth';
 
 // Mock do hook usePrivyAuth
 jest.mock('@/hooks/usePrivyAuth', () => ({
   usePrivyAuth: jest.fn()
 }));
-
-const mockUsePrivyAuth = require('@/hooks/usePrivyAuth').usePrivyAuth;
 
 // Mock do JourneyLogger
 jest.mock('@/utils/journeyLogger', () => ({
@@ -23,7 +21,7 @@ jest.mock('@/utils/journeyLogger', () => ({
   }
 }));
 
-const mockJourneyLogger = require('@/utils/journeyLogger').default;
+import mockJourneyLogger from '@/utils/journeyLogger';
 const mockjourneyLogger = mockJourneyLogger;
 
 // Mock do localStorage

@@ -1,7 +1,6 @@
 "use client";
 
 import { usePrivy } from '@privy-io/react-auth';
-import { useMockAuth } from '@/components/auth/MockAuthProvider';
 import { useContext } from 'react';
 import { MockAuthContext } from '@/components/auth/MockAuthProvider';
 
