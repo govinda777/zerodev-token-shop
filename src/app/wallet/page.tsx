@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Header } from "@/components/common/Header";
 import { Footer } from "@/components/common/Footer";
 import { SkipLinks } from "@/components/common/SkipLinks";
-import { TokenBalance } from "@/components/common/TokenBalance";
 import { WalletInfo } from "@/components/common/WalletInfo";
 import { PurchaseHistory } from "@/components/shop/PurchaseHistory";
 import { NetworkGuard } from "@/components/common/NetworkGuard";
@@ -109,7 +108,7 @@ export default function WalletPage() {
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
+                    onClick={() => setActiveTab(tab.id as typeof activeTab)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                       activeTab === tab.id
                         ? 'bg-purple-600 text-white'

@@ -306,3 +306,5 @@ const TestMissionCard: React.FC<MissionCardProps> = (props) => {
     // The current tests import MissionCard assuming it's exported.
     return <div data-testid="mission-card-wrapper" />;
 };
+
+TestMissionCard.displayName = 'TestMissionCard';

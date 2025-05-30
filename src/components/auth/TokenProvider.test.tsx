@@ -1,4 +1,4 @@
-import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { TokenProvider, useTokens } from './TokenProvider';
 import React from 'react';
 import { MockAuthProvider } from './MockAuthProvider';

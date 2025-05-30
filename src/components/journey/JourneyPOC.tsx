@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 
 interface Mission {
@@ -167,30 +167,25 @@ export function JourneyPOC() {
     if (isConnected && !progress.completedMissions.includes('login')) {
       handleMissionComplete('login');
     }
-  }, [isConnected]);
+  }, [isConnected, handleMissionComplete, progress.completedMissions]);
 
-  const handleMissionComplete = async (missionId: string) => {
+  const handleMissionComplete = useCallback(async (missionId: string) => {
     const missionIndex = missions.findIndex(m => m.id === missionId);
     const mission = missions[missionIndex];
-    
     if (!mission || mission.completed) return;
-
     // Executar ação real da missão
     const success = await executeMissionAction(missionId);
     if (!success) {
       console.error(`Falha ao executar missão: ${missionId}`);
       return;
     }
-
     // Atualizar progresso
     const newCompletedMissions = [...progress.completedMissions, missionId];
     const newCurrentIndex = Math.min(progress.currentMissionIndex + 1, missions.length - 1);
-    
     let tokensEarned = 0;
     if (mission.reward.type === 'tokens' && mission.reward.amount) {
       tokensEarned = mission.reward.amount;
     }
-
     const newProgress = {
       ...progress,
       currentMissionIndex: newCurrentIndex,
@@ -198,9 +193,7 @@ export function JourneyPOC() {
       totalTokens: progress.totalTokens + tokensEarned,
       unlockedFeatures: [...progress.unlockedFeatures, missionId]
     };
-
     setProgress(newProgress);
-
     // Atualizar missões
     const updatedMissions = missions.map((m, index) => ({
       ...m,
@@ -208,11 +201,10 @@ export function JourneyPOC() {
       unlocked: index <= newCurrentIndex
     }));
     setMissions(updatedMissions);
-
     // Mostrar celebração
     setShowCelebration(true);
     setTimeout(() => setShowCelebration(false), 3000);
-  };
+  }, [missions, progress, executeMissionAction]);
 
   // Implementações reais das missões
   const executeMissionAction = async (missionId: string): Promise<boolean> => {

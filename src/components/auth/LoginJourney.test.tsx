@@ -31,8 +31,6 @@ import { TokenProvider } from './TokenProvider';
 import { MockAuthProvider } from './MockAuthProvider';
 import JourneyLogger from '@/utils/journeyLogger';
 
-const MockedJourneyLogger = JourneyLogger as jest.Mocked<typeof JourneyLogger>;
-
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <MockAuthProvider>
     <TokenProvider>

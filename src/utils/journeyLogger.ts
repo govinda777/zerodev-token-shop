@@ -44,7 +44,7 @@ class JourneyLogger {
     }
   }
 
-  static getLogs(): any[] {
+  static getLogs(): JourneyLogEntry[] {
     try {
       const logs = localStorage.getItem(this.STORAGE_KEY);
       return logs ? JSON.parse(logs) : [];
@@ -53,11 +53,11 @@ class JourneyLogger {
     }
   }
 
-  static getLogsForUser(walletAddress: string): any[] {
+  static getLogsForUser(walletAddress: string): JourneyLogEntry[] {
     return this.getLogs().filter(log => log.walletAddress === walletAddress);
   }
 
-  static getLogsByEvent(event: JourneyLogEntry['event']): any[] {
+  static getLogsByEvent(event: JourneyLogEntry['event']): JourneyLogEntry[] {
     return this.getLogs().filter(log => log.event === event);
   }
 
@@ -136,12 +136,12 @@ class JourneyLogger {
     });
   }
 
-  static logAirdropClaim(walletAddress: string, amount: number, tokenType: string): void {
+  static logAirdropClaim(walletAddress: string, amount: number, tokenType: JourneyLogEntry['tokenType']): void {
     this.log({
       event: 'AIRDROP_CLAIM',
       walletAddress,
       amount,
-      tokenType: tokenType as any,
+      tokenType: tokenType,
       timestamp: Date.now(),
       details: {
         claimType: 'airdrop',
