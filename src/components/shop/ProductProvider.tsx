@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Product, Purchase } from '@/types/product';
 import { useTokens } from '@/hooks/useTokens';
 import { usePrivyAuth } from '@/hooks/usePrivyAuth';

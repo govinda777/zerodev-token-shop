@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { createPublicClient, createWalletClient, custom, parseEther, formatEther, getContract } from 'viem';
 import { sepolia } from 'viem/chains';
 import { usePrivyAuth } from './usePrivyAuth';
-import { CONTRACTS } from '@/contracts/config';
+import { CONTRACTS, NETWORK_CONFIG } from '@/contracts/config';
 import { 
   TOKEN_ABI, 
   FAUCET_ABI, 
@@ -19,7 +19,7 @@ import {
 export interface BlockchainError {
   code: string;
   message: string;
-  details?: unknown;
+  details?: any;
 }
 
 export interface TransactionResult {
@@ -63,7 +63,7 @@ export function useBlockchain() {
     contractAddress: string,
     abi: readonly string[],
     functionName: string,
-    args: unknown[] = [],
+    args: any[] = [],
     value?: bigint
   ): Promise<TransactionResult> => {
     setIsLoading(true);
@@ -90,14 +90,14 @@ export function useBlockchain() {
         success: receipt.status === 'success',
         hash,
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error(`Error executing ${functionName}:`, error);
       
       return {
         success: false,
         error: {
-          code: (error as any)?.code || 'UNKNOWN_ERROR',
-          message: (error as any)?.message || 'Transaction failed',
+          code: error.code || 'UNKNOWN_ERROR',
+          message: error.message || 'Transaction failed',
           details: error,
         },
       };
@@ -111,8 +111,8 @@ export function useBlockchain() {
     contractAddress: string,
     abi: readonly string[],
     functionName: string,
-    args: unknown[] = []
-  ): Promise<unknown> => {
+    args: any[] = []
+  ): Promise<any> => {
     try {
       const contract = getContract({
         address: contractAddress as `0x${string}`,
@@ -191,7 +191,7 @@ export function useBlockchain() {
     },
 
     // Get user stake info
-    getUserStake: async (userAddress: string, poolId: number): Promise<unknown> => {
+    getUserStake: async (userAddress: string, poolId: number): Promise<any> => {
       return readContract(CONTRACTS.STAKING, STAKING_ABI, 'userStakes', [userAddress, poolId]);
     },
 
@@ -272,7 +272,7 @@ export function useBlockchain() {
     },
 
     // Get subscription info
-    getSubscription: async (userAddress?: string): Promise<unknown> => {
+    getSubscription: async (userAddress?: string): Promise<any> => {
       const address = userAddress || await getUserAddress();
       return readContract(CONTRACTS.SUBSCRIPTION, SUBSCRIPTION_ABI, 'userSubscriptions', [address]);
     },

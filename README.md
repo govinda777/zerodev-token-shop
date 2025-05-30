@@ -1,7 +1,6 @@
 # 🚀 ZeroDev Token Shop
 
- yarn install
- 
+
 
 Um marketplace moderno e acessível para tokens digitais únicos, construído com Next.js, TypeScript e Tailwind CSS.
 

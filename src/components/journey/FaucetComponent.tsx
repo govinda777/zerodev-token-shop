@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
 import { useBlockchain } from '@/hooks/useBlockchain';
@@ -40,19 +40,20 @@ export function FaucetComponent() {
     if (isUnlocked) {
       checkCanClaim();
     }
-  }, [isUnlocked, faucetOperations, canClaim]);
+  }, [isUnlocked, faucetOperations]);
 
-  const canClaim = useCallback(() => {
+  const canClaim = () => {
     // Usar verificação do contrato se disponível, senão usar lógica local
     if (canClaimFromContract !== undefined) {
       return canClaimFromContract;
     }
+
     if (!lastClaim) return true;
     const now = Date.now();
     const timeDiff = now - lastClaim;
     const cooldownTime = 24 * 60 * 60 * 1000; // 24 horas
     return timeDiff >= cooldownTime;
-  }, [canClaimFromContract, lastClaim]);
+  };
 
   const getTimeUntilNextClaim = () => {
     if (!lastClaim) return null;

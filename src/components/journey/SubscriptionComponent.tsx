@@ -45,7 +45,7 @@ export function SubscriptionComponent() {
   const { subscriptionOperations, tokenOperations, isLoading: blockchainLoading } = useBlockchain();
   const [activeSubscription, setActiveSubscription] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<string | null>(null);
-  const [subscriptionInfo, setSubscriptionInfo] = useState<unknown>(null);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
 
   const subscriptionMission = journey.missions.find(m => m.id === 'subscription');
   const isUnlocked = subscriptionMission?.unlocked || false;

@@ -130,7 +130,7 @@ function MissionCard({ mission, onComplete, isNextAvailableMission }: MissionCar
 export function JourneyDashboard() {
   const { isConnected } = usePrivyAuth();
   const { balance } = useTokens();
-  const { journey, getNextAvailableMission } = useJourney();
+  const { journey, completeMission, getNextAvailableMission } = useJourney();
 
   const nextMission = getNextAvailableMission(); // Get the next available mission
 

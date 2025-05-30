@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Mission, UserJourney, JourneyContextType } from '@/types/journey';
 import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import { useTokens } from '@/hooks/useTokens';
@@ -142,23 +142,26 @@ export function JourneyProvider({ children }: JourneyProviderProps) {
     if (isConnected && !journey.completedMissions.includes('login')) {
       completeMission('login');
     }
-  }, [isConnected, completeMission, journey.completedMissions]);
+  }, [isConnected]);
 
-  const completeMission = useCallback((missionId: string) => {
+  const completeMission = (missionId: string) => {
     setJourney(prev => {
       if (prev.completedMissions.includes(missionId)) {
         return prev; // Já completada
       }
+
       const updatedMissions = prev.missions.map(mission => {
         if (mission.id === missionId) {
           // Dar recompensa
           if (mission.reward?.type === 'tokens' && mission.reward.amount) {
             addTokens(mission.reward.amount);
           }
+
           return { ...mission, completed: true };
         }
         return mission;
       });
+
       // Desbloquear próximas missões
       const unlockedMissions = updatedMissions.map(mission => {
         if (mission.requirements) {
@@ -169,8 +172,10 @@ export function JourneyProvider({ children }: JourneyProviderProps) {
         }
         return mission;
       });
+
       const newCompletedMissions = [...prev.completedMissions, missionId];
       const tokensFromMission = prev.missions.find(m => m.id === missionId)?.reward?.amount || 0;
+
       return {
         ...prev,
         missions: unlockedMissions,
@@ -179,7 +184,7 @@ export function JourneyProvider({ children }: JourneyProviderProps) {
         totalTokensEarned: prev.totalTokensEarned + tokensFromMission
       };
     });
-  }, [addTokens]);
+  };
 
   const checkMissionRequirements = (missionId: string): boolean => {
     const mission = journey.missions.find(m => m.id === missionId);

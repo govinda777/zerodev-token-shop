@@ -23,6 +23,7 @@ export const ProductCard = ({
   const [selectedInstallments, setSelectedInstallments] = useState(2);
 
   const installmentOptions = [2, 3, 4, 6];
+  const installmentAmount = product.price / selectedInstallments;
 
   const handleInstallmentPurchase = () => {
     if (onBuyInstallment) {

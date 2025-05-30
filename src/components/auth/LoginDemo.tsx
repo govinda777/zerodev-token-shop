@@ -9,6 +9,7 @@ export function LoginDemo() {
     isReady, 
     isAuthenticated, 
     isConnecting, 
+    user,
     address, 
     userInfo, 
     hasWallet,

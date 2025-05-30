@@ -50,7 +50,7 @@ export function StakingComponent() {
   const [stakeAmount, setStakeAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [stakedAmount, setStakedAmount] = useState(0);
-  const [userStakes, setUserStakes] = useState<unknown[]>([]);
+  const [userStakes, setUserStakes] = useState<any[]>([]);
 
   const stakeMission = journey.missions.find(m => m.id === 'stake');
   const isUnlocked = stakeMission?.unlocked || false;
