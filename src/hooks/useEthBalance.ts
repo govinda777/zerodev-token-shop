@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createPublicClient, http, formatEther } from 'viem';
 import { sepolia } from 'viem/chains';
 import { usePrivyAuth } from './usePrivyAuth';
@@ -16,7 +16,7 @@ export function useEthBalance() {
     transport: http()
   });
 
-  const fetchBalance = async () => {
+  const fetchBalance = useCallback(async () => {
     if (!address || !isConnected) {
       setEthBalance('0');
       return;
@@ -39,11 +39,11 @@ export function useEthBalance() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [address, isConnected, publicClient]);
 
   useEffect(() => {
     fetchBalance();
-  }, [address, isConnected]);
+  }, [fetchBalance]);
 
   return {
     ethBalance,

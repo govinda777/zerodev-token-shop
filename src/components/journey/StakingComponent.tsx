@@ -15,6 +15,14 @@ interface StakePool {
   icon: string;
 }
 
+interface StakeInfo {
+  poolId: number;
+  amount?: number;
+  timestamp?: number;
+  rewards?: number;
+  [key: string]: unknown;
+}
+
 const stakePools: StakePool[] = [
   {
     id: STAKING_POOLS.BASIC.id,
@@ -50,7 +58,6 @@ export function StakingComponent() {
   const [stakeAmount, setStakeAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [stakedAmount, setStakedAmount] = useState(0);
-  const [userStakes, setUserStakes] = useState<any[]>([]);
 
   const stakeMission = journey.missions.find(m => m.id === 'stake');
   const isUnlocked = stakeMission?.unlocked || false;
@@ -66,7 +73,7 @@ export function StakingComponent() {
             try {
               const userAddress = await tokenOperations.getBalance(); // Usar para obter endereço
               const stakeInfo = await stakingOperations.getUserStake(userAddress, index);
-              return { poolId: index, ...stakeInfo };
+              return typeof stakeInfo === 'object' && stakeInfo !== null ? { poolId: index, ...stakeInfo } : { poolId: index };
             } catch (error) {
               console.warn(`Erro ao carregar stake do pool ${pool.id}:`, error);
               return { poolId: index, amount: 0, timestamp: 0, rewards: 0 };
@@ -74,10 +81,8 @@ export function StakingComponent() {
           })
         );
         
-        setUserStakes(stakes);
-        
         // Calcular total em stake
-        const total = stakes.reduce((sum, stake) => sum + Number(stake.amount || 0), 0);
+        const total = stakes.reduce((sum: number, stake: StakeInfo) => sum + Number(stake.amount || 0), 0);
         setStakedAmount(total);
       } catch (error) {
         console.error('Erro ao carregar stakes do usuário:', error);
@@ -109,10 +114,10 @@ export function StakingComponent() {
 
       if (approveResult.success) {
         // Fazer stake no contrato
-        const stakeResult = await stakingOperations.stake(poolIndex, stakeAmount);
+        const tx: unknown = await stakingOperations.stake(poolIndex, stakeAmount);
         
-        if (stakeResult.success) {
-          console.log('✅ Stake realizado via contrato:', stakeResult.hash);
+        if (tx) {
+          console.log('✅ Stake realizado via contrato:', tx);
           
           // Gastar tokens localmente
           removeTokens(amount);
@@ -124,7 +129,7 @@ export function StakingComponent() {
             completeMission('stake');
           }
         } else {
-          throw new Error(stakeResult.error?.message || 'Falha no stake');
+          throw new Error('Falha no stake');
         }
       } else {
         throw new Error(approveResult.error?.message || 'Falha na aprovação');

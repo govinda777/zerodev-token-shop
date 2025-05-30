@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import JourneyLogger from '@/utils/journeyLogger';
 
@@ -33,21 +33,13 @@ export function UserAnalytics() {
   const [recentEvents, setRecentEvents] = useState<JourneyEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (isConnected && address) {
-      loadUserAnalytics();
-    }
-  }, [isConnected, address]);
-
-  const loadUserAnalytics = () => {
+  const loadUserAnalytics = useCallback(() => {
     if (!address) return;
-
     setLoading(true);
     try {
       // Load user statistics
       const userStats = JourneyLogger.getUserStats(address);
       setStats(userStats);
-
       // Load recent events (last 10)
       const userLogs = JourneyLogger.getLogsForUser(address);
       setRecentEvents(userLogs.slice(0, 10));
@@ -56,7 +48,13 @@ export function UserAnalytics() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [address]);
+
+  useEffect(() => {
+    if (isConnected && address) {
+      loadUserAnalytics();
+    }
+  }, [isConnected, address, loadUserAnalytics]);
 
   const formatEventName = (event: string): string => {
     const eventNames: Record<string, string> = {

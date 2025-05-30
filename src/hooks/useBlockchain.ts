@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { createPublicClient, createWalletClient, custom, parseEther, formatEther, getContract } from 'viem';
 import { sepolia } from 'viem/chains';
 import { usePrivyAuth } from './usePrivyAuth';
-import { CONTRACTS, NETWORK_CONFIG } from '@/contracts/config';
+import { CONTRACTS } from '@/contracts/config';
 import { 
   TOKEN_ABI, 
   FAUCET_ABI, 
@@ -19,7 +19,7 @@ import {
 export interface BlockchainError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 export interface TransactionResult {
@@ -63,7 +63,7 @@ export function useBlockchain() {
     contractAddress: string,
     abi: readonly string[],
     functionName: string,
-    args: any[] = [],
+    args: unknown[] = [],
     value?: bigint
   ): Promise<TransactionResult> => {
     setIsLoading(true);
@@ -90,14 +90,14 @@ export function useBlockchain() {
         success: receipt.status === 'success',
         hash,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`Error executing ${functionName}:`, error);
       
       return {
         success: false,
         error: {
-          code: error.code || 'UNKNOWN_ERROR',
-          message: error.message || 'Transaction failed',
+          code: (error as { code?: string })?.code || 'UNKNOWN_ERROR',
+          message: (error as { message?: string })?.message || 'Transaction failed',
           details: error,
         },
       };
@@ -111,8 +111,8 @@ export function useBlockchain() {
     contractAddress: string,
     abi: readonly string[],
     functionName: string,
-    args: any[] = []
-  ): Promise<any> => {
+    args: unknown[] = []
+  ): Promise<unknown> => {
     try {
       const contract = getContract({
         address: contractAddress as `0x${string}`,
@@ -133,7 +133,7 @@ export function useBlockchain() {
     getBalance: async (userAddress?: string): Promise<string> => {
       const address = userAddress || await getUserAddress();
       const balance = await readContract(CONTRACTS.TOKEN, TOKEN_ABI, 'balanceOf', [address]);
-      return formatEther(balance);
+      return formatEther(balance as bigint);
     },
 
     // Transfer tokens
@@ -151,7 +151,7 @@ export function useBlockchain() {
     // Get allowance
     getAllowance: async (owner: string, spender: string): Promise<string> => {
       const allowance = await readContract(CONTRACTS.TOKEN, TOKEN_ABI, 'allowance', [owner, spender]);
-      return formatEther(allowance);
+      return formatEther(allowance as bigint);
     },
   };
 
@@ -160,7 +160,7 @@ export function useBlockchain() {
     // Check if user can claim
     canClaim: async (userAddress?: string): Promise<boolean> => {
       const address = userAddress || await getUserAddress();
-      return readContract(CONTRACTS.FAUCET, FAUCET_ABI, 'canClaim', [address]);
+      return readContract(CONTRACTS.FAUCET, FAUCET_ABI, 'canClaim', [address]) as Promise<boolean>;
     },
 
     // Request tokens from faucet
@@ -191,14 +191,14 @@ export function useBlockchain() {
     },
 
     // Get user stake info
-    getUserStake: async (userAddress: string, poolId: number): Promise<any> => {
+    getUserStake: async (userAddress: string, poolId: number): Promise<unknown> => {
       return readContract(CONTRACTS.STAKING, STAKING_ABI, 'userStakes', [userAddress, poolId]);
     },
 
     // Calculate rewards
     calculateRewards: async (userAddress: string, poolId: number): Promise<string> => {
       const rewards = await readContract(CONTRACTS.STAKING, STAKING_ABI, 'calculateRewards', [userAddress, poolId]);
-      return formatEther(rewards);
+      return formatEther(rewards as bigint);
     },
 
     // Claim rewards
@@ -218,7 +218,7 @@ export function useBlockchain() {
 
     // Get NFT owner
     getOwner: async (tokenId: number): Promise<string> => {
-      return readContract(CONTRACTS.NFT, NFT_ABI, 'ownerOf', [tokenId]);
+      return readContract(CONTRACTS.NFT, NFT_ABI, 'ownerOf', [tokenId]) as Promise<string>;
     },
 
     // Buy NFT from marketplace
@@ -228,13 +228,13 @@ export function useBlockchain() {
 
     // Check if NFT is listed
     isListed: async (tokenId: number): Promise<boolean> => {
-      return readContract(CONTRACTS.NFT_MARKETPLACE, NFT_MARKETPLACE_ABI, 'isListed', [tokenId]);
+      return readContract(CONTRACTS.NFT_MARKETPLACE, NFT_MARKETPLACE_ABI, 'isListed', [tokenId]) as Promise<boolean>;
     },
 
     // Get listing price
     getListingPrice: async (tokenId: number): Promise<string> => {
       const price = await readContract(CONTRACTS.NFT_MARKETPLACE, NFT_MARKETPLACE_ABI, 'getListingPrice', [tokenId]);
-      return formatEther(price);
+      return formatEther(price as bigint);
     },
   };
 
@@ -243,13 +243,13 @@ export function useBlockchain() {
     // Check if user has received airdrop
     hasReceived: async (userAddress?: string): Promise<boolean> => {
       const address = userAddress || await getUserAddress();
-      return readContract(CONTRACTS.AIRDROP, AIRDROP_ABI, 'hasReceivedAirdrop', [address]);
+      return readContract(CONTRACTS.AIRDROP, AIRDROP_ABI, 'hasReceivedAirdrop', [address]) as Promise<boolean>;
     },
 
     // Check if user is eligible
     isEligible: async (userAddress?: string): Promise<boolean> => {
       const address = userAddress || await getUserAddress();
-      return readContract(CONTRACTS.AIRDROP, AIRDROP_ABI, 'isEligible', [address]);
+      return readContract(CONTRACTS.AIRDROP, AIRDROP_ABI, 'isEligible', [address]) as Promise<boolean>;
     },
 
     // Claim airdrop
@@ -263,7 +263,7 @@ export function useBlockchain() {
     // Check if subscription is active
     isActive: async (userAddress?: string): Promise<boolean> => {
       const address = userAddress || await getUserAddress();
-      return readContract(CONTRACTS.SUBSCRIPTION, SUBSCRIPTION_ABI, 'isSubscriptionActive', [address]);
+      return readContract(CONTRACTS.SUBSCRIPTION, SUBSCRIPTION_ABI, 'isSubscriptionActive', [address]) as Promise<boolean>;
     },
 
     // Subscribe to plan
@@ -272,7 +272,7 @@ export function useBlockchain() {
     },
 
     // Get subscription info
-    getSubscription: async (userAddress?: string): Promise<any> => {
+    getSubscription: async (userAddress?: string): Promise<unknown> => {
       const address = userAddress || await getUserAddress();
       return readContract(CONTRACTS.SUBSCRIPTION, SUBSCRIPTION_ABI, 'userSubscriptions', [address]);
     },
@@ -283,7 +283,7 @@ export function useBlockchain() {
     // Check if passive income is active
     isActive: async (userAddress?: string): Promise<boolean> => {
       const address = userAddress || await getUserAddress();
-      return readContract(CONTRACTS.PASSIVE_INCOME, PASSIVE_INCOME_ABI, 'isActive', [address]);
+      return readContract(CONTRACTS.PASSIVE_INCOME, PASSIVE_INCOME_ABI, 'isActive', [address]) as Promise<boolean>;
     },
 
     // Activate passive income
@@ -295,7 +295,7 @@ export function useBlockchain() {
     getPendingRewards: async (userAddress?: string): Promise<string> => {
       const address = userAddress || await getUserAddress();
       const rewards = await readContract(CONTRACTS.PASSIVE_INCOME, PASSIVE_INCOME_ABI, 'calculatePendingRewards', [address]);
-      return formatEther(rewards);
+      return formatEther(rewards as bigint);
     },
 
     // Claim rewards

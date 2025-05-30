@@ -1,8 +1,9 @@
-import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { TokenProvider, useTokens } from './TokenProvider';
 import React from 'react';
 import { MockAuthProvider } from './MockAuthProvider';
-import JourneyLogger from '@/utils/journeyLogger';
+// import JourneyLogger from '@/utils/journeyLogger';
+import { usePrivyAuth as mockUsePrivyAuth } from '@/hooks/usePrivyAuth';
 
 // Mock do hook usePrivyAuth
 jest.mock('@/hooks/usePrivyAuth', () => ({
@@ -20,9 +21,8 @@ jest.mock('@/utils/journeyLogger', () => ({
   }
 }));
 
-const mockUsePrivyAuth = require('@/hooks/usePrivyAuth').usePrivyAuth as jest.Mock;
-const mockJourneyLogger = require('@/utils/journeyLogger').default;
-const MockedJourneyLogger = JourneyLogger as jest.Mocked<typeof JourneyLogger>;
+import mockJourneyLogger from '@/utils/journeyLogger';
+const mockjourneyLogger = mockJourneyLogger;
 
 // Mock do localStorage
 const localStorageMock = (() => {
@@ -148,7 +148,7 @@ describe('TokenProvider', () => {
       expect(localStorageMock.setItem).toHaveBeenCalledWith(`initial_grant_${testAddress}`, 'true');
       expect(localStorageMock.setItem).toHaveBeenCalledWith(testAddress, '10');
       expect(mockJourneyLogger.logFirstLogin).toHaveBeenCalledWith(testAddress, 10);
-      expect(mockJourneyLogger.logTokenReward).toHaveBeenCalledWith(testAddress, 10, 'welcome_bonus');
+      expect(mockjourneyLogger.logTokenReward).toHaveBeenCalledWith(testAddress, 10, 'welcome_bonus');
     });
   });
 
@@ -178,7 +178,7 @@ describe('TokenProvider', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('balance')).toHaveTextContent('25');
-      expect(mockJourneyLogger.logFirstLogin).not.toHaveBeenCalled();
+      expect(mockjourneyLogger.logFirstLogin).not.toHaveBeenCalled();
     });
   });
 
@@ -218,7 +218,7 @@ describe('TokenProvider', () => {
 
     expect(screen.getByTestId('balance')).toHaveTextContent('30');
     expect(localStorageMock.setItem).toHaveBeenCalledWith(testAddress, '30');
-    expect(mockJourneyLogger.logTokenReward).toHaveBeenCalledWith(testAddress, 10, 'manual_addition');
+    expect(mockjourneyLogger.logTokenReward).toHaveBeenCalledWith(testAddress, 10, 'manual_addition');
   });
 
   it('deve remover tokens corretamente quando há saldo suficiente', async () => {
@@ -419,11 +419,11 @@ describe('TokenProvider - Recompensa Inicial', () => {
 
     // Verificar se os logs foram chamados
     await waitFor(() => {
-      expect(MockedJourneyLogger.logFirstLogin).toHaveBeenCalledWith(
+      expect(mockjourneyLogger.logFirstLogin).toHaveBeenCalledWith(
         expect.any(String),
         10
       );
-      expect(MockedJourneyLogger.logTokenReward).toHaveBeenCalledWith(
+      expect(mockjourneyLogger.logTokenReward).toHaveBeenCalledWith(
         expect.any(String),
         10,
         'welcome_bonus'
@@ -463,8 +463,8 @@ describe('TokenProvider - Recompensa Inicial', () => {
 
     // Verificar que não é mais primeiro login (o estado pode não mudar imediatamente)
     // Verificar que os logs de primeiro login não foram chamados novamente
-    expect(MockedJourneyLogger.logFirstLogin).not.toHaveBeenCalled();
-    expect(MockedJourneyLogger.logTokenReward).not.toHaveBeenCalled();
+    expect(mockjourneyLogger.logFirstLogin).not.toHaveBeenCalled();
+    expect(mockjourneyLogger.logTokenReward).not.toHaveBeenCalled();
   });
 
   it('deve permitir adicionar tokens', async () => {

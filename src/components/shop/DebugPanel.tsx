@@ -5,7 +5,7 @@ import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import { useProducts } from './ProductProvider';
 
 export const DebugPanel = () => {
-  const { balance, addTokens, removeTokens } = useTokens();
+  const { balance, addTokens } = useTokens();
   const { address, isConnected } = usePrivyAuth();
   const { products, purchases, buyProduct } = useProducts();
 

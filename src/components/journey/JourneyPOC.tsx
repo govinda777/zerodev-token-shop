@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 
 interface Mission {
@@ -162,96 +162,30 @@ export function JourneyPOC() {
     }
   }, [progress, user?.wallet?.address]);
 
-  // Auto-completar login quando conectado
-  useEffect(() => {
-    if (isConnected && !progress.completedMissions.includes('login')) {
-      handleMissionComplete('login');
-    }
-  }, [isConnected]);
-
-  const handleMissionComplete = async (missionId: string) => {
-    const missionIndex = missions.findIndex(m => m.id === missionId);
-    const mission = missions[missionIndex];
-    
-    if (!mission || mission.completed) return;
-
-    // Executar ação real da missão
-    const success = await executeMissionAction(missionId);
-    if (!success) {
-      console.error(`Falha ao executar missão: ${missionId}`);
-      return;
-    }
-
-    // Atualizar progresso
-    const newCompletedMissions = [...progress.completedMissions, missionId];
-    const newCurrentIndex = Math.min(progress.currentMissionIndex + 1, missions.length - 1);
-    
-    let tokensEarned = 0;
-    if (mission.reward.type === 'tokens' && mission.reward.amount) {
-      tokensEarned = mission.reward.amount;
-    }
-
-    const newProgress = {
-      ...progress,
-      currentMissionIndex: newCurrentIndex,
-      completedMissions: newCompletedMissions,
-      totalTokens: progress.totalTokens + tokensEarned,
-      unlockedFeatures: [...progress.unlockedFeatures, missionId]
-    };
-
-    setProgress(newProgress);
-
-    // Atualizar missões
-    const updatedMissions = missions.map((m, index) => ({
-      ...m,
-      completed: newCompletedMissions.includes(m.id),
-      unlocked: index <= newCurrentIndex
-    }));
-    setMissions(updatedMissions);
-
-    // Mostrar celebração
-    setShowCelebration(true);
-    setTimeout(() => setShowCelebration(false), 3000);
-  };
-
   // Implementações reais das missões
-  const executeMissionAction = async (missionId: string): Promise<boolean> => {
+  const executeMissionAction = useCallback(async (missionId: string): Promise<boolean> => {
     try {
       switch (missionId) {
         case 'login':
-          // Login já é tratado automaticamente pelo usePrivyAuth
           return true;
-          
         case 'faucet':
-          // Redirecionar para componente de faucet real
           window.location.hash = '#faucet';
           return true;
-          
         case 'stake':
-          // Redirecionar para componente de staking real
           window.location.hash = '#staking';
           return true;
-          
         case 'buy-nft':
-          // Redirecionar para marketplace de NFTs real
           window.location.hash = '#nft-marketplace';
           return true;
-          
         case 'airdrop':
-          // Redirecionar para componente de airdrop real
           window.location.hash = '#airdrop';
           return true;
-          
         case 'subscription':
-          // Redirecionar para componente de assinatura real
           window.location.hash = '#subscription';
           return true;
-          
         case 'passive-income':
-          // Redirecionar para componente de renda passiva real
           window.location.hash = '#passive-income';
           return true;
-          
         default:
           return false;
       }
@@ -259,7 +193,51 @@ export function JourneyPOC() {
       console.error(`Erro ao executar missão ${missionId}:`, error);
       return false;
     }
-  };
+  }, []);
+
+  const handleMissionComplete = useCallback(async (missionId: string) => {
+    const missionIndex = missions.findIndex(m => m.id === missionId);
+    const mission = missions[missionIndex];
+    if (!mission || mission.completed) return;
+    // Executar ação real da missão
+    const success = await executeMissionAction(missionId);
+    if (!success) {
+      console.error(`Falha ao executar missão: ${missionId}`);
+      return;
+    }
+    // Atualizar progresso
+    const newCompletedMissions = [...progress.completedMissions, missionId];
+    const newCurrentIndex = Math.min(progress.currentMissionIndex + 1, missions.length - 1);
+    let tokensEarned = 0;
+    if (mission.reward.type === 'tokens' && mission.reward.amount) {
+      tokensEarned = mission.reward.amount;
+    }
+    const newProgress = {
+      ...progress,
+      currentMissionIndex: newCurrentIndex,
+      completedMissions: newCompletedMissions,
+      totalTokens: progress.totalTokens + tokensEarned,
+      unlockedFeatures: [...progress.unlockedFeatures, missionId]
+    };
+    setProgress(newProgress);
+    // Atualizar missões
+    const updatedMissions = missions.map((m, index) => ({
+      ...m,
+      completed: newCompletedMissions.includes(m.id),
+      unlocked: index <= newCurrentIndex
+    }));
+    setMissions(updatedMissions);
+    // Mostrar celebração
+    setShowCelebration(true);
+    setTimeout(() => setShowCelebration(false), 3000);
+  }, [missions, progress, executeMissionAction]);
+
+  // Auto-completar login quando conectado
+  useEffect(() => {
+    if (isConnected && !progress.completedMissions.includes('login')) {
+      handleMissionComplete('login');
+    }
+  }, [isConnected, handleMissionComplete, progress.completedMissions]);
 
   const resetJourney = () => {
     const resetProgress = {

@@ -1,6 +1,7 @@
 // Journey Logger - Specific for tracking user journeys and interactions
 
 export interface JourneyLogEntry {
+  id: string;
   event: 'FIRST_LOGIN' | 'TOKEN_REWARD' | 'PURCHASE' | 'STAKE' | 'UNSTAKE' | 'AIRDROP_CLAIM' | 'GOVERNANCE_VOTE' | 'POOL_JOIN' | 'INSTALLMENT_CREATE' | 'INSTALLMENT_PAYMENT' | 'NFT_RECEIVED';
   walletAddress: string;
   timestamp: number;
@@ -17,7 +18,7 @@ class JourneyLogger {
   private static readonly STORAGE_KEY = 'journey_logs';
   private static readonly MAX_LOGS = 1000;
 
-  static log(entry: JourneyLogEntry): void {
+  static log(entry: Omit<JourneyLogEntry, 'id'>): void {
     try {
       const logs = this.getLogs();
       const newLog = {
@@ -44,7 +45,7 @@ class JourneyLogger {
     }
   }
 
-  static getLogs(): any[] {
+  static getLogs(): JourneyLogEntry[] {
     try {
       const logs = localStorage.getItem(this.STORAGE_KEY);
       return logs ? JSON.parse(logs) : [];
@@ -53,11 +54,11 @@ class JourneyLogger {
     }
   }
 
-  static getLogsForUser(walletAddress: string): any[] {
+  static getLogsForUser(walletAddress: string): JourneyLogEntry[] {
     return this.getLogs().filter(log => log.walletAddress === walletAddress);
   }
 
-  static getLogsByEvent(event: JourneyLogEntry['event']): any[] {
+  static getLogsByEvent(event: JourneyLogEntry['event']): JourneyLogEntry[] {
     return this.getLogs().filter(log => log.event === event);
   }
 
@@ -136,12 +137,12 @@ class JourneyLogger {
     });
   }
 
-  static logAirdropClaim(walletAddress: string, amount: number, tokenType: string): void {
+  static logAirdropClaim(walletAddress: string, amount: number, tokenType: JourneyLogEntry['tokenType']): void {
     this.log({
       event: 'AIRDROP_CLAIM',
       walletAddress,
       amount,
-      tokenType: tokenType as any,
+      tokenType: tokenType,
       timestamp: Date.now(),
       details: {
         claimType: 'airdrop',

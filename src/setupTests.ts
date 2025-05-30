@@ -1,10 +1,10 @@
 import '@testing-library/jest-dom';
+import { TextEncoder, TextDecoder } from 'util';
 
 // Polyfills para ambiente Node.js
 if (typeof global.TextEncoder === 'undefined') {
-  const { TextEncoder, TextDecoder } = require('util');
-  global.TextEncoder = TextEncoder;
-  global.TextDecoder = TextDecoder;
+  global.TextEncoder = TextEncoder as typeof global.TextEncoder;
+  global.TextDecoder = TextDecoder as typeof global.TextDecoder;
 }
 
 // Mock do fetch
@@ -19,7 +19,7 @@ global.fetch = jest.fn(() =>
 // Mock do console.error para evitar poluição nos testes
 const originalError = console.error;
 beforeAll(() => {
-  console.error = (...args: any[]) => {
+  console.error = (...args: unknown[]) => {
     if (
       typeof args[0] === 'string' &&
       args[0].includes('Warning: An update to')

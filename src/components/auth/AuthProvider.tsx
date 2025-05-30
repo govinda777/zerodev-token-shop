@@ -1,7 +1,7 @@
 "use client";
 
 import { PrivyProvider, usePrivy } from '@privy-io/react-auth';
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { MockAuthProvider } from './MockAuthProvider';
 import { sepolia } from 'viem/chains';
 
@@ -17,7 +17,6 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 function PrivyWrapper({ children }: { children: React.ReactNode }) {
   const { ready } = usePrivy();
-  const [timeoutReached, setTimeoutReached] = useState(false);
   const [useFallback, setUseFallback] = useState(false);
   
   useEffect(() => {

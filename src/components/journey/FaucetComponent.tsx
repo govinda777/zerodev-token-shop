@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
 import { useBlockchain } from '@/hooks/useBlockchain';
@@ -18,12 +18,24 @@ export function FaucetComponent() {
   const isUnlocked = faucetMission?.unlocked || false;
   const isCompleted = faucetMission?.completed || false;
 
+  const canClaim = useCallback(() => {
+    // Usar verificação do contrato se disponível, senão usar lógica local
+    if (canClaimFromContract !== undefined) {
+      return canClaimFromContract;
+    }
+    if (!lastClaim) return true;
+    const now = Date.now();
+    const timeDiff = now - lastClaim;
+    const cooldownTime = 24 * 60 * 60 * 1000; // 24 horas
+    return timeDiff >= cooldownTime;
+  }, [canClaimFromContract, lastClaim]);
+
   // Verificar se pode reivindicar do contrato
   useEffect(() => {
     const checkCanClaim = async () => {
       try {
-        const canClaim = await faucetOperations.canClaim();
-        setCanClaimFromContract(canClaim);
+        const canClaimResult = await faucetOperations.canClaim();
+        setCanClaimFromContract(canClaimResult);
         
         // Obter último claim do contrato
         const lastClaimTime = await faucetOperations.getLastClaim();
@@ -40,20 +52,7 @@ export function FaucetComponent() {
     if (isUnlocked) {
       checkCanClaim();
     }
-  }, [isUnlocked, faucetOperations]);
-
-  const canClaim = () => {
-    // Usar verificação do contrato se disponível, senão usar lógica local
-    if (canClaimFromContract !== undefined) {
-      return canClaimFromContract;
-    }
-    
-    if (!lastClaim) return true;
-    const now = Date.now();
-    const timeDiff = now - lastClaim;
-    const cooldownTime = 24 * 60 * 60 * 1000; // 24 horas
-    return timeDiff >= cooldownTime;
-  };
+  }, [isUnlocked, faucetOperations, canClaim]);
 
   const getTimeUntilNextClaim = () => {
     if (!lastClaim) return null;

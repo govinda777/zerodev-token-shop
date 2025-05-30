@@ -72,7 +72,7 @@ const rarityLabels = {
 export function NFTMarketplace() {
   const { balance, removeTokens } = useTokens();
   const { journey, completeMission } = useJourney();
-  const { nftOperations, tokenOperations, isLoading: blockchainLoading } = useBlockchain();
+  const { nftOperations, isLoading: blockchainLoading } = useBlockchain();
   const [ownedNFTs, setOwnedNFTs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [nftBalance, setNftBalance] = useState(0);
@@ -93,14 +93,11 @@ export function NFTMarketplace() {
         for (const nft of nftCollection) {
           try {
             if (nft.id === 'member-nft') {
-              const owner = await nftOperations.getOwner(NFT_CONFIG.MEMBER_NFT.id);
-              // Se não der erro, o NFT existe e tem dono
               owned.push(nft.id);
             } else if (nft.id === 'premium-nft') {
-              const owner = await nftOperations.getOwner(NFT_CONFIG.PREMIUM_NFT.id);
               owned.push(nft.id);
             }
-          } catch (error) {
+          } catch {
             // NFT não existe ou usuário não possui
           }
         }

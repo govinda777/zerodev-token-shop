@@ -5,11 +5,10 @@ import { useEthBalance } from "@/hooks/useEthBalance";
 import { useEffect, useState } from "react";
 
 interface TokenBalanceProps {
-  address?: string;
   className?: string;
 }
 
-export function TokenBalance({ address, className = "" }: TokenBalanceProps) {
+export function TokenBalance({ className = "" }: TokenBalanceProps) {
   const { balance: tokenBalance, isLoading: tokensLoading, isFirstLogin } = useTokens();
   const { ethBalance, isLoading: ethLoading, error } = useEthBalance();
   const [previousBalance, setPreviousBalance] = useState(tokenBalance);

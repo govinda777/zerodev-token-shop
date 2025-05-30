@@ -13,13 +13,41 @@ jest.mock('@/hooks/usePrivyAuth');
 jest.mock('@/hooks/useTokens');
 
 // Mock Mission Components
-jest.mock('@/components/journey/FaucetComponent', () => () => <div data-testid="mock-faucet-component" />);
-jest.mock('@/components/journey/StakingComponent', () => () => <div data-testid="mock-staking-component" />);
-jest.mock('@/components/journey/NFTMarketplace', () => () => <div data-testid="mock-nft-marketplace" />);
-jest.mock('@/components/journey/AirdropComponent', () => () => <div data-testid="mock-airdrop-component" />);
-jest.mock('@/components/journey/SubscriptionComponent', () => () => <div data-testid="mock-subscription-component" />);
-jest.mock('@/components/journey/PassiveIncomeComponent', () => () => <div data-testid="mock-passive-income-component" />);
-jest.mock('@/components/common/NetworkGuard', () => ({ children }: { children: React.ReactNode }) => <div data-testid="mock-network-guard">{children}</div>);
+jest.mock('@/components/journey/FaucetComponent', () => {
+  const MockFaucetComponent = () => <div data-testid="mock-faucet-component" />;
+  MockFaucetComponent.displayName = 'MockFaucetComponent';
+  return MockFaucetComponent;
+});
+jest.mock('@/components/journey/StakingComponent', () => {
+  const MockStakingComponent = () => <div data-testid="mock-staking-component" />;
+  MockStakingComponent.displayName = 'MockStakingComponent';
+  return MockStakingComponent;
+});
+jest.mock('@/components/journey/NFTMarketplace', () => {
+  const MockNFTMarketplace = () => <div data-testid="mock-nft-marketplace" />;
+  MockNFTMarketplace.displayName = 'MockNFTMarketplace';
+  return MockNFTMarketplace;
+});
+jest.mock('@/components/journey/AirdropComponent', () => {
+  const MockAirdropComponent = () => <div data-testid="mock-airdrop-component" />;
+  MockAirdropComponent.displayName = 'MockAirdropComponent';
+  return MockAirdropComponent;
+});
+jest.mock('@/components/journey/SubscriptionComponent', () => {
+  const MockSubscriptionComponent = () => <div data-testid="mock-subscription-component" />;
+  MockSubscriptionComponent.displayName = 'MockSubscriptionComponent';
+  return MockSubscriptionComponent;
+});
+jest.mock('@/components/journey/PassiveIncomeComponent', () => {
+  const MockPassiveIncomeComponent = () => <div data-testid="mock-passive-income-component" />;
+  MockPassiveIncomeComponent.displayName = 'MockPassiveIncomeComponent';
+  return MockPassiveIncomeComponent;
+});
+jest.mock('@/components/common/NetworkGuard', () => {
+  const MockNetworkGuard = ({ children }: { children: React.ReactNode }) => <div data-testid="mock-network-guard">{children}</div>;
+  MockNetworkGuard.displayName = 'MockNetworkGuard';
+  return MockNetworkGuard;
+});
 
 
 const mockUseJourney = useJourney as jest.Mock;
@@ -177,7 +205,7 @@ describe('JourneyDashboard Components', () => {
       // The key is that it's identified as active.
       // We can check if the "Completar Missão (Indisponível)" is NOT there for login.
       const loginCard = screen.getByText('Login Mission').closest('.card');
-      expect(within(loginCard!).queryByText('Completar Missão (Indisponível)')).not.toBeInTheDocument();
+      expect(within(loginCard as HTMLElement).queryByText('Completar Missão (Indisponível)')).not.toBeInTheDocument();
     });
     
     it('correctly passes isNextAvailableMission=true to the active mission card (faucet)', () => {
@@ -198,12 +226,12 @@ describe('JourneyDashboard Components', () => {
         const faucetCard = screen.getByText('Faucet Mission').closest('.card');
         expect(faucetCard).toBeInTheDocument();
         // Check for ActiveMissionDisplay presence within Faucet Card
-        expect(within(faucetCard!).getByTestId('mock-faucet-component')).toBeInTheDocument();
+        expect(within(faucetCard as HTMLElement).getByTestId('mock-faucet-component')).toBeInTheDocument();
 
         const stakeCard = screen.getByText('Stake Mission').closest('.card');
         expect(stakeCard).toBeInTheDocument();
-        expect(within(stakeCard!).queryByTestId('mock-staking-component')).not.toBeInTheDocument();
-        expect(within(stakeCard!).getByText('Bloqueada')).toBeInTheDocument(); // As requirements not met for stake yet
+        expect(within(stakeCard as HTMLElement).queryByTestId('mock-staking-component')).not.toBeInTheDocument();
+        expect(within(stakeCard as HTMLElement).getByText('Bloqueada')).toBeInTheDocument(); // As requirements not met for stake yet
     });
 
 
@@ -300,9 +328,8 @@ interface MissionCardProps {
   onComplete?: () => void;
   isNextAvailableMission: boolean;
 }
-const TestMissionCard: React.FC<MissionCardProps> = (props) => {
-    // This is a placeholder if MissionCard is not exported.
-    // For actual testing, you'd import the real MissionCard.
-    // The current tests import MissionCard assuming it's exported.
+const TestMissionCard: React.FC<MissionCardProps> = () => {
     return <div data-testid="mission-card-wrapper" />;
 };
+
+TestMissionCard.displayName = 'TestMissionCard';

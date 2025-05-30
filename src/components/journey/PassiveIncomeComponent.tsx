@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
 import { useBlockchain } from '@/hooks/useBlockchain';
-import { PASSIVE_INCOME_CONFIG, MISSION_REWARDS } from '@/contracts/config';
+import { PASSIVE_INCOME_CONFIG } from '@/contracts/config';
 
 interface IncomeStream {
   id: string;
@@ -73,11 +73,10 @@ interface ActiveInvestment {
 export function PassiveIncomeComponent() {
   const { balance, removeTokens, addTokens } = useTokens();
   const { journey, completeMission } = useJourney();
-  const { passiveIncomeOperations, subscriptionOperations, tokenOperations, isLoading: blockchainLoading } = useBlockchain();
+  const { passiveIncomeOperations, subscriptionOperations, isLoading: blockchainLoading } = useBlockchain();
   const [activeInvestments, setActiveInvestments] = useState<ActiveInvestment[]>([]);
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [isPassiveIncomeActive, setIsPassiveIncomeActive] = useState(false);
-  const [pendingRewards, setPendingRewards] = useState(0);
 
   const passiveIncomeMission = journey.missions.find(m => m.id === 'passive-income');
   const isUnlocked = passiveIncomeMission?.unlocked || false;
@@ -90,12 +89,6 @@ export function PassiveIncomeComponent() {
         // Verificar se a renda passiva está ativa
         const isActive = await passiveIncomeOperations.isActive();
         setIsPassiveIncomeActive(isActive);
-
-        if (isActive) {
-          // Carregar recompensas pendentes
-          const pending = await passiveIncomeOperations.getPendingRewards();
-          setPendingRewards(parseFloat(pending));
-        }
 
         // Verificar se tem assinatura ativa (requisito para renda passiva)
         const hasActiveSubscription = await subscriptionOperations.isActive();
@@ -205,42 +198,6 @@ export function PassiveIncomeComponent() {
       setActiveInvestments(prev => [...prev, newInvestment]);
     } catch (error) {
       console.error('Erro ao investir:', error);
-    } finally {
-      setIsLoading(null);
-    }
-  };
-
-  const handleClaimRewards = async () => {
-    if (pendingRewards <= 0 || isLoading || blockchainLoading) return;
-
-    setIsLoading('claim');
-
-    try {
-      // Reivindicar recompensas do contrato
-      const result = await passiveIncomeOperations.claimRewards();
-      
-      if (result.success) {
-        console.log('✅ Recompensas reivindicadas via contrato:', result.hash);
-        
-        // Adicionar tokens ganhos
-        addTokens(pendingRewards);
-        setPendingRewards(0);
-      } else {
-        throw new Error(result.error?.message || 'Falha ao reivindicar recompensas');
-      }
-    } catch (error) {
-      console.error('Erro ao reivindicar recompensas:', error);
-      
-      // Fallback para simulação
-      try {
-        console.warn('⚠️ Usando simulação de reivindicação');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        addTokens(pendingRewards);
-        setPendingRewards(0);
-      } catch (fallbackError) {
-        console.error('Erro no fallback:', fallbackError);
-      }
     } finally {
       setIsLoading(null);
     }

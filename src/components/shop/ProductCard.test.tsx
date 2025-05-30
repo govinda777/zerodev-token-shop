@@ -2,13 +2,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ProductCard } from './ProductCard';
 import { Product } from '@/types/product';
 import React from 'react';
+import Image from 'next/image';
 
 // Mock do Next.js Image
 jest.mock('next/image', () => {
-  return function MockImage({ src, alt, fill, ...props }: any) {
-    // Remove fill prop since it's not a valid HTML attribute
-    const { sizes, className, ...imgProps } = props;
-    return <img src={src} alt={alt} className={className} {...imgProps} />;
+  return function MockImage({ src, alt, ...props }: { src: string; alt: string; className?: string }) {
+    return <Image src={src} alt={alt} className={props.className} {...props} />;
   };
 });
 

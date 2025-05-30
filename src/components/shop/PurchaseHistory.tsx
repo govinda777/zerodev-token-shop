@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useProducts } from "./ProductProvider";
-import { usePrivyAuth } from "@/hooks/usePrivyAuth";
-import type { Product } from "@/types/product";
-import Image from "next/image";
+import { useProducts } from '@/hooks/useProducts';
+import { usePrivyAuth } from '@/hooks/usePrivyAuth';
+import type { Purchase } from '@/types/product';
 
 // Verificar se estamos em ambiente de teste
 const isTesting = typeof jest !== 'undefined';
 
 // Exportar um único componente PurchaseHistory
 export function PurchaseHistory() {
+  const { purchases } = useProducts();
+  const { isConnected } = usePrivyAuth();
+  
   // Se estiver em ambiente de teste, retornar mock simplificado
   if (isTesting) {
     return (
@@ -23,10 +24,6 @@ export function PurchaseHistory() {
       </div>
     );
   }
-  
-  // Implementação real para ambiente de produção
-  const { purchases } = useProducts();
-  const { isConnected } = usePrivyAuth();
   
   if (!isConnected) {
     return null;
@@ -60,7 +57,7 @@ export function PurchaseHistory() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {purchases.map((purchase, index) => (
+            {purchases.map((purchase: Purchase, index: number) => (
               <tr key={index}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
