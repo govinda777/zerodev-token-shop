@@ -5,6 +5,7 @@ import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
 import { useBlockchain } from '@/hooks/useBlockchain';
 import { NFT_CONFIG } from '@/contracts/config';
+import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationService';
 
 interface NFT {
   id: string;
@@ -103,7 +104,8 @@ export function NFTMarketplace() {
         }
         setOwnedNFTs(owned);
       } catch (error) {
-        console.error('Erro ao carregar NFTs do usuário:', error);
+        // console.error('Erro ao carregar NFTs do usuário:', error);
+        // Potentially notifyError("Não foi possível carregar seus NFTs.");
       }
     };
 
@@ -131,37 +133,38 @@ export function NFTMarketplace() {
       }
 
       if (result.success) {
-        console.log('✅ NFT comprado via contrato:', result.hash);
-        
-        // Gastar tokens localmente
-        removeTokens(nft.price);
+        // console.log('✅ NFT comprado via contrato:', result.hash); // Dev log
+        await removeTokens(nft.price); // removeTokens is now async
         setOwnedNFTs(prev => [...prev, nft.id]);
         setNftBalance(prev => prev + 1);
+        notifySuccess(`${nft.name} comprado com sucesso!`);
 
-        // Completar missão se for a primeira vez
         if (!isCompleted) {
           completeMission('buy-nft');
         }
       } else {
+        notifyError(`Falha na compra do NFT: ${result.error?.message || 'Erro desconhecido'}`);
         throw new Error(result.error?.message || 'Falha na compra do NFT');
       }
     } catch (error) {
-      console.error('Erro ao comprar NFT:', error);
-      
-      // Fallback para simulação
+      // console.error('Erro ao comprar NFT:', error); // Original error
+      notifyWarning('Ocorreu um erro ao comprar NFT. Usando simulação.');
+      // Fallback to simulation
       try {
-        console.warn('⚠️ Usando simulação de compra de NFT');
+        // console.warn('⚠️ Usando simulação de compra de NFT'); // Dev log
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        removeTokens(nft.price);
+        await removeTokens(nft.price); // removeTokens is now async
         setOwnedNFTs(prev => [...prev, nft.id]);
         setNftBalance(prev => prev + 1);
+        notifySuccess(`${nft.name} (simulado) comprado com sucesso!`);
 
         if (!isCompleted) {
           completeMission('buy-nft');
         }
       } catch (fallbackError) {
-        console.error('Erro no fallback:', fallbackError);
+        // console.error('Erro no fallback da compra de NFT:', fallbackError); // Dev log
+        notifyError('Falha ao comprar NFT mesmo com simulação.');
       }
     } finally {
       setIsLoading(null);

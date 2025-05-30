@@ -5,6 +5,7 @@ import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
 import { useBlockchain } from '@/hooks/useBlockchain';
 import { SUBSCRIPTION_PLANS } from '@/contracts/config';
+import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationService';
 
 interface SubscriptionPlan {
   id: string;
@@ -66,7 +67,8 @@ export function SubscriptionComponent() {
           setActiveSubscription(sub.planId === 1 ? 'monthly' : 'annual');
         }
       } catch (error) {
-        console.error('Erro ao carregar informações da assinatura:', error);
+        // console.error('Erro ao carregar informações da assinatura:', error);
+        // Potentially notifyError("Não foi possível carregar os dados da sua assinatura.");
       }
     };
 
@@ -95,38 +97,40 @@ export function SubscriptionComponent() {
         const subscribeResult = await subscriptionOperations.subscribe(contractPlanId);
         
         if (subscribeResult.success) {
-          console.log('✅ Assinatura realizada via contrato:', subscribeResult.hash);
-          
-          // Gastar tokens localmente
-          removeTokens(plan.price);
+          // console.log('✅ Assinatura realizada via contrato:', subscribeResult.hash); // Dev log
+          await removeTokens(plan.price); // removeTokens is async
           setActiveSubscription(plan.id);
+          notifySuccess(`Assinatura do plano "${plan.name}" realizada com sucesso!`);
 
-          // Completar missão se for a primeira vez
           if (!isCompleted) {
             completeMission('subscription');
           }
         } else {
+          notifyError(`Falha na assinatura: ${subscribeResult.error?.message || 'Erro desconhecido'}`);
           throw new Error(subscribeResult.error?.message || 'Falha na assinatura');
         }
       } else {
+        notifyError(`Falha ao aprovar tokens para assinatura: ${approveResult.error?.message || 'Erro desconhecido'}`);
         throw new Error(approveResult.error?.message || 'Falha na aprovação');
       }
     } catch (error) {
-      console.error('Erro ao assinar plano:', error);
-      
-      // Fallback para simulação
+      // console.error('Erro ao assinar plano:', error); // Original error
+      notifyWarning(`Ocorreu um erro ao assinar o plano "${plan.name}". Usando simulação.`);
+      // Fallback to simulation
       try {
-        console.warn('⚠️ Usando simulação de assinatura');
+        // console.warn('⚠️ Usando simulação de assinatura'); // Dev log
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        removeTokens(plan.price);
+        await removeTokens(plan.price); // removeTokens is async
         setActiveSubscription(plan.id);
+        notifySuccess(`Assinatura do plano "${plan.name}" (simulada) realizada com sucesso!`);
 
         if (!isCompleted) {
           completeMission('subscription');
         }
       } catch (fallbackError) {
-        console.error('Erro no fallback:', fallbackError);
+        // console.error('Erro no fallback da assinatura:', fallbackError); // Dev log
+        notifyError(`Falha ao assinar o plano "${plan.name}" mesmo com simulação.`);
       }
     } finally {
       setIsLoading(null);

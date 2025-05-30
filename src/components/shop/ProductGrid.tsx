@@ -5,6 +5,7 @@ import { useInvestment } from '@/components/investment/InvestmentProvider';
 import { Product } from '@/types/product';
 import { useState } from 'react';
 import { DebugPanel } from './DebugPanel';
+import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationService';
 
 export const ProductGrid = () => {
   const { products, buyProduct, buyProductInstallment } = useProducts();
@@ -16,28 +17,28 @@ export const ProductGrid = () => {
   const hasStakeForInstallments = stakePositions.some(p => p.status === 'active' && p.amount >= 50);
 
   const handleBuy = async (product: Product) => {
-    console.log('🛒 Tentando comprar produto:', product.name, 'Preço:', product.price, 'Saldo:', balance);
+    // console.log('🛒 Tentando comprar produto:', product.name, 'Preço:', product.price, 'Saldo:', balance); // Dev log
     
     if (balance < product.price) {
-      alert(`Saldo insuficiente! Você tem ${balance} tokens, mas precisa de ${product.price} tokens.`);
+      notifyWarning(`Saldo insuficiente! Você tem ${balance} tokens, mas precisa de ${product.price} tokens.`);
       return;
     }
 
     setPurchaseLoading(product.id);
     
     try {
-      const success = buyProduct(product.id);
+      const success = await buyProduct(product.id); // Assuming buyProduct could become async
       
       if (success) {
-        alert(`✅ Compra realizada com sucesso! Você comprou ${product.name} por ${product.price} token${product.price !== 1 ? 's' : ''}.`);
-        console.log(`✅ Compra bem-sucedida: ${product.name}`);
+        notifySuccess(`Compra realizada com sucesso! Você comprou ${product.name} por ${product.price} token${product.price !== 1 ? 's' : ''}.`);
+        // console.log(`✅ Compra bem-sucedida: ${product.name}`); // Dev log
       } else {
-        alert('❌ Erro ao processar a compra. Tente novamente.');
-        console.error('❌ Falha na compra:', product.name);
+        notifyError('Erro ao processar a compra. Tente novamente.');
+        // console.error('❌ Falha na compra:', product.name); // Dev log
       }
     } catch (error) {
-      console.error('❌ Erro durante a compra:', error);
-      alert('❌ Erro inesperado durante a compra. Tente novamente.');
+      // console.error('❌ Erro durante a compra:', error); // Dev log
+      notifyError('Erro inesperado durante a compra. Tente novamente.');
     } finally {
       setPurchaseLoading(null);
     }
@@ -45,17 +46,25 @@ export const ProductGrid = () => {
 
   const handleBuyInstallment = async (product: Product, installments: number) => {
     if (!hasStakeForInstallments) {
-      alert('Você precisa ter pelo menos 50 tokens em stake para fazer compras parceladas.');
+      notifyWarning('Você precisa ter pelo menos 50 tokens em stake para fazer compras parceladas.');
       return;
     }
 
-    const success = await createInstallmentPurchase(product.id, product.price, installments);
-    if (success) {
-      // Also add to product purchases for tracking
-      buyProductInstallment(product.id, installments);
-      console.log(`Successfully created installment purchase for ${product.name}`);
-    } else {
-      alert('Não foi possível criar a compra parcelada. Verifique se você tem stake suficiente.');
+    setPurchaseLoading(product.id); // Consider separate loading state for installment button if needed
+    try {
+      const success = await createInstallmentPurchase(product.id, product.price, installments);
+      if (success) {
+        // Also add to product purchases for tracking
+        buyProductInstallment(product.id, installments); // This should ideally also be async and return status
+        notifySuccess(`Compra parcelada de ${product.name} iniciada com sucesso.`);
+        // console.log(`Successfully created installment purchase for ${product.name}`); // Dev log
+      } else {
+        notifyError('Não foi possível criar a compra parcelada. Verifique se você tem stake suficiente ou tente novamente.');
+      }
+    } catch (error) {
+      notifyError('Erro inesperado ao criar compra parcelada.');
+    } finally {
+      setPurchaseLoading(null);
     }
   };
 

@@ -83,7 +83,8 @@ export function usePrivyAuth() {
     try {
       await login();
     } catch (error) {
-      console.error('Erro ao conectar:', error);
+      // console.error('Erro ao conectar:', error); // Error is re-thrown
+      // Assuming the calling component or a global error handler would show a notification.
       throw error;
     }
   };

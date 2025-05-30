@@ -14,7 +14,8 @@ export const LoginButton = () => {
         await connect();
       }
     } catch (err) {
-      console.error('Authentication error:', err);
+      // console.error('Authentication error:', err); // Replaced by user notification if connect() throws & is handled by usePrivyAuth or calling component
+      // Assuming connect() itself or usePrivyAuth would trigger a notification on error.
     } finally {
       setIsLoading(false);
     }

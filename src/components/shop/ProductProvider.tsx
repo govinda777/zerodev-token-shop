@@ -94,57 +94,63 @@ export const ProductContext = createContext<ProductContextType | undefined>(unde
 
 export function ProductProvider({ children }: { children: React.ReactNode }) {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
-  const { balance, removeTokens } = useTokens();
+  const { balance, removeTokens } = useTokens(); // removeTokens is now async
   const { address } = usePrivyAuth();
 
-  const buyProduct = (productId: string, installments = 1) => {
-    console.log('🔍 ProductProvider.buyProduct chamado:', { productId, installments, balance, address });
+  const buyProduct = async (productId: string, installments = 1): Promise<boolean> => {
+    // console.log('🔍 ProductProvider.buyProduct chamado:', { productId, installments, balance, address }); // Dev log
     
     const product = PRODUCTS.find(p => p.id === productId);
-    console.log('🔍 Produto encontrado:', product);
+    // console.log('🔍 Produto encontrado:', product); // Dev log
     
     if (!product) {
-      console.error('❌ Produto não encontrado:', productId);
+      // console.error('❌ Produto não encontrado:', productId); // Dev log
       return false;
     }
     
     if (balance < product.price) {
-      console.error('❌ Saldo insuficiente:', { balance, price: product.price });
+      // console.error('❌ Saldo insuficiente:', { balance, price: product.price }); // Dev log
       return false;
     }
     
     if (!address) {
-      console.error('❌ Endereço não conectado');
+      // console.error('❌ Endereço não conectado'); // Dev log
       return false;
     }
 
-    console.log('✅ Removendo tokens:', product.price);
-    removeTokens(product.price);
+    // console.log('✅ Removendo tokens:', product.price); // Dev log
+    const removeSuccess = await removeTokens(product.price); // removeTokens is async and returns boolean
+    if (!removeSuccess) {
+      // console.error('❌ Falha ao remover tokens para compra direta:', product.name); // Dev log
+      return false;
+    }
     
-    const newPurchase = {
+    const newPurchase: Purchase = { // Added type for newPurchase
       productId,
       timestamp: Date.now(),
       price: product.price,
       installments: installments > 1 ? installments : undefined
     };
     
-    console.log('✅ Adicionando compra:', newPurchase);
+    // console.log('✅ Adicionando compra:', newPurchase); // Dev log
     setPurchases(prev => [...prev, newPurchase]);
     
-    // Log purchase
     JourneyLogger.logPurchase(address, productId, product.price, installments > 1 ? installments : undefined);
     
-    console.log('✅ Compra finalizada com sucesso');
+    // console.log('✅ Compra finalizada com sucesso'); // Dev log
     return true;
   };
 
-  const buyProductInstallment = (productId: string, installments: number) => {
+  const buyProductInstallment = async (productId: string, installments: number): Promise<boolean> => {
     const product = PRODUCTS.find(p => p.id === productId);
-    if (!product || !product.installments || !address) return false;
+    if (!product || !product.installments || !address) {
+      return false;
+    }
 
-    // For installment purchases, we don't charge immediately
-    // This would be handled by the investment provider's installment system
-    const newPurchase = {
+    // For installment purchases, we don't charge immediately via ProductProvider's removeTokens.
+    // This is handled by the InvestmentProvider's installment system, which will call removeTokens for each installment.
+    // Here, we just record the intent/initiation of an installment purchase.
+    const newPurchase: Purchase = { // Added type for newPurchase
       productId,
       timestamp: Date.now(),
       price: product.price,
@@ -152,8 +158,6 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     };
     
     setPurchases(prev => [...prev, newPurchase]);
-    
-    // Log installment purchase initiation
     JourneyLogger.logPurchase(address, productId, product.price, installments);
     
     return true;

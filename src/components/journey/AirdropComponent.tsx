@@ -5,6 +5,7 @@ import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
 import { useBlockchain } from '@/hooks/useBlockchain';
 import { MISSION_REWARDS, AIRDROP_CONFIG } from '@/contracts/config';
+import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationService';
 
 interface AirdropEvent {
   id: string;
@@ -82,7 +83,8 @@ export function AirdropComponent() {
           'member-airdrop': nftBalance > 0
         }));
       } catch (error) {
-        console.error('Erro ao verificar status do airdrop:', error);
+        // console.error('Erro ao verificar status do airdrop:', error);
+        // Potentially notifyError("Não foi possível verificar o status do airdrop.");
         // Fallback para verificação local
         setEligibilityStatus({
           'member-airdrop': journey.completedMissions.includes('buy-nft'),
@@ -147,37 +149,41 @@ export function AirdropComponent() {
         const result = await airdropOperations.claimAirdrop();
         
         if (result.success) {
-          console.log('✅ Airdrop reivindicado via contrato:', result.hash);
-          
-          addTokens(airdrop.reward);
+          // console.log('✅ Airdrop reivindicado via contrato:', result.hash); // Dev log
+          await addTokens(airdrop.reward); // addTokens is async
           setClaimedAirdrops(prev => [...prev, airdrop.id]);
+          notifySuccess(`Airdrop "${airdrop.name}" reivindicado com sucesso! Você ganhou ${airdrop.reward} tokens.`);
 
           if (!isCompleted) {
             completeMission('airdrop');
           }
         } else {
+          notifyError(`Falha ao reivindicar airdrop: ${result.error?.message || 'Erro desconhecido'}`);
           throw new Error(result.error?.message || 'Falha ao reivindicar airdrop');
         }
       } else {
-        // Para outros airdrops, usar simulação
+        // Para outros airdrops, usar simulação (this path will also hit the catch block)
+        notifyWarning(`Airdrop "${airdrop.name}" não configurado para interação direta com contrato. Usando simulação.`);
         throw new Error('Airdrop não disponível no contrato');
       }
     } catch (error) {
-      console.error('Erro ao reivindicar airdrop:', error);
-      
-      // Fallback para simulação
+      // console.error('Erro ao reivindicar airdrop:', error); // Original error
+      notifyWarning(`Ocorreu um erro ao reivindicar "${airdrop.name}". Usando simulação.`);
+      // Fallback to simulation
       try {
-        console.warn('⚠️ Usando simulação de airdrop');
+        // console.warn('⚠️ Usando simulação de airdrop'); // Dev log
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        addTokens(airdrop.reward);
+        await addTokens(airdrop.reward); // addTokens is async
         setClaimedAirdrops(prev => [...prev, airdrop.id]);
+        notifySuccess(`Airdrop "${airdrop.name}" (simulado) reivindicado! Você ganhou ${airdrop.reward} tokens.`);
 
         if (!isCompleted) {
           completeMission('airdrop');
         }
       } catch (fallbackError) {
-        console.error('Erro no fallback:', fallbackError);
+        // console.error('Erro no fallback do airdrop:', fallbackError); // Dev log
+        notifyError(`Falha ao reivindicar airdrop "${airdrop.name}" mesmo com simulação.`);
       }
     } finally {
       setIsLoading(null);

@@ -5,6 +5,7 @@ import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
 import { useBlockchain } from '@/hooks/useBlockchain';
 import { PASSIVE_INCOME_CONFIG } from '@/contracts/config';
+import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationService';
 
 interface IncomeStream {
   id: string;
@@ -93,10 +94,12 @@ export function PassiveIncomeComponent() {
         // Verificar se tem assinatura ativa (requisito para renda passiva)
         const hasActiveSubscription = await subscriptionOperations.isActive();
         if (!hasActiveSubscription && PASSIVE_INCOME_CONFIG.MIN_SUBSCRIPTION_REQUIRED) {
-          console.warn('Assinatura ativa necessária para renda passiva');
+          // console.warn('Assinatura ativa necessária para renda passiva');
+          // UI should ideally prevent actions if this is a strict requirement not met.
         }
       } catch (error) {
-        console.error('Erro ao carregar dados da renda passiva:', error);
+        // console.error('Erro ao carregar dados da renda passiva:', error);
+        // Potentially notifyError("Não foi possível carregar dados da renda passiva.");
       }
     };
 
@@ -136,32 +139,33 @@ export function PassiveIncomeComponent() {
       const result = await passiveIncomeOperations.activate();
       
       if (result.success) {
-        console.log('✅ Renda passiva ativada via contrato:', result.hash);
-        
+        // console.log('✅ Renda passiva ativada via contrato:', result.hash); // Dev log
         setIsPassiveIncomeActive(true);
+        notifySuccess('Renda passiva ativada com sucesso!');
         
-        // Completar missão se for a primeira vez
         if (!isCompleted) {
           completeMission('passive-income');
         }
       } else {
+        notifyError(`Falha ao ativar renda passiva: ${result.error?.message || 'Erro desconhecido'}`);
         throw new Error(result.error?.message || 'Falha ao ativar renda passiva');
       }
     } catch (error) {
-      console.error('Erro ao ativar renda passiva:', error);
-      
-      // Fallback para simulação
+      // console.error('Erro ao ativar renda passiva:', error); // Original error
+      notifyWarning('Ocorreu um erro ao ativar a renda passiva. Usando simulação.');
+      // Fallback to simulation
       try {
-        console.warn('⚠️ Usando simulação de ativação de renda passiva');
+        // console.warn('⚠️ Usando simulação de ativação de renda passiva'); // Dev log
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
         setIsPassiveIncomeActive(true);
+        notifySuccess('Renda passiva (simulada) ativada com sucesso!');
         
         if (!isCompleted) {
           completeMission('passive-income');
         }
       } catch (fallbackError) {
-        console.error('Erro no fallback:', fallbackError);
+        // console.error('Erro no fallback da ativação de renda passiva:', fallbackError); // Dev log
+        notifyError('Falha ao ativar renda passiva mesmo com simulação.');
       }
     } finally {
       setIsLoading(null);
@@ -183,8 +187,7 @@ export function PassiveIncomeComponent() {
       // Para outros investimentos, simular
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Gastar tokens
-      removeTokens(stream.initialInvestment);
+      await removeTokens(stream.initialInvestment); // removeTokens is async
 
       // Criar novo investimento
       const newInvestment: ActiveInvestment = {
@@ -196,8 +199,10 @@ export function PassiveIncomeComponent() {
       };
 
       setActiveInvestments(prev => [...prev, newInvestment]);
+      notifySuccess(`Investimento em "${stream.name}" realizado com sucesso.`);
     } catch (error) {
-      console.error('Erro ao investir:', error);
+      // console.error('Erro ao investir:', error); // Dev log
+      notifyError(`Falha ao investir em "${stream.name}".`);
     } finally {
       setIsLoading(null);
     }
@@ -214,7 +219,7 @@ export function PassiveIncomeComponent() {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Adicionar tokens ganhos
-      addTokens(pendingEarnings);
+      await addTokens(pendingEarnings); // addTokens is async
 
       // Atualizar investimento
       setActiveInvestments(prev => prev.map((inv, index) => 
@@ -226,8 +231,10 @@ export function PassiveIncomeComponent() {
             }
           : inv
       ));
+      notifySuccess(`${pendingEarnings} tokens de renda passiva reivindicados!`);
     } catch (error) {
-      console.error('Erro ao reivindicar ganhos:', error);
+      // console.error('Erro ao reivindicar ganhos:', error); // Dev log
+      notifyError('Falha ao reivindicar ganhos da renda passiva.');
     }
   };
 

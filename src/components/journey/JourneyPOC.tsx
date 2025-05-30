@@ -1,5 +1,13 @@
 "use client";
 
+// -------------------------------------------------------------------------------------
+// NOTA IMPORTANTE: Este componente (JourneyPOC.tsx) é uma Prova de Conceito (POC) inicial
+// e provavelmente está obsoleto. O sistema de jornada principal da aplicação é implementado
+// através de `JourneyProvider.tsx` e seus componentes de missão associados.
+// Este arquivo é mantido para referência histórica da POC.
+// Considere remover este arquivo e suas referências se não houver mais valor histórico.
+// -------------------------------------------------------------------------------------
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 

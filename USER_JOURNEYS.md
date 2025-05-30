@@ -1,8 +1,8 @@
 # Jornadas do Usuário
 
-O layout da home não está fazendo muito sentido.
+**Nota:** Muitas destas jornadas estão agora implementadas através do sistema `JourneyProvider` e seus componentes de missão associados (e.g., `FaucetComponent`, `StakingComponent`), utilizando simulações para interações blockchain conforme descrito em `BLOCKCHAIN_INTEGRATION_COMPLETE.md`. A preocupação original sobre "O layout da home não está fazendo muito sentido" foi abordada com a estrutura atual da `src/app/page.tsx` que integra o `JourneyDashboard` e condicionalmente o `ProductGrid`.
 
-A ideia era criar uma página onde conforme o usuário faça as missões ele seja capaz de esperimentar novas funcionalidades.
+A ideia é criar uma página onde conforme o usuário faça as missões ele seja capaz de experimentar novas funcionalidades.
 
 Exemplo:
 
