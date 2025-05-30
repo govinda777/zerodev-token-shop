@@ -45,7 +45,6 @@ export function SubscriptionComponent() {
   const { subscriptionOperations, tokenOperations, isLoading: blockchainLoading } = useBlockchain();
   const [activeSubscription, setActiveSubscription] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<string | null>(null);
-  const [subscriptionInfo, setSubscriptionInfo] = useState<unknown>(null);
 
   const subscriptionMission = journey.missions.find(m => m.id === 'subscription');
   const isUnlocked = subscriptionMission?.unlocked || false;
@@ -58,11 +57,8 @@ export function SubscriptionComponent() {
         const isActive = await subscriptionOperations.isActive();
         if (isActive) {
           const subscription = await subscriptionOperations.getSubscription();
-          setSubscriptionInfo(subscription);
-          
-          // Mapear planId para nossos IDs locais
-          const planId = subscription.planId === 1 ? 'monthly' : 'annual';
-          setActiveSubscription(planId);
+          const sub = subscription as any;
+          setActiveSubscription(sub.planId === 1 ? 'monthly' : 'annual');
         }
       } catch (error) {
         console.error('Erro ao carregar informações da assinatura:', error);

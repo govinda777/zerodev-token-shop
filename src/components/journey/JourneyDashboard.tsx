@@ -127,6 +127,8 @@ function MissionCard({ mission, onComplete, isNextAvailableMission }: MissionCar
   );
 }
 
+export { MissionCard };
+
 export function JourneyDashboard() {
   const { isConnected } = usePrivyAuth();
   const { balance } = useTokens();

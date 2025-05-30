@@ -162,12 +162,38 @@ export function JourneyPOC() {
     }
   }, [progress, user?.wallet?.address]);
 
-  // Auto-completar login quando conectado
-  useEffect(() => {
-    if (isConnected && !progress.completedMissions.includes('login')) {
-      handleMissionComplete('login');
+  // Implementações reais das missões
+  const executeMissionAction = useCallback(async (missionId: string): Promise<boolean> => {
+    try {
+      switch (missionId) {
+        case 'login':
+          return true;
+        case 'faucet':
+          window.location.hash = '#faucet';
+          return true;
+        case 'stake':
+          window.location.hash = '#staking';
+          return true;
+        case 'buy-nft':
+          window.location.hash = '#nft-marketplace';
+          return true;
+        case 'airdrop':
+          window.location.hash = '#airdrop';
+          return true;
+        case 'subscription':
+          window.location.hash = '#subscription';
+          return true;
+        case 'passive-income':
+          window.location.hash = '#passive-income';
+          return true;
+        default:
+          return false;
+      }
+    } catch (error) {
+      console.error(`Erro ao executar missão ${missionId}:`, error);
+      return false;
     }
-  }, [isConnected, handleMissionComplete, progress.completedMissions]);
+  }, []);
 
   const handleMissionComplete = useCallback(async (missionId: string) => {
     const missionIndex = missions.findIndex(m => m.id === missionId);
@@ -206,52 +232,12 @@ export function JourneyPOC() {
     setTimeout(() => setShowCelebration(false), 3000);
   }, [missions, progress, executeMissionAction]);
 
-  // Implementações reais das missões
-  const executeMissionAction = async (missionId: string): Promise<boolean> => {
-    try {
-      switch (missionId) {
-        case 'login':
-          // Login já é tratado automaticamente pelo usePrivyAuth
-          return true;
-          
-        case 'faucet':
-          // Redirecionar para componente de faucet real
-          window.location.hash = '#faucet';
-          return true;
-          
-        case 'stake':
-          // Redirecionar para componente de staking real
-          window.location.hash = '#staking';
-          return true;
-          
-        case 'buy-nft':
-          // Redirecionar para marketplace de NFTs real
-          window.location.hash = '#nft-marketplace';
-          return true;
-          
-        case 'airdrop':
-          // Redirecionar para componente de airdrop real
-          window.location.hash = '#airdrop';
-          return true;
-          
-        case 'subscription':
-          // Redirecionar para componente de assinatura real
-          window.location.hash = '#subscription';
-          return true;
-          
-        case 'passive-income':
-          // Redirecionar para componente de renda passiva real
-          window.location.hash = '#passive-income';
-          return true;
-          
-        default:
-          return false;
-      }
-    } catch (error) {
-      console.error(`Erro ao executar missão ${missionId}:`, error);
-      return false;
+  // Auto-completar login quando conectado
+  useEffect(() => {
+    if (isConnected && !progress.completedMissions.includes('login')) {
+      handleMissionComplete('login');
     }
-  };
+  }, [isConnected, handleMissionComplete, progress.completedMissions]);
 
   const resetJourney = () => {
     const resetProgress = {

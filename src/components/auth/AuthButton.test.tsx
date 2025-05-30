@@ -1,14 +1,13 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AuthButton, LoginButton } from './AuthButton';
 import React from 'react';
-import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 
 // Mock do hook usePrivyAuth
 jest.mock('@/hooks/usePrivyAuth', () => ({
   usePrivyAuth: jest.fn()
 }));
 
-const mockUsePrivyAuth = require('@/hooks/usePrivyAuth').usePrivyAuth as jest.Mock;
+const mockUsePrivyAuth = require('@/hooks/usePrivyAuth').usePrivyAuth;
 
 describe('AuthButton', () => {
   beforeEach(() => {

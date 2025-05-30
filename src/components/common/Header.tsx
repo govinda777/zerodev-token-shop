@@ -101,7 +101,7 @@ export function Header() {
 
                 {/* Balance Display */}
                 <div className="hidden lg:block">
-                  <TokenBalance address={address} />
+                  <TokenBalance />
                 </div>
 
                 {/* Address Display */}
@@ -239,7 +239,7 @@ export function Header() {
                   </div>
                   
                   <div className="px-3">
-                    <TokenBalance address={address} />
+                    <TokenBalance />
                   </div>
                   <button
                     onClick={() => {

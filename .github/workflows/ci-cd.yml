@@ -28,4 +28,3 @@ jobs:
         run: yarn test:unit
       - name: Build
         run: yarn build
-      # ... (demais etapas de deploy permanecem iguais)

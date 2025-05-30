@@ -1,6 +1,7 @@
 // Journey Logger - Specific for tracking user journeys and interactions
 
 export interface JourneyLogEntry {
+  id: string;
   event: 'FIRST_LOGIN' | 'TOKEN_REWARD' | 'PURCHASE' | 'STAKE' | 'UNSTAKE' | 'AIRDROP_CLAIM' | 'GOVERNANCE_VOTE' | 'POOL_JOIN' | 'INSTALLMENT_CREATE' | 'INSTALLMENT_PAYMENT' | 'NFT_RECEIVED';
   walletAddress: string;
   timestamp: number;
@@ -17,7 +18,7 @@ class JourneyLogger {
   private static readonly STORAGE_KEY = 'journey_logs';
   private static readonly MAX_LOGS = 1000;
 
-  static log(entry: JourneyLogEntry): void {
+  static log(entry: Omit<JourneyLogEntry, 'id'>): void {
     try {
       const logs = this.getLogs();
       const newLog = {

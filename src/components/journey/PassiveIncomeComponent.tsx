@@ -77,7 +77,6 @@ export function PassiveIncomeComponent() {
   const [activeInvestments, setActiveInvestments] = useState<ActiveInvestment[]>([]);
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [isPassiveIncomeActive, setIsPassiveIncomeActive] = useState(false);
-  const [pendingRewards, setPendingRewards] = useState(0);
 
   const passiveIncomeMission = journey.missions.find(m => m.id === 'passive-income');
   const isUnlocked = passiveIncomeMission?.unlocked || false;
@@ -90,12 +89,6 @@ export function PassiveIncomeComponent() {
         // Verificar se a renda passiva está ativa
         const isActive = await passiveIncomeOperations.isActive();
         setIsPassiveIncomeActive(isActive);
-
-        if (isActive) {
-          // Carregar recompensas pendentes
-          const pending = await passiveIncomeOperations.getPendingRewards();
-          setPendingRewards(parseFloat(pending));
-        }
 
         // Verificar se tem assinatura ativa (requisito para renda passiva)
         const hasActiveSubscription = await subscriptionOperations.isActive();

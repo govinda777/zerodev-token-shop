@@ -119,31 +119,6 @@ export function JourneyProvider({ children }: JourneyProviderProps) {
     completedMissions: []
   });
 
-  // Carregar progresso do localStorage
-  useEffect(() => {
-    if (user?.wallet?.address) {
-      const savedJourney = localStorage.getItem(`journey_${user.wallet.address}`);
-      if (savedJourney) {
-        const parsed = JSON.parse(savedJourney);
-        setJourney(parsed);
-      }
-    }
-  }, [user?.wallet?.address]);
-
-  // Salvar progresso no localStorage
-  useEffect(() => {
-    if (user?.wallet?.address) {
-      localStorage.setItem(`journey_${user.wallet.address}`, JSON.stringify(journey));
-    }
-  }, [journey, user?.wallet?.address]);
-
-  // Verificar se o login foi completado
-  useEffect(() => {
-    if (isConnected && !journey.completedMissions.includes('login')) {
-      completeMission('login');
-    }
-  }, [isConnected, completeMission, journey.completedMissions]);
-
   const completeMission = useCallback((missionId: string) => {
     setJourney(prev => {
       if (prev.completedMissions.includes(missionId)) {
@@ -180,6 +155,31 @@ export function JourneyProvider({ children }: JourneyProviderProps) {
       };
     });
   }, [addTokens]);
+
+  // Carregar progresso do localStorage
+  useEffect(() => {
+    if (user?.wallet?.address) {
+      const savedJourney = localStorage.getItem(`journey_${user.wallet.address}`);
+      if (savedJourney) {
+        const parsed = JSON.parse(savedJourney);
+        setJourney(parsed);
+      }
+    }
+  }, [user?.wallet?.address]);
+
+  // Salvar progresso no localStorage
+  useEffect(() => {
+    if (user?.wallet?.address) {
+      localStorage.setItem(`journey_${user.wallet.address}`, JSON.stringify(journey));
+    }
+  }, [journey, user?.wallet?.address]);
+
+  // Verificar se o login foi completado
+  useEffect(() => {
+    if (isConnected && !journey.completedMissions.includes('login')) {
+      completeMission('login');
+    }
+  }, [isConnected, completeMission, journey.completedMissions]);
 
   const checkMissionRequirements = (missionId: string): boolean => {
     const mission = journey.missions.find(m => m.id === missionId);

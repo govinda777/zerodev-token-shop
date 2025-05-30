@@ -12,40 +12,39 @@ export interface UserInfo {
   createdAt?: number;
 }
 
+// ATENÇÃO: useMockAuth e usePrivy são chamados no topo para evitar hooks condicionalmente.
 export function usePrivyAuth() {
-  // Verificar se estamos usando mock auth
   const mockContext = useContext(MockAuthContext);
+  const privy = usePrivy();
+
+  // Verificar se estamos usando mock auth
   const isMockMode = !!mockContext;
 
-  // Se estiver em modo mock, usar mock auth
-  if (isMockMode) {
-    const mockAuth = useMockAuth();
+  // Se estiver em modo mock, usar mockContext diretamente
+  if (isMockMode && mockContext) {
     return {
       // Estados
       isReady: true,
-      isAuthenticated: mockAuth.isConnected,
-      isConnecting: mockAuth.isConnecting,
-      isConnected: mockAuth.isConnected,
-      
+      isAuthenticated: mockContext.isConnected,
+      isConnecting: mockContext.isConnecting,
+      isConnected: mockContext.isConnected,
       // Dados
-      user: mockAuth.isConnected ? { 
+      user: mockContext.isConnected ? { 
         id: 'mock-user', 
-        wallet: { address: mockAuth.address } 
+        wallet: { address: mockContext.address } 
       } : null,
-      address: mockAuth.address,
-      userInfo: mockAuth.isConnected ? {
+      address: mockContext.address,
+      userInfo: mockContext.isConnected ? {
         id: 'mock-user',
-        wallet: mockAuth.address,
+        wallet: mockContext.address,
         createdAt: Date.now()
       } : null,
-      
       // Verificações
-      hasWallet: !!mockAuth.address,
-      
+      hasWallet: !!mockContext.address,
       // Ações
-      connect: mockAuth.connect,
-      disconnect: mockAuth.disconnect,
-      connectWallet: mockAuth.connect,
+      connect: mockContext.connect,
+      disconnect: mockContext.disconnect,
+      connectWallet: mockContext.connect,
       linkWallet: async () => {}
     };
   }
@@ -59,7 +58,7 @@ export function usePrivyAuth() {
     logout,
     connectWallet,
     linkWallet
-  } = usePrivy();
+  } = privy;
 
   // Estados derivados
   const isReady = ready;

@@ -29,7 +29,6 @@ import { render, screen } from '@testing-library/react';
 import { LoginDemo } from './LoginDemo';
 import { TokenProvider } from './TokenProvider';
 import { MockAuthProvider } from './MockAuthProvider';
-import JourneyLogger from '@/utils/journeyLogger';
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <MockAuthProvider>

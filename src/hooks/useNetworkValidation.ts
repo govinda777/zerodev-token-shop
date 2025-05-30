@@ -15,7 +15,7 @@ export interface NetworkValidation {
 }
 
 export function useNetworkValidation(): NetworkValidation {
-  const { isConnected, user } = usePrivyAuth();
+  const { isConnected } = usePrivyAuth();
   const [currentChainId, setCurrentChainId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,9 +81,9 @@ export function useNetworkValidation(): NetworkValidation {
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: `0x${SEPOLIA_CHAIN_ID.toString(16)}` }],
       });
-    } catch (switchError: any) {
+    } catch (switchError: unknown) {
       // Se a rede não estiver adicionada, tentar adicionar
-      if (switchError.code === 4902) {
+      if (switchError instanceof Error && switchError.message.includes('4902')) {
         try {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
@@ -107,7 +107,7 @@ export function useNetworkValidation(): NetworkValidation {
         }
       } else {
         console.error('Erro ao trocar para Sepolia:', switchError);
-        setError('Erro ao trocar para rede Sepolia');
+        setError((error as { message?: string })?.message || 'Erro ao mudar de rede');
       }
     } finally {
       setIsLoading(false);

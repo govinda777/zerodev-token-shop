@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "type-check": "tsc --noEmit",
     "test": "jest",
     "test:unit": "jest --testPathPattern=\"usePrivyAuth|LoginDemo|PrivyLoadingScreen|ProductCard|AuthButton|MockAuthProvider|TokenProvider\" --passWithNoTests --watchAll=false",
     "test:unit:watch": "jest --testPathPattern=\"usePrivyAuth|LoginDemo|PrivyLoadingScreen|ProductCard|AuthButton|MockAuthProvider|TokenProvider\" --watch",

@@ -41,7 +41,7 @@ export interface NFT {
 export interface Airdrop {
   id: string;
   name: string;
-  tokenType: 'governance' | 'stake' | 'pool' | 'investment' | 'payment';
+  tokenType: 'reward' | 'governance' | 'stake' | 'pool';
   amount: number;
   description: string;
   timestamp: number;

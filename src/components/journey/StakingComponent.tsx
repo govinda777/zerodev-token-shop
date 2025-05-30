@@ -50,7 +50,6 @@ export function StakingComponent() {
   const [stakeAmount, setStakeAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [stakedAmount, setStakedAmount] = useState(0);
-  const [userStakes, setUserStakes] = useState<unknown[]>([]);
 
   const stakeMission = journey.missions.find(m => m.id === 'stake');
   const isUnlocked = stakeMission?.unlocked || false;
@@ -66,7 +65,7 @@ export function StakingComponent() {
             try {
               const userAddress = await tokenOperations.getBalance(); // Usar para obter endereço
               const stakeInfo = await stakingOperations.getUserStake(userAddress, index);
-              return { poolId: index, ...stakeInfo };
+              return typeof stakeInfo === 'object' && stakeInfo !== null ? { poolId: index, ...stakeInfo } : { poolId: index };
             } catch (error) {
               console.warn(`Erro ao carregar stake do pool ${pool.id}:`, error);
               return { poolId: index, amount: 0, timestamp: 0, rewards: 0 };
@@ -74,10 +73,8 @@ export function StakingComponent() {
           })
         );
         
-        setUserStakes(stakes);
-        
         // Calcular total em stake
-        const total = stakes.reduce((sum, stake) => sum + Number(stake.amount || 0), 0);
+        const total = stakes.reduce((sum: number, stake: any) => sum + Number(stake.amount || 0), 0);
         setStakedAmount(total);
       } catch (error) {
         console.error('Erro ao carregar stakes do usuário:', error);
