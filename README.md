@@ -22,13 +22,16 @@ Um marketplace moderno e acessível para tokens digitais únicos, construído co
 - **Framework**: Next.js 14 (App Router)
 - **Linguagem**: TypeScript
 - **Styling**: Tailwind CSS
-- **Web3**: MetaMask integration
-   - ERC-4337
-   - Account Abstraction
-   - ZeroDev
-   - Privy
-- **Testes**: Jest + React Testing Library
-- **Lint**: ESLint + Prettier
+- **Frontend Framework**: Next.js 14 (App Router)
+- **Linguagem**: TypeScript
+- **Styling**: Tailwind CSS
+- **Autenticação Web3**: Privy
+- **Account Abstraction & SDK**: ZeroDev
+- **Interação Blockchain**: Viem
+- **Testes Unitários/Integração**: Jest + React Testing Library
+- **Testes E2E**: Playwright
+- **Linting & Formatting**: ESLint + Prettier
+- **Hooks Git**: Husky
 
 ## 📸 Uma breve explicação sobre Account Abstraction, ERC-4337 e ZeroDev
 
@@ -93,12 +96,16 @@ O **ERC-4337** é o padrão Ethereum que implementa Account Abstraction sem modi
 
 ### Variáveis de Ambiente
 
+Copie o arquivo `.env-example` para `.env.local` e preencha as seguintes variáveis:
+
 ```env
-NEXT_PUBLIC_ZERODEV_RPC=
-NEXT_PUBLIC_CHAIN=
-NEXT_PUBLIC_ZERODEV_PROJECT_ID=
-NEXT_PUBLIC_PRIVY_APP_ID=
+NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id_here
+NEXT_PUBLIC_ZERODEV_PROJECT_ID=your_zerodev_project_id_here
+# NEXT_PUBLIC_ZERODEV_RPC is optional if you use ZeroDev's default RPC with your Project ID.
+# Define it if you need a custom RPC endpoint for Sepolia.
+# Example: NEXT_PUBLIC_ZERODEV_RPC=https://rpc.zerodev.app/api/v2/bundler/your_zerodev_project_id_here
 ```
+A variável `NEXT_PUBLIC_CHAIN` não é mais diretamente usada; a configuração da chain (Sepolia) está em `src/contracts/config.ts` e nos provedores.
 
 ### Como configurar o ZeroDev
 
@@ -192,34 +199,41 @@ Warning: #F59E0B (amber-500)
 ### Instalação
 
 ```bash
-# Clone o repositório
-git clone https://github.com/usuario/zerodev-token-shop.git
+# Clone o repositório (substitua 'your-username' pelo seu usuário ou organização do GitHub se for um fork)
+git clone https://github.com/govinda777/zerodev-token-shop.git
 
 # Entre no diretório
 cd zerodev-token-shop
 
-# Instale as dependências
-npm install
+# Instale as dependências (usando yarn - como indicado no início do README)
+yarn install
+
+# Configure as variáveis de ambiente
+cp .env-example .env.local
+# Edite .env.local com suas chaves do Privy e ZeroDev (veja a seção Variáveis de Ambiente)
 
 # Execute em desenvolvimento
-npm run dev
-
-# Execute os testes
-npm test
+yarn dev
 
 # Build para produção
-npm run build
+yarn build
+
+# Execute o servidor de produção
+yarn start
 ```
 
 ### Scripts Disponíveis
 
 ```bash
-npm run dev          # Servidor de desenvolvimento
-npm run build        # Build de produção
-npm run start        # Servidor de produção
-npm run lint         # Verificar código
-npm run test         # Executar testes
-npm run test:watch   # Testes em modo watch
+yarn dev          # Servidor de desenvolvimento
+yarn build        # Build de produção
+yarn start        # Servidor de produção
+yarn lint         # ESLint e Prettier
+yarn type-check   # Verificação de tipos TypeScript
+yarn test         # Executa todos os testes (unit e e2e)
+yarn test:unit    # Testes de unidade (Jest)
+yarn test:e2e     # Testes end-to-end (Playwright)
+# yarn test:watch é geralmente um alias para test:unit --watch
 ```
 
 ## 🎯 Funcionalidades
@@ -234,20 +248,42 @@ npm run test:watch   # Testes em modo watch
 - [x] **Estados de Carregamento**: UX otimizada
 - [x] **Navegação por Teclado**: Skip links e focus management
 
-### 🚧 Em Desenvolvimento (User Journeys)
-- [ ] **Login**: Login com Privy
-- [ ] **Faucets**: Faucets de tokens
-- [ ] **Stacke**: Stacke de tokens
-- [ ] **By NFE**: By NFE 
-- [ ] **Get Air Drop**: Get Air Drop
-- [ ] **Fazer assinatura, pagamento mensal ou anual**: Fazer assinatura, pagamento mensal ou anual
-- [ ] **Renda Passiva**: Renda Passiva
+### ✅ Funcionalidades Implementadas (Incluindo User Journeys)
+- [x] **Layout Responsivo**: Mobile-first design
+- [x] **Sistema de Autenticação**: Conexão com carteiras Web3 via Privy (MetaMask, WalletConnect, etc.)
+- [x] **Marketplace**: Grid de produtos com compra direta e parcelada (simulada).
+- [x] **Acessibilidade**: WCAG 2.1 AA compliant (em progresso).
+- [x] **Performance**: Lazy loading e otimizações (em progresso).
+- [x] **Design System**: Componentes consistentes.
+- [x] **Estados de Carregamento**: UX otimizada.
+- [x] **Navegação por Teclado**: Skip links e focus management.
+- [x] **Jornada do Usuário Gamificada (`JourneyProvider` e `JourneyDashboard`):**
+    - [x] **Login com Privy**: Primeira etapa da jornada.
+    - [x] **Faucet de Tokens**: Reivindicação de tokens (simulada).
+    - [x] **Staking de Tokens**: Mecanismo de stake (simulado, interações com `InvestmentProvider`).
+    - [x] **Compra de NFT**: Aquisição de NFTs (simulada, interações com `NFTMarketplace` e `InvestmentProvider`).
+    - [x] **Recebimento de Airdrop**: Reivindicação de airdrops (simulada, interações com `AirdropComponent` e `InvestmentProvider`).
+    - [x] **Assinaturas**: Sistema de assinatura de planos (simulado, interações com `SubscriptionComponent` e `InvestmentProvider`).
+    - [x] **Renda Passiva**: Configuração de renda passiva (simulada, interações com `PassiveIncomeComponent` e `InvestmentProvider`).
+- [x] **Gerenciamento de Tokens do Usuário (`TokenProvider`):**
+    - [x] Saldo de tokens persistido no `localStorage`.
+    - [x] Concessão de bônus de boas-vindas.
+- [x] **Visualização de Carteira (`WalletPage.tsx`):**
+    - [x] Resumo de tokens, saldo ETH (real da Sepolia).
+    - [x] Interface para interagir com Staking, Governança (compra simulada), Pools (entrada simulada), NFTs (visualização), Airdrops, Compras Parceladas.
+    - [x] Histórico de compras (buscando nomes de produtos).
+- [x] **Sistema de Notificação (Conceitual):** Implementado `src/utils/notificationService.ts` para feedback ao usuário (requer integração de `react-toastify` pelo usuário).
+- [x] **Validação de Rede (`NetworkGuard`):** Alerta e permite trocar para Sepolia Testnet.
 
-- [ ] **Carrinho de Compras**: Sistema de carrinho persistente
-- [ ] **Histórico de Transações**: Visualização de compras
-- [ ] **Filtros Avançados**: Busca e categorização
-- [ ] **Modo Escuro**: Toggle de tema
-- [ ] **Multi-idioma**: Suporte i18n
+### 🚧 Próximos Passos / Melhorias
+- [ ] **Integração Blockchain Completa**: Conectar as operações simuladas (stake, compra de NFT, airdrops, etc.) com contratos reais na Sepolia.
+- [ ] **Finalizar Account Abstraction com ZeroDev**: Integrar completamente o SDK ZeroDev para transações sem gas, batch transactions, etc. (Hook `useSmartAccount` é um placeholder).
+- [ ] **Implementar `react-toastify`**: Adicionar a biblioteca e o `<ToastContainer />` para o `notificationService` funcionar visualmente.
+- [ ] **Carrinho de Compras**: Sistema de carrinho persistente.
+- [ ] **Filtros Avançados no Marketplace**: Busca e categorização.
+- [ ] **Modo Claro/Escuro**: Toggle de tema (atualmente apenas escuro).
+- [ ] **Multi-idioma**: Suporte i18n.
+- [ ] **Testes E2E**: Expandir cobertura para novas funcionalidades e interações blockchain reais.
 
 ## 📊 Performance
 
@@ -274,15 +310,16 @@ npm run test:watch   # Testes em modo watch
 
 ### Executar Testes
 ```bash
-# Todos os testes
-npm test
+# Testes de unidade
+yarn test:unit
 
-# Testes em modo watch
-npm run test:watch
+# Testes End-to-End
+yarn test:e2e
 
-# Coverage report
-npm run test:coverage
+# Todos os testes (se configurado no package.json para rodar ambos)
+yarn test
 ```
+Para mais detalhes sobre testes, incluindo hooks de pre-commit e pre-push, veja `PRE_COMMIT_GUIDE.md`.
 
 ## 📝 Changelog
 
@@ -305,172 +342,13 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 🙋‍♂️ Suporte
 
-Se você encontrar problemas ou tiver sugestões:
+Se você encontrar problemas ou tiver sugestões, por favor, abra uma issue no repositório GitHub do projeto.
+(Nota: Substitua 'govinda777/zerodev-token-shop' pelo caminho correto do repositório se for diferente).
 
-1. **Issues**: [GitHub Issues](https://github.com/usuario/zerodev-token-shop/issues)
-2. **Discussões**: [GitHub Discussions](https://github.com/usuario/zerodev-token-shop/discussions)
-3. **Email**: suporte@zerodev-token-shop.com
-
----
-
-**Feito com ❤️ by ZeroDev Team**
-
-## 🧪 Testes e Qualidade
-
-### Pre-commit Hook
-O projeto utiliza **Husky** para executar automaticamente testes de unidade antes de cada commit:
-
-```bash
-# Commit normal - testes executam automaticamente
-git commit -m "feat: nova funcionalidade"
-🧪 Executando testes de unidade...
-✅ Testes de unidade passaram!
-
-# Em caso de falha - commit é cancelado
-❌ Testes de unidade falharam. Commit cancelado.
-```
-
-### Scripts de Teste
-```bash
-# Testes de unidade (44 testes passando)
-npm run test:unit
-
-# Testes em modo watch
-npm run test:unit:watch
-
-# Testes com cobertura
-npm run test:unit:coverage
-
-# Todos os testes
-npm run test:all
-
-# Testes e2e
-npm run test:e2e
-```
-
-### Documentação
-- 📋 [**TESTS_README.md**](./TESTS_README.md) - Documentação completa dos testes
-- 🔧 [**PRE_COMMIT_GUIDE.md**](./PRE_COMMIT_GUIDE.md) - Guia do pre-commit hook
-
-## 🛠️ Tecnologias
-
-- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
-- **Autenticação**: Privy (Web3 Auth)
-- **Blockchain**: ZeroDev (Account Abstraction)
-- **Testes**: Jest, React Testing Library
-- **CI/CD**: Husky (pre-commit hooks)
-- **E2E**: Playwright
-
-## 📦 Instalação
-
-```bash
-# Clonar repositório
-git clone <repository-url>
-cd zerodev-token-shop
-
-# Instalar dependências
-npm install
-
-# Configurar variáveis de ambiente
-cp .env.example .env.local
-# Editar .env.local com suas chaves
-
-# Executar em desenvolvimento
-npm run dev
-```
-
-## 🔧 Configuração
-
-### Variáveis de Ambiente
-
-```env
-NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id
-NEXT_PUBLIC_ZERODEV_PROJECT_ID=your_zerodev_project_id
-```
-
-### Privy Setup
-Consulte [PRIVY_SETUP.md](./PRIVY_SETUP.md) para configuração detalhada.
-
-## 🚀 Scripts Disponíveis
-
-```bash
-# Desenvolvimento
-npm run dev          # Servidor de desenvolvimento
-npm run build        # Build de produção
-npm run start        # Servidor de produção
-
-# Testes
-npm run test:unit    # Testes de unidade
-npm run test:e2e     # Testes end-to-end
-npm run test:all     # Todos os testes
-
-# Qualidade
-npm run lint         # ESLint
-npm run type-check   # TypeScript check
-
-# Git
-npm run push:skip-tests     # Push sem testes (emergência)
-npm run push:all-tests      # Push com todos os testes
-```
-
-
-## 🔄 Workflow de Desenvolvimento
-
-1. **Desenvolvimento**:
-   ```bash
-   npm run test:unit:watch  # Executar testes em paralelo
-   ```
-
-2. **Antes do commit**:
-   ```bash
-   npm run test:unit        # Verificar se tudo passa
-   npm run lint             # Verificar código
-   ```
-
-3. **Commit**:
-   ```bash
-   git add .
-   git commit -m "feat: nova funcionalidade"  # Pre-commit executa automaticamente
-   ```
-
-4. **Push**:
-   ```bash
-   git push                 # Push normal
-   # ou
-   npm run push:all-tests   # Push com testes completos
-   ```
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'feat: Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-### Padrões de Commit
-- `feat:` Nova funcionalidade
-- `fix:` Correção de bug
-- `docs:` Documentação
-- `test:` Testes
-- `refactor:` Refatoração
-- `style:` Formatação
-
-## 📊 Status do Projeto
-
-- ✅ **Testes de Unidade**: 44 testes passando (100%)
-- ✅ **Pre-commit Hook**: Configurado e funcionando
-- ✅ **Autenticação**: Privy integrado
-- ✅ **Marketplace**: Funcional com parcelamento
-- 🔄 **Account Abstraction**: Em desenvolvimento
-- 🔄 **Testes E2E**: Em desenvolvimento
-
-## 📞 Suporte
-
-- 📋 [Documentação de Testes](./TESTS_README.md)
-- 🔧 [Guia do Pre-commit](./PRE_COMMIT_GUIDE.md)
-- 🔐 [Setup do Privy](./PRIVY_SETUP.md)
+1. **Issues**: [GitHub Issues](https://github.com/govinda777/zerodev-token-shop/issues)
+2. **Discussões**: [GitHub Discussions](https://github.com/govinda777/zerodev-token-shop/discussions)
 
 ---
 
-**Desenvolvido com ❤️ usando ZeroDev e Privy**
+**Desenvolvido com ❤️**
+(Se este é um projeto da ZeroDev Team, pode manter o nome, caso contrário, ajuste conforme apropriado)

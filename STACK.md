@@ -18,9 +18,11 @@ Stack do projeto com Alchemy
 |                     | Viem 2.x                | Interação com blockchain, suporte a múltiplos providers                          | Integração com Alchemy           |
 |                     | Wagmi 2.x               | Gerenciamento de conexão de carteiras e providers                                | Compatível com ZeroDev           |
 | **Account Abstraction** | ZeroDev Kernel      | Smart contracts accounts (ERC-4337/EIP-7702), autenticação social, batch tx      | Kernel principal do projeto      |
-|                     | Magic.Link              | Autenticação Web2 via email/redes sociais                                        | Opcional, pode usar Privy        |
-| **Infraestrutura**  | Alchemy RPC             | Endpoint principal para interação com a blockchain                               | Alta disponibilidade, APIs avançadas |
-|                     | ZeroDev Bundler         | Processamento de user operations (ERC-4337)                                      | Integração com paymaster         |
+| **Autenticação**    | Privy                   | Autenticação Web3 (carteiras, social login via configuração Privy)                 | Principal sistema de auth        |
+|                     | Magic.Link              | Autenticação Web2 via email/redes sociais                                        | Opcional/Alternativa ao Privy    |
+| **Infraestrutura RPC**| ZeroDev RPC             | Endpoint configurado via `NEXT_PUBLIC_ZERODEV_RPC` para interação com a blockchain | Pode usar Alchemy por baixo      |
+|                     | Alchemy RPC             | Pode ser usado como alternativa ou se ZeroDev RPC for baseado em Alchemy         | Alta disponibilidade, APIs avançadas |
+| **Bundler & Paymaster** | ZeroDev Bundler     | Processamento de user operations (ERC-4337)                                      | Integração com paymaster         |
 |                     | ZeroDev Paymaster       | Sponsorship de taxas de gas (gasless)                                            | Facilita UX para usuários        |
 | **Smart Contracts** | Solidity                | Linguagem para desenvolvimento de contratos inteligentes                         | Padrão Ethereum                  |
 |                     | Foundry                 | Ambiente de desenvolvimento, testes e deploy de contratos                        | Forge, Anvil, Cast               |
@@ -31,9 +33,9 @@ Stack do projeto com Alchemy
 
 | Etapa                | Descrição                                                                                 | Tecnologia/Provedor      |
 |----------------------|------------------------------------------------------------------------------------------|--------------------------|
-| **Login do Usuário** | Autenticação via Magic (email/redes sociais) ou outro provider                           | Magic.Link / Privy       |
-| **Criação de Conta** | ZeroDev cria uma smart account associada ao login do usuário                             | ZeroDev Kernel           |
-| **Interação Blockchain** | Frontend utiliza o RPC da Alchemy para consultas e envio de transações               | Alchemy RPC              |
+| **Login do Usuário** | Autenticação via Privy (carteiras Web3; social login se configurado no Privy)            | Privy                    |
+| **Criação de Conta** | ZeroDev cria uma smart account associada ao login do usuário (se EOA for usado com ZeroDev) | ZeroDev Kernel           |
+| **Interação Blockchain** | Frontend utiliza o RPC configurado (ZeroDev RPC) para consultas e envio de transações | ZeroDev RPC / Viem       |
 | **Processamento Tx** | ZeroDev processa user operations via bundler próprio                                     | ZeroDev Bundler          |
 | **Sponsorship Gas**  | Paymaster da ZeroDev patrocina as taxas de gas, se configurado                           | ZeroDev Paymaster        |
 | **UX Avançada**      | Usuário interage sem seed phrase, token nativo para gas ou múltiplas aprovações           | ZeroDev + Alchemy        |
@@ -45,8 +47,8 @@ Stack do projeto com Alchemy
 | Camada               | Tecnologias Principais                        | Benefícios Principais                                 |
 |----------------------|-----------------------------------------------|------------------------------------------------------|
 | **Frontend**         | Next.js, Tailwind, shadcn/ui, Viem, Wagmi     | UI moderna, interação fácil com blockchain           |
-| **AA & Auth**        | ZeroDev, Magic/Privy                          | Autenticação social, smart accounts, gasless         |
-| **Infraestrutura**   | Alchemy RPC, ZeroDev Bundler/Paymaster        | Alta disponibilidade, APIs avançadas, sponsorship    |
+| **AA & Auth**        | ZeroDev, Privy                                | Autenticação Web3 flexível, smart accounts, gasless  |
+| **Infraestrutura**   | ZeroDev RPC (Bundler/Paymaster)               | Abstração de conta completa, sponsorship             |
 | **Smart Contracts**  | Solidity, Foundry                             | Contratos seguros, testes automatizados              |
 
 ---

@@ -17,13 +17,14 @@ git commit -m "feat: nova funcionalidade"
 
 # 3. Pre-commit executa automaticamente
 🧪 Executando testes de unidade...
- PASS  src/hooks/usePrivyAuth.test.ts
- PASS  src/components/auth/LoginDemo.test.tsx
- PASS  src/components/auth/PrivyLoadingScreen.test.tsx
- PASS  src/components/shop/ProductCard.test.tsx
+# (A saída exata do teste pode variar)
+# Exemplo:
+# PASS  src/hooks/usePrivyAuth.test.ts
+# PASS  src/components/auth/LoginDemo.test.tsx
+# ... mais testes ...
 
-Test Suites: 4 passed, 4 total
-Tests:       44 passed, 44 total
+# Test Suites: XX passed, XX total
+# Tests:       YY passed, YY total
 
 ✅ Testes de unidade passaram!
 
@@ -50,47 +51,42 @@ git commit -m "feat: código com bug"
 
 ## 🧪 Testes Executados
 
-O pre-commit executa apenas os testes que estão **100% estáveis**:
+O pre-commit executa os testes de unidade definidos no script `test:unit` do `package.json`.
+O número exato de testes pode variar conforme o desenvolvimento.
 
-| Arquivo | Testes | Descrição |
-|---------|--------|-----------|
-| `usePrivyAuth.test.ts` | 8 | Hook de autenticação |
-| `LoginDemo.test.tsx` | 11 | Componente de demo de login |
-| `PrivyLoadingScreen.test.tsx` | 9 | Tela de loading |
-| `ProductCard.test.tsx` | 16 | Card de produto |
-| **Total** | **44** | **100% passando** |
-
-**Tempo médio de execução**: ~6 segundos
+**Tempo médio de execução**: Varia, mas geralmente alguns segundos.
 
 ## 🛠️ Scripts Disponíveis
 
 ### Scripts de Teste
 
 ```bash
-# Executar apenas os testes do pre-commit
-npm run test:unit
+# Executar apenas os testes de unidade (usados pelo pre-commit)
+yarn test:unit
 
-# Executar testes em modo watch (desenvolvimento)
-npm run test:unit:watch
+# Executar testes de unidade em modo watch (desenvolvimento)
+yarn test:unit:watch # Ou o alias configurado em package.json
 
-# Executar testes com relatório de cobertura
-npm run test:unit:coverage
+# Executar testes de unidade com relatório de cobertura
+yarn test:unit:coverage # Ou o alias configurado
 
-# Executar TODOS os testes (incluindo os instáveis)
-npm run test:all
+# Executar TODOS os testes (unitários e e2e, se configurado)
+yarn test
+
+# Executar testes End-to-End (Playwright)
+yarn test:e2e
 ```
 
 ### Scripts de Commit/Push
 
 ```bash
-# Push normal (com testes)
+# Push normal (executará pre-push hook se configurado)
 git push
 
-# Push pulando testes (emergência)
-npm run push:skip-tests
+# Push pulando hooks de Git (emergência, não recomendado)
+git push --no-verify
 
-# Push com todos os testes (incluindo e2e)
-npm run push:all-tests
+# (Outros scripts como push:skip-tests, push:all-tests dependem da configuração em package.json)
 ```
 
 ## 🚨 Situações Especiais
@@ -157,7 +153,7 @@ src/setupTests.ts      # Setup global dos testes
 echo "🧪 Executando testes de unidade..."
 
 # Executar testes de unidade
-npm run test:unit -- --silent
+yarn test:unit --silent # ou o comando exato do seu package.json
 
 if [ $? -ne 0 ]; then
   echo "❌ Testes de unidade falharam. Commit cancelado."
@@ -191,8 +187,8 @@ echo "✅ Testes de unidade passaram!"
 
 ```bash
 # Solução: Reinstalar Husky
-npm install husky --save-dev
-npm run prepare
+yarn add husky --dev
+yarn prepare # Ou o comando configurado em package.json para 'prepare'
 ```
 
 ### Problema: "Permission denied"
@@ -206,50 +202,51 @@ chmod +x .husky/pre-commit
 
 ```bash
 # Solução: Executar apenas testes específicos
-npm run test:unit -- --testPathPattern="usePrivyAuth"
+yarn test:unit --testPathPattern="usePrivyAuth" # Exemplo
 ```
 
 ### Problema: "False positives"
 
 ```bash
 # Solução: Verificar se há testes instáveis
-npm run test:all
+yarn test # Executar todos os testes para identificar
 
-# Se necessário, remover teste instável do pre-commit
-# (editar package.json > test:unit)
+# Se necessário, revisar ou desabilitar temporariamente o teste problemático
+# (e investigar a causa da instabilidade)
 ```
 
 ## 📝 Boas Práticas
 
 ### ✅ Faça
 
-- Execute `npm run test:unit` antes de commitar
-- Corrija todos os testes que falharem
-- Use commits pequenos e frequentes
-- Escreva mensagens de commit descritivas
+- Execute `yarn test:unit` antes de commitar se quiser verificar manualmente.
+- Corrija todos os testes que falharem.
+- Use commits pequenos e frequentes.
+- Escreva mensagens de commit descritivas.
 
 ### ❌ Evite
 
-- Usar `--no-verify` sem necessidade
-- Commitar código não testado
-- Ignorar falhas de teste
-- Fazer commits muito grandes
+- Usar `--no-verify` em commits ou `git push --no-verify` sem um bom motivo.
+- Commitar código que você sabe que está quebrando os testes.
+- Ignorar falhas de teste reportadas pelo hook.
+- Fazer commits muito grandes que dificultam a identificação de problemas se os testes falharem.
 
 ## 🔄 Workflow Recomendado
 
 ```bash
 # 1. Desenvolvimento
-npm run test:unit:watch  # Executar em paralelo
+yarn test:unit:watch  # Executar testes de unidade em modo watch enquanto desenvolve
 
 # 2. Antes do commit
-npm run test:unit        # Verificar se tudo passa
+yarn lint             # Opcional, mas recomendado: verificar lint e formatação
+yarn test:unit        # Verificar se todos os testes de unidade passam
 
 # 3. Commit
 git add .
-git commit -m "feat: nova funcionalidade"  # Pre-commit executa automaticamente
+git commit -m "feat: nova funcionalidade"  # Pre-commit hook executa 'yarn test:unit --silent' automaticamente
 
 # 4. Push
-git push                 # Ou npm run push:all-tests para testes completos
+git push                 # (Pre-push hook pode executar mais testes, como 'yarn test:e2e', se configurado)
 ```
 
 ## 📞 Suporte

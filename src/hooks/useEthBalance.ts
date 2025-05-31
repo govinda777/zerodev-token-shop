@@ -33,7 +33,7 @@ export function useEthBalance() {
       const formattedBalance = formatEther(balance);
       setEthBalance(formattedBalance);
     } catch (err) {
-      console.error('Erro ao obter saldo ETH:', err);
+      // console.error('Erro ao obter saldo ETH:', err); // Potentially notifyError or handle in UI
       setError('Erro ao obter saldo');
       setEthBalance('0');
     } finally {

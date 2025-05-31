@@ -5,6 +5,7 @@ import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
 import { useBlockchain } from '@/hooks/useBlockchain';
 import { STAKING_POOLS } from '@/contracts/config';
+import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationService';
 
 interface StakePool {
   id: string;
@@ -85,7 +86,8 @@ export function StakingComponent() {
         const total = stakes.reduce((sum: number, stake: StakeInfo) => sum + Number(stake.amount || 0), 0);
         setStakedAmount(total);
       } catch (error) {
-        console.error('Erro ao carregar stakes do usuário:', error);
+        // console.error('Erro ao carregar stakes do usuário:', error);
+        // Potentially notifyError("Não foi possível carregar seus stakes anteriores.");
       }
     };
 
@@ -117,40 +119,43 @@ export function StakingComponent() {
         const tx: unknown = await stakingOperations.stake(poolIndex, stakeAmount);
         
         if (tx) {
-          console.log('✅ Stake realizado via contrato:', tx);
-          
-          // Gastar tokens localmente
-          removeTokens(amount);
+          // console.log('✅ Stake realizado via contrato:', tx); // Dev log
+          await removeTokens(amount); // removeTokens is now async
           setStakedAmount(prev => prev + amount);
           setStakeAmount('');
+          notifySuccess(`${amount} tokens investidos com sucesso em ${selectedPool.name}!`);
           
-          // Completar missão se for a primeira vez
           if (!isCompleted) {
             completeMission('stake');
           }
         } else {
-          throw new Error('Falha no stake');
+          // This path might not be hit if stakingOperations.stake itself throws an error that's caught by the outer catch.
+          notifyError('Falha ao registrar o stake no contrato.');
+          throw new Error('Falha no stake (transação não confirmada ou tx é null/undefined)');
         }
       } else {
+        notifyError(`Falha ao aprovar tokens para stake: ${approveResult.error?.message || 'Erro desconhecido'}`);
         throw new Error(approveResult.error?.message || 'Falha na aprovação');
       }
     } catch (error) {
-      console.error('Erro ao fazer stake:', error);
-      
-      // Fallback para simulação
+      // console.error('Erro ao fazer stake:', error); // Original error
+      notifyWarning('Ocorreu um erro ao fazer stake. Usando simulação.');
+      // Fallback to simulation
       try {
-        console.warn('⚠️ Usando simulação de stake');
+        // console.warn('⚠️ Usando simulação de stake'); // Dev log
         await new Promise(resolve => setTimeout(resolve, 2000));
         
-        removeTokens(amount);
+        await removeTokens(amount); // removeTokens is now async
         setStakedAmount(prev => prev + amount);
         setStakeAmount('');
+        notifySuccess(`${amount} tokens (simulados) investidos em ${selectedPool.name}!`);
         
         if (!isCompleted) {
           completeMission('stake');
         }
       } catch (fallbackError) {
-        console.error('Erro no fallback:', fallbackError);
+        // console.error('Erro no fallback do stake:', fallbackError); // Dev log
+        notifyError('Falha ao fazer stake mesmo com simulação.');
       }
     } finally {
       setIsLoading(false);

@@ -1,4 +1,8 @@
-# 🚀 POC - Jornada Progressiva do Usuário
+# 🚀 POC - Jornada Progressiva do Usuário (Obsoleto)
+
+**NOTA IMPORTANTE:** Este documento e o componente `src/components/journey/JourneyPOC.tsx` a que se refere são de uma Prova de Conceito (POC) inicial e provavelmente estão obsoletos. O sistema de jornada principal da aplicação é implementado através de `src/components/journey/JourneyProvider.tsx` e seus componentes de missão associados. Esta documentação é mantida para referência histórica da POC.
+
+---
 
 ## 📋 Visão Geral
 
@@ -93,8 +97,6 @@ interface UserProgress {
 
 ### 1. Iniciar a Aplicação
 ```bash
-npm run dev
-# ou
 yarn dev
 ```
 

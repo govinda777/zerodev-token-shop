@@ -1,8 +1,10 @@
-# Integração Blockchain Completa - Jornada Progressiva
+# Estrutura para Integração Blockchain - Jornada Progressiva
 
-## 📋 Resumo das Implementações
+## 📋 Resumo da Estrutura Implementada
 
-Todas as jornadas do usuário foram atualizadas para usar integrações reais com blockchain (Sepolia testnet) através do ZeroDev SDK, mantendo fallbacks para simulação quando os contratos não estão disponíveis.
+A arquitetura para as jornadas do usuário foi implementada para utilizar o hook `useBlockchain.ts` (que interage com o ZeroDev SDK e Viem) para futuras integrações com contratos reais na Sepolia testnet. Atualmente, muitas operações de blockchain são **simuladas** dentro dos componentes de missão ou no próprio hook `useBlockchain.ts`, com fallbacks para simulação local, especialmente porque os endereços de contrato em `contracts/config.ts` são placeholders.
+
+Esta estrutura permite o desenvolvimento e teste da UI/UX da jornada enquanto os contratos definitivos não estão deployados ou totalmente integrados.
 
 ## 🔧 Arquitetura Implementada
 
@@ -36,49 +38,39 @@ Todas as jornadas do usuário foram atualizadas para usar integrações reais co
   - `subscriptionOperations`: plans, activation
   - `passiveIncomeOperations`: activation, rewards
 
-## 🚀 Componentes Atualizados
+## 🚀 Componentes da Jornada Principal (Usando `JourneyProvider`)
 
-### 1. JourneyPOC.tsx
-- ✅ **Navegação real** entre componentes
-- ✅ **Execução de missões** com integrações blockchain
-- ✅ **Fallback para simulação** quando contratos falham
-- ✅ **Progresso persistente** no localStorage
+Os seguintes componentes utilizam `useBlockchain.ts` e estão preparados para interações reais, atualmente operando com simulações/fallbacks:
+
+### 1. JourneyProvider.tsx & JourneyDashboard.tsx
+- ✅ Gerencia o estado geral da jornada do usuário.
+- ✅ Persiste o progresso no `localStorage`.
+- ✅ Desbloqueia missões sequencialmente.
+
+### (Anteriormente `JourneyPOC.tsx` - Agora considerado uma POC obsoleta)
+- `JourneyPOC.tsx` foi uma prova de conceito inicial. A lógica de jornada principal foi movida para `JourneyProvider` e os componentes de missão individuais.
 
 ### 2. FaucetComponent.tsx
-- ✅ **Verificação real de cooldown** via contrato
-- ✅ **Requisição de tokens** com transação blockchain
-- ✅ **Estado híbrido** (contrato + local)
-- ✅ **Fallback para simulação** em caso de erro
+- ✅ **Estrutura para verificação de cooldown** e **requisição de tokens** (atualmente simulado/fallback).
+- ✅ **Estado híbrido** (tentativa de contrato + fallback local).
 
 ### 3. StakingComponent.tsx
-- ✅ **Aprovação de tokens** para contrato de staking
-- ✅ **Stake real** em pools configuráveis
-- ✅ **Carregamento de stakes** do usuário
-- ✅ **Cálculo de recompensas** via contrato
+- ✅ **Estrutura para aprovação de tokens** e **stake** (atualmente simulado/fallback).
+- ✅ **Estrutura para carregamento de stakes** do usuário (atualmente simulado/fallback).
 
 ### 4. NFTMarketplace.tsx
-- ✅ **Compra real de NFTs** via marketplace
-- ✅ **Verificação de propriedade** via contrato
-- ✅ **Integração com configuração** de NFTs
-- ✅ **Balance de NFTs** em tempo real
+- ✅ **Estrutura para compra de NFTs** e **verificação de propriedade** (atualmente simulado/fallback).
+- ✅ **Integração com configuração** de NFTs.
 
 ### 5. AirdropComponent.tsx
-- ✅ **Verificação de elegibilidade** via contrato
-- ✅ **Claim de airdrops** com transação blockchain
-- ✅ **Status de recebimento** persistente
-- ✅ **Múltiplos tipos de airdrop** configuráveis
+- ✅ **Estrutura para verificação de elegibilidade** e **claim de airdrops** (atualmente simulado/fallback).
 
 ### 6. SubscriptionComponent.tsx
-- ✅ **Assinatura real** com pagamento em tokens
-- ✅ **Verificação de status** ativo via contrato
-- ✅ **Planos configuráveis** (mensal/anual)
-- ✅ **Aprovação de tokens** para pagamento
+- ✅ **Estrutura para assinatura** com pagamento em tokens (atualmente simulado/fallback).
+- ✅ **Estrutura para verificação de status** da assinatura.
 
 ### 7. PassiveIncomeComponent.tsx
-- ✅ **Ativação de renda passiva** via contrato
-- ✅ **Cálculo de recompensas** em tempo real
-- ✅ **Claim de recompensas** com transação
-- ✅ **Verificação de assinatura** como requisito
+- ✅ **Estrutura para ativação de renda passiva** e **claim de recompensas** (atualmente simulado/fallback).
 
 ## 🔄 Estratégia de Fallback
 
@@ -181,6 +173,6 @@ src/
 
 ## 🎉 Conclusão
 
-A implementação está completa e pronta para uso em produção. Todos os componentes mantêm funcionalidade total mesmo sem contratos deployados, garantindo uma experiência de usuário consistente durante o desenvolvimento e após o deploy.
+A estrutura atual permite o desenvolvimento completo da UI e UX, com simulações robustas para interações blockchain. A transição para contratos reais exigirá o deploy dos mesmos e a atualização dos endereços em `config.ts`.
 
-A arquitetura modular permite fácil manutenção e extensão das funcionalidades, enquanto a estratégia de fallback garante robustez e confiabilidade. 
+A arquitetura modular permite fácil manutenção e extensão das funcionalidades, e a estratégia de fallback garante que a aplicação permaneça funcional para demonstração mesmo sem uma infraestrutura blockchain totalmente operacional.

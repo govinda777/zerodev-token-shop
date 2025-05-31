@@ -1,4 +1,8 @@
-# TODOs para Integração Real - Jornada Progressiva
+# TODOs para Integração Real - Jornada Progressiva (Referente ao JourneyPOC.tsx Obsoleto)
+
+**NOTA IMPORTANTE:** Este documento refere-se ao componente `src/components/journey/JourneyPOC.tsx`, que é uma Prova de Conceito (POC) inicial e provavelmente está obsoleto. O sistema de jornada principal da aplicação é implementado através de `src/components/journey/JourneyProvider.tsx` e seus componentes de missão associados (e.g., `FaucetComponent.tsx`, `StakingComponent.tsx`), os quais utilizam o hook `src/hooks/useBlockchain.ts` para interações (atualmente simuladas) com a blockchain. As TODOs listadas abaixo são específicas do contexto do `JourneyPOC.tsx` e podem não ser relevantes para o sistema de jornada atual.
+
+---
 
 Este documento lista todas as integrações que precisam ser implementadas para substituir os mocks da POC por funcionalidades reais.
 

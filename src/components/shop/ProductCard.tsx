@@ -74,7 +74,7 @@ export const ProductCard = ({
         {/* Regular Purchase Button */}
         <button
           onClick={() => {
-            console.log('🖱️ Botão "Comprar Agora" clicado para:', product.name);
+            // console.log('🖱️ Botão "Comprar Agora" clicado para:', product.name); // Dev log, can be removed
             onBuy(product);
           }}
           disabled={disabled || isLoading}

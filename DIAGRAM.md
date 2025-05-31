@@ -1,5 +1,9 @@
 # Documentação de Arquitetura - Token Shop
 
+**NOTA IMPORTANTE:** Os diagramas nesta documentação foram criados em uma fase anterior do projeto. Embora muitos conceitos gerais de arquitetura possam ainda ser válidos, detalhes específicos sobre componentes, hooks, fluxos de dados e interações podem estar desatualizados em relação à implementação atual. Esta documentação requer uma revisão e atualização para refletir com precisão o estado corrente do código.
+
+---
+
 ## 1. Visão Macro do Sistema
 
 ### 1.1 Arquitetura Geral

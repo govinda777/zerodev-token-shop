@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePrivyAuth } from './usePrivyAuth';
+import { notifyError } from '@/utils/notificationService';
 
 // Chain IDs
 const SEPOLIA_CHAIN_ID = 11155111;
@@ -40,7 +41,7 @@ export function useNetworkValidation(): NetworkValidation {
         const numericChainId = parseInt(chainId, 16);
         setCurrentChainId(numericChainId);
       } catch (err) {
-        console.error('Erro ao verificar rede:', err);
+        // console.error('Erro ao verificar rede:', err); // Error is set for UI state
         setError('Erro ao verificar rede');
       } finally {
         setIsLoading(false);
@@ -102,12 +103,16 @@ export function useNetworkValidation(): NetworkValidation {
             ],
           });
         } catch (addError) {
-          console.error('Erro ao adicionar rede Sepolia:', addError);
-          setError('Erro ao adicionar rede Sepolia');
+            // console.error('Erro ao adicionar rede Sepolia:', addError); // Dev log
+            const addErrorMessage = (addError as { message?: string })?.message || 'Erro desconhecido ao adicionar rede.';
+            setError(`Falha ao adicionar rede. ${addErrorMessage}`);
+            notifyError(`Falha ao adicionar rede Sepolia: ${addErrorMessage}. Por favor, adicione manualmente.`);
         }
       } else {
-        console.error('Erro ao trocar para Sepolia:', switchError);
-        setError((error as { message?: string })?.message || 'Erro ao mudar de rede');
+          // console.error('Erro ao trocar para Sepolia:', switchError); // Dev log
+          const switchErrorMessage = (switchError as { message?: string })?.message || 'Erro desconhecido ao trocar de rede.';
+          setError(`Falha ao trocar de rede. ${switchErrorMessage}`);
+          notifyError(`Falha ao trocar para rede Sepolia: ${switchErrorMessage}`);
       }
     } finally {
       setIsLoading(false);

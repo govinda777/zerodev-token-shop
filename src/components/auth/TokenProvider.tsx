@@ -1,13 +1,14 @@
 "use client";
 
-import { createContext, useEffect, useState, useContext } from 'react';
+import { createContext, useEffect, useState, useContext, useCallback } from 'react';
 import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import JourneyLogger from '@/utils/journeyLogger';
+import * as Storage from '@/utils/storage'; // Import all storage functions
 
 export interface TokenContextType {
   balance: number;
-  addTokens: (amount: number) => void;
-  removeTokens: (amount: number) => void;
+  addTokens: (amount: number) => Promise<void>; // Now async
+  removeTokens: (amount: number) => Promise<boolean>; // Now async, returns success
   isLoading: boolean;
   isFirstLogin: boolean;
   welcomeReward: number | null;
@@ -21,7 +22,7 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
   const [balance, setBalance] = useState(0);
   const { isConnected, address } = usePrivyAuth();
   const [mounted, setMounted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start with loading true
   const [isFirstLogin, setIsFirstLogin] = useState(false);
   const [welcomeReward, setWelcomeReward] = useState<number | null>(null);
   const [showWelcomeNotification, setShowWelcomeNotification] = useState(false);
@@ -30,40 +31,36 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
+  const loadData = useCallback(async () => {
     if (mounted && isConnected && address) {
       setIsLoading(true);
       
-      // Check if first login and grant initial tokens
-      const hasInitialGrant = localStorage.getItem(`initial_grant_${address}`);
-      if (!hasInitialGrant) {
-        const welcomeRewardAmount = 10;
+      const hasBeenGrantedWelcome = Storage.hasReceivedWelcomeReward(address); // This is sync
+
+      if (!hasBeenGrantedWelcome) {
+        const welcomeRewardAmount = 10; // Define welcome reward amount
+        await Storage.addTokens(address, welcomeRewardAmount); // Grant initial tokens
+        Storage.markWelcomeRewardReceived(address); // Mark as received
+
         setBalance(welcomeRewardAmount);
         setIsFirstLogin(true);
         setWelcomeReward(welcomeRewardAmount);
         setShowWelcomeNotification(true);
         
-        localStorage.setItem(`initial_grant_${address}`, 'true');
-        localStorage.setItem(address, welcomeRewardAmount.toString());
-        
-        // Log first login with reward
         JourneyLogger.logFirstLogin(address, welcomeRewardAmount);
         JourneyLogger.logTokenReward(address, welcomeRewardAmount, 'welcome_bonus');
         
-        console.log(`🎉 Welcome bonus of ${welcomeRewardAmount} tokens granted to ${address}`);
+        // console.log(`🎉 Welcome bonus of ${welcomeRewardAmount} tokens granted to ${address}`); // To be removed
         
-        // Auto-dismiss notification after 10 seconds
         setTimeout(() => {
           setShowWelcomeNotification(false);
         }, 10000);
       } else {
-        // Fetch current balance from storage
-        const currentBalance = parseInt(localStorage.getItem(address) || "0");
+        const currentBalance = await Storage.getTokenBalance(address);
         setBalance(currentBalance);
         setIsFirstLogin(false);
         setWelcomeReward(null);
       }
-      
       setIsLoading(false);
     } else if (mounted) {
       setBalance(0);
@@ -74,52 +71,52 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isConnected, address, mounted]);
 
-  const addTokens = (amount: number) => {
-    if (!address) return;
-    
-    const currentBalance = parseInt(localStorage.getItem(address) || "0");
-    const newBalance = currentBalance + amount;
-    localStorage.setItem(address, newBalance.toString());
-    setBalance(newBalance);
-    
-    // Log token addition
-    JourneyLogger.logTokenReward(address, amount, 'manual_addition');
-  };
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-  const removeTokens = (amount: number) => {
-    console.log('🔍 TokenProvider.removeTokens chamado:', { amount, address, currentBalance: balance });
-    
+  const addTokensProvider = useCallback(async (amount: number) => {
+    if (!address) return;
+    setIsLoading(true);
+    await Storage.addTokens(address, amount);
+    const newBalance = await Storage.getTokenBalance(address);
+    setBalance(newBalance);
+    JourneyLogger.logTokenReward(address, amount, 'manual_addition');
+    setIsLoading(false);
+  }, [address]);
+
+  const removeTokensProvider = useCallback(async (amount: number): Promise<boolean> => {
     if (!address) {
-      console.error('❌ Endereço não disponível para remoção de tokens');
-      return;
+      // console.error('❌ Endereço não disponível para remoção de tokens'); // To be removed
+      return false;
     }
-    
-    const currentBalance = parseInt(localStorage.getItem(address) || "0");
-    console.log('🔍 Saldo atual no localStorage:', currentBalance);
-    
-    if (currentBalance >= amount) {
-      const newBalance = currentBalance - amount;
-      localStorage.setItem(address, newBalance.toString());
+    setIsLoading(true);
+    const success = await Storage.spendTokens(address, amount);
+    if (success) {
+      const newBalance = await Storage.getTokenBalance(address);
       setBalance(newBalance);
-      console.log('✅ Tokens removidos com sucesso:', { oldBalance: currentBalance, newBalance, amount });
+      // console.log('✅ Tokens removidos com sucesso:', { oldBalance: balance, newBalance, amount }); // To be removed
     } else {
-      console.error('❌ Saldo insuficiente para remoção:', { currentBalance, amount });
+      // console.error('❌ Saldo insuficiente para remoção:', { currentBalance: balance, amount }); // To be removed
     }
-  };
+    setIsLoading(false);
+    return success;
+  }, [address, balance]); // Added balance to dep array for oldBalance logging, though it's removed now
 
   const dismissWelcomeNotification = () => {
     setShowWelcomeNotification(false);
   };
 
   if (!mounted) {
+    // Avoid rendering until client-side mount to prevent hydration issues with localStorage
     return null;
   }
 
   return (
     <TokenContext.Provider value={{ 
       balance, 
-      addTokens, 
-      removeTokens, 
+      addTokens: addTokensProvider,
+      removeTokens: removeTokensProvider,
       isLoading,
       isFirstLogin,
       welcomeReward,

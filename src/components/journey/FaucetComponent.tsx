@@ -43,8 +43,9 @@ export function FaucetComponent() {
           setLastClaim(lastClaimTime * 1000); // Converter para milliseconds
         }
       } catch (error) {
-        console.error('Erro ao verificar faucet:', error);
+        // console.error('Erro ao verificar faucet:', error);
         // Fallback para lógica local se contrato não estiver disponível
+        // Potentially notifyError("Não foi possível verificar o estado do faucet no contrato.") if this check is critical for UX
         setCanClaimFromContract(canClaim());
       }
     };
@@ -79,39 +80,33 @@ export function FaucetComponent() {
       const result = await faucetOperations.requestTokens();
       
       if (result.success) {
-        // Sucesso na transação blockchain
-        console.log('✅ Tokens reivindicados via contrato:', result.hash);
-        
-        // Adicionar tokens localmente
+        // console.log('✅ Tokens reivindicados via contrato:', result.hash); // Dev log
         addTokens(MISSION_REWARDS.FAUCET);
         setLastClaim(Date.now());
         setCanClaimFromContract(false);
+        notifySuccess(`${MISSION_REWARDS.FAUCET} tokens reivindicados com sucesso!`);
         
-        // Completar missão se for a primeira vez
         if (!isCompleted) {
           completeMission('faucet');
         }
       } else {
-        // Fallback para simulação se contrato falhar
-        console.warn('⚠️ Contrato falhou, usando simulação:', result.error);
+        // console.warn('⚠️ Contrato falhou, usando simulação:', result.error); // Dev log
+        notifyWarning('Interação com contrato falhou. Usando simulação para conceder tokens do faucet.');
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate delay
         
-        // Simular delay da transação
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Adicionar tokens localmente
         addTokens(MISSION_REWARDS.FAUCET);
         setLastClaim(Date.now());
         
-        // Completar missão se for a primeira vez
         if (!isCompleted) {
           completeMission('faucet');
         }
       }
     } catch (error) {
-      console.error('Erro ao reivindicar tokens:', error);
-      
-      // Fallback para simulação em caso de erro
+      // console.error('Erro ao reivindicar tokens:', error); // Original error
+      notifyWarning('Ocorreu um erro. Usando simulação para conceder tokens do faucet.');
+      // Fallback to simulation
       try {
+        // console.warn('⚠️ Usando simulação de faucet devido a erro anterior.'); // Dev log
         await new Promise(resolve => setTimeout(resolve, 1000));
         addTokens(MISSION_REWARDS.FAUCET);
         setLastClaim(Date.now());
@@ -120,7 +115,8 @@ export function FaucetComponent() {
           completeMission('faucet');
         }
       } catch (fallbackError) {
-        console.error('Erro no fallback:', fallbackError);
+        // console.error('Erro no fallback do faucet:', fallbackError); // Dev log
+        notifyError('Falha ao reivindicar tokens do faucet mesmo com simulação.');
       }
     } finally {
       setIsLoading(false);
