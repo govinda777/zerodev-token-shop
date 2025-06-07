@@ -14,6 +14,8 @@ export function FaucetComponent() {
   const [isLoading, setIsLoading] = useState(false);
   const [lastClaim, setLastClaim] = useState<number | null>(null);
   const [canClaimFromContract, setCanClaimFromContract] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
+  const [hasNotifiedCooldownEnd, setHasNotifiedCooldownEnd] = useState(false);
 
   const faucetMission = journey.missions.find(m => m.id === 'faucet');
   const isUnlocked = faucetMission?.unlocked || false;
@@ -30,6 +32,53 @@ export function FaucetComponent() {
     const cooldownTime = 24 * 60 * 60 * 1000; // 24 horas
     return timeDiff >= cooldownTime;
   }, [canClaimFromContract, lastClaim]);
+
+  const updateTimeRemaining = useCallback(() => {
+    if (!lastClaim) {
+      setTimeRemaining(null);
+      return;
+    }
+    
+    const now = Date.now();
+    const timeDiff = now - lastClaim;
+    const cooldownTime = 24 * 60 * 60 * 1000; // 24 horas
+    const remaining = cooldownTime - timeDiff;
+    
+    if (remaining <= 0) {
+      setTimeRemaining(null);
+      // Quando o cooldown acabar, atualizar o estado para permitir novo claim
+      setCanClaimFromContract(true);
+      
+      // Notificar apenas uma vez que o cooldown acabou
+      if (!hasNotifiedCooldownEnd) {
+        notifySuccess('🎉 Faucet liberado! Você pode reivindicar novos tokens agora.');
+        setHasNotifiedCooldownEnd(true);
+      }
+      return;
+    }
+    
+    const hours = Math.floor(remaining / (60 * 60 * 1000));
+    const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+    const seconds = Math.floor((remaining % (60 * 1000)) / 1000);
+    
+    setTimeRemaining(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+  }, [lastClaim]);
+
+  // Timer para atualizar o countdown a cada segundo
+  useEffect(() => {
+    if (!lastClaim || canClaim()) {
+      setTimeRemaining(null);
+      return;
+    }
+
+    // Atualizar imediatamente
+    updateTimeRemaining();
+
+    // Configurar interval para atualizar a cada segundo
+    const interval = setInterval(updateTimeRemaining, 1000);
+
+    return () => clearInterval(interval);
+  }, [lastClaim, canClaim, updateTimeRemaining]);
 
   // Verificar se pode reivindicar do contrato e se já usou o faucet antes
   useEffect(() => {
@@ -63,21 +112,6 @@ export function FaucetComponent() {
     }
   }, [isUnlocked, faucetOperations, canClaim, isCompleted, completeMission]);
 
-  const getTimeUntilNextClaim = () => {
-    if (!lastClaim) return null;
-    const now = Date.now();
-    const timeDiff = now - lastClaim;
-    const cooldownTime = 24 * 60 * 60 * 1000; // 24 horas
-    const remaining = cooldownTime - timeDiff;
-    
-    if (remaining <= 0) return null;
-    
-    const hours = Math.floor(remaining / (60 * 60 * 1000));
-    const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
-    
-    return `${hours}h ${minutes}m`;
-  };
-
   const handleClaim = async () => {
     if (!canClaim() || isLoading || blockchainLoading) return;
 
@@ -92,6 +126,7 @@ export function FaucetComponent() {
         addTokens(MISSION_REWARDS.FAUCET);
         setLastClaim(Date.now());
         setCanClaimFromContract(false);
+        setHasNotifiedCooldownEnd(false); // Reset notification flag
         notifySuccess(`${MISSION_REWARDS.FAUCET} tokens reivindicados com sucesso!`);
         
         if (!isCompleted) {
@@ -104,6 +139,7 @@ export function FaucetComponent() {
         
         addTokens(MISSION_REWARDS.FAUCET);
         setLastClaim(Date.now());
+        setHasNotifiedCooldownEnd(false); // Reset notification flag
         
         if (!isCompleted) {
           completeMission('faucet');
@@ -118,6 +154,7 @@ export function FaucetComponent() {
         await new Promise(resolve => setTimeout(resolve, 1000));
         addTokens(MISSION_REWARDS.FAUCET);
         setLastClaim(Date.now());
+        setHasNotifiedCooldownEnd(false); // Reset notification flag
         
         if (!isCompleted) {
           completeMission('faucet');
@@ -166,7 +203,7 @@ export function FaucetComponent() {
           </div>
         </div>
 
-        {/* Claim Button */}
+        {/* Claim Button or Countdown */}
         {canClaim() ? (
           <button
             onClick={handleClaim}
@@ -185,8 +222,37 @@ export function FaucetComponent() {
             )}
           </button>
         ) : (
-          <div className="w-full bg-gray-600/20 text-gray-400 font-medium py-3 px-6 rounded-lg text-center">
-            Próxima reivindicação em: {getTimeUntilNextClaim()}
+          <div className="w-full">
+            {/* Countdown Display */}
+            <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-4 text-center">
+              <div className="text-orange-300 text-sm font-medium mb-2">
+                ⏰ Próximo claim disponível em:
+              </div>
+              <div className="text-orange-100 text-xl font-mono font-bold">
+                {timeRemaining || '00:00:00'}
+              </div>
+              <div className="text-orange-300/70 text-xs mt-1">
+                horas : minutos : segundos
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            {lastClaim && (
+              <div className="mt-3">
+                <div className="bg-gray-600/30 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-orange-500 to-purple-500 h-2 rounded-full transition-all duration-1000"
+                    style={{
+                      width: `${Math.max(0, Math.min(100, ((Date.now() - lastClaim) / (24 * 60 * 60 * 1000)) * 100))}%`
+                    }}
+                  ></div>
+                </div>
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>Último claim</span>
+                  <span>Disponível em 24h</span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
