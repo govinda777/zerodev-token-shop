@@ -1,8 +1,8 @@
-import { usePrivyAuth } from "@privy-io/react-auth";
+import { usePrivy } from "@privy-io/react-auth";
 import { useState } from "react";
 
 export default function Login() {
-  const { login, logout, user } = usePrivyAuth();
+  const { login, logout, user } = usePrivy();
   const [loading, setLoading] = useState(false);
 
   const handleMetamaskLogin = async () => {

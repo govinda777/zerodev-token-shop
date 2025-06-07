@@ -120,20 +120,22 @@ export function JourneyProvider({ children }: JourneyProviderProps) {
   });
 
   const completeMission = useCallback((missionId: string) => {
+    // Verificar se já foi completada antes de fazer qualquer coisa
     setJourney(prev => {
       if (prev.completedMissions.includes(missionId)) {
         return prev; // Já completada
       }
+      
+      // Buscar a missão para pegar a recompensa
+      const mission = prev.missions.find(m => m.id === missionId);
+      
       const updatedMissions = prev.missions.map(mission => {
         if (mission.id === missionId) {
-          // Dar recompensa
-          if (mission.reward?.type === 'tokens' && mission.reward.amount) {
-            addTokens(mission.reward.amount);
-          }
           return { ...mission, completed: true };
         }
         return mission;
       });
+      
       // Desbloquear próximas missões
       const unlockedMissions = updatedMissions.map(mission => {
         if (mission.requirements) {
@@ -144,8 +146,17 @@ export function JourneyProvider({ children }: JourneyProviderProps) {
         }
         return mission;
       });
+      
       const newCompletedMissions = [...prev.completedMissions, missionId];
-      const tokensFromMission = prev.missions.find(m => m.id === missionId)?.reward?.amount || 0;
+      const tokensFromMission = mission?.reward?.amount || 0;
+      
+      // Dar recompensa APÓS a atualização do estado
+      if (mission?.reward?.type === 'tokens' && mission.reward.amount) {
+        setTimeout(() => {
+          addTokens(mission.reward.amount);
+        }, 0);
+      }
+      
       return {
         ...prev,
         missions: unlockedMissions,
@@ -177,7 +188,10 @@ export function JourneyProvider({ children }: JourneyProviderProps) {
   // Verificar se o login foi completado
   useEffect(() => {
     if (isConnected && !journey.completedMissions.includes('login')) {
-      completeMission('login');
+      // Atrasa a execução para evitar setState durante render
+      setTimeout(() => {
+        completeMission('login');
+      }, 0);
     }
   }, [isConnected, completeMission, journey.completedMissions]);
 

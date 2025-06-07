@@ -59,15 +59,14 @@ export function PurchaseHistory() {
           <tbody className="bg-white divide-y divide-gray-200">
             {purchases.map((purchase: Purchase, index: number) => {
               const product = products.find(p => p.id === purchase.productId);
-              const productName = product ? product.name : purchase.productId; // Fallback to ID if not found
-              const productImage = product ? product.image : '/placeholder.png'; // Fallback image
+              const productName = product ? product.name : purchase.productId;
+              const productImage = product ? product.image : '/placeholder.png';
 
               return (
-                <tr key={purchase.timestamp + purchase.productId}> {/* More stable key */}
+                <tr key={purchase.timestamp + purchase.productId}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img className="h-10 w-10 rounded-md object-cover" src={productImage} alt={productName} />
                       </div>
                       <div className="ml-4">
@@ -79,15 +78,16 @@ export function PurchaseHistory() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">
-                    {new Date(purchase.timestamp).toLocaleDateString()}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {purchase.price} Token{purchase.price !== 1 ? 's' : ''}
-                </td>
-              </tr>
-            ))}
+                    <div className="text-sm text-gray-500">
+                      {new Date(purchase.timestamp).toLocaleDateString()}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {purchase.price} Token{purchase.price !== 1 ? 's' : ''}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

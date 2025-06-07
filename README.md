@@ -236,6 +236,194 @@ yarn test:e2e     # Testes end-to-end (Playwright)
 # yarn test:watch é geralmente um alias para test:unit --watch
 ```
 
+## 🏗️ Deploy de Contratos Blockchain
+
+Este projeto inclui um sistema completo de contratos inteligentes para tokens ERC-20 e faucet. Siga estas etapas para fazer o deploy e configurar o sistema blockchain:
+
+### 📋 Pré-requisitos para Deploy
+
+Antes de fazer o deploy dos contratos, você precisa:
+
+1. **Carteira com ETH Sepolia**: Você precisará de ~0.015 ETH na Sepolia testnet
+2. **Chaves de API**: RPC da Sepolia e Etherscan API key
+3. **Node.js 18+**: Para executar os scripts de deploy
+
+### ⚙️ Configuração do Ambiente
+
+```bash
+# 1. Configure as variáveis de ambiente para blockchain
+cp .env-example .env.local
+
+# 2. Edite .env.local e adicione:
+PRIVATE_KEY=sua_private_key_aqui                    # Chave privada da carteira (SEM 0x)
+SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/...   # RPC da Sepolia (Infura, Alchemy, etc.)
+ETHERSCAN_API_KEY=sua_etherscan_api_key            # Para verificação dos contratos
+```
+
+⚠️ **IMPORTANTE**: Nunca commite arquivos `.env*` com chaves privadas!
+
+### 🚀 Deploy dos Contratos
+
+```bash
+# 1. Compile os contratos
+npm run compile
+
+# 2. Execute os testes (opcional mas recomendado)
+npm run test:contracts
+
+# 3. Faça o deploy na Sepolia
+npm run deploy:sepolia
+
+# 4. Verifique os contratos no Etherscan (após deploy)
+npm run verify:sepolia
+
+# 5. Teste o faucet (após deploy)
+npm run test:claim
+```
+
+### 📊 Custos Estimados
+
+- **ZeroDevToken**: ~0.008 ETH (~$15)
+- **TokenFaucet**: ~0.007 ETH (~$13)
+- **Total**: ~0.015 ETH (~$28)
+
+### 🔍 Verificação do Deploy
+
+Após o deploy bem-sucedido, você verá:
+
+```bash
+✅ ZeroDevToken deployed to: 0x1234...
+✅ TokenFaucet deployed to: 0x5678...
+📄 Deployment info saved to: deployments/sepolia-latest.json
+```
+
+### 🧪 Testes dos Contratos
+
+Execute os testes completos dos contratos:
+
+```bash
+# Testes unitários dos contratos
+npm run test:contracts
+
+# Teste específico do ZeroDevToken
+npx hardhat test test/ZeroDevToken.test.ts
+
+# Teste específico do TokenFaucet  
+npx hardhat test test/TokenFaucet.test.ts
+
+# Teste de integração (claim do faucet)
+npm run test:claim
+```
+
+### 📱 Configuração da Aplicação
+
+Após o deploy dos contratos, configure a aplicação:
+
+```bash
+# 1. Atualize .env.local com os endereços dos contratos
+NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS=0x1234...        # Endereço do ZeroDevToken
+NEXT_PUBLIC_FAUCET_CONTRACT_ADDRESS=0x5678...       # Endereço do TokenFaucet
+
+# 2. Configure para usar contratos reais (não mock)
+USE_MOCK_CONTRACTS=false
+```
+
+### 🔧 Scripts Disponíveis (Blockchain)
+
+```bash
+# Desenvolvimento
+npm run compile                 # Compila contratos
+npm run test:contracts         # Testa contratos
+npm run blockchain:setup      # Setup completo (compile + test)
+
+# Deploy e Verificação
+npm run deploy:sepolia        # Deploy na Sepolia
+npm run verify:sepolia        # Verifica no Etherscan
+npm run test:claim           # Testa claim do faucet
+
+# Limpeza
+npx hardhat clean            # Limpa artifacts e cache
+```
+
+### 🛠️ Troubleshooting
+
+**Erro: insufficient funds**
+```bash
+# Verifique seu saldo ETH na Sepolia
+# Use um faucet: https://sepoliafaucet.com/
+```
+
+**Erro: nonce too high**
+```bash
+# Reset da conta no MetaMask:
+# Settings > Advanced > Reset Account
+```
+
+**Erro: contract verification failed**
+```bash
+# Tente novamente após alguns minutos
+npm run verify:sepolia
+```
+
+Para guia detalhado, consulte: [`BLOCKCHAIN_DEPLOY.md`](./BLOCKCHAIN_DEPLOY.md)
+
+## 🏃‍♂️ Executando a Aplicação
+
+### 🔧 Setup Completo
+
+```bash
+# 1. Clone e instale dependências
+git clone https://github.com/govinda777/zerodev-token-shop.git
+cd zerodev-token-shop
+yarn install
+
+# 2. Configure ambiente
+cp .env-example .env.local
+# Edite .env.local com suas chaves (veja seções anteriores)
+
+# 3. Modo desenvolvimento (com contratos mock)
+yarn dev
+
+# 4. Ou com contratos reais (após deploy)
+# Configure USE_MOCK_CONTRACTS=false no .env.local
+yarn dev
+```
+
+### 🌐 Ambientes
+
+**Desenvolvimento (Mock):**
+- Tokens simulados no localStorage
+- Não requer contratos reais
+- Ideal para desenvolvimento da UI
+
+**Desenvolvimento (Real):**
+- Contratos reais na Sepolia
+- Requer deploy dos contratos
+- Transações reais de blockchain
+
+**Produção:**
+- Build otimizado
+- Contratos em mainnet (quando disponível)
+
+```bash
+# Build para produção
+yarn build
+
+# Servidor de produção
+yarn start
+
+# Preview do build
+yarn preview
+```
+
+### 📊 Monitoramento
+
+Após o deploy, monitore seus contratos:
+
+1. **Etherscan Sepolia**: https://sepolia.etherscan.io/
+2. **Logs da aplicação**: Console do navegador
+3. **Transações**: Verifique no MetaMask
+
 ## 🎯 Funcionalidades
 
 ### ✅ Implementadas

@@ -10,6 +10,17 @@ jest.mock('@/hooks/usePrivyAuth', () => ({
   usePrivyAuth: jest.fn()
 }));
 
+// Mock do módulo storage
+jest.mock('@/utils/storage', () => ({
+  getTokenBalance: jest.fn(),
+  addTokens: jest.fn(),
+  spendTokens: jest.fn(),
+  hasReceivedWelcomeReward: jest.fn(),
+  markWelcomeRewardReceived: jest.fn(),
+  getTransactions: jest.fn(() => []),
+  addTransaction: jest.fn()
+}));
+
 // Mock do JourneyLogger
 jest.mock('@/utils/journeyLogger', () => ({
   __esModule: true,
@@ -22,6 +33,7 @@ jest.mock('@/utils/journeyLogger', () => ({
 }));
 
 import mockJourneyLogger from '@/utils/journeyLogger';
+import * as mockStorage from '@/utils/storage';
 const mockjourneyLogger = mockJourneyLogger;
 
 // Mock do localStorage
@@ -76,6 +88,13 @@ describe('TokenProvider', () => {
     jest.clearAllMocks();
     localStorageMock.clear();
     jest.useFakeTimers();
+    
+    // Reset storage mocks
+    (mockStorage.getTokenBalance as jest.Mock).mockResolvedValue(0);
+    (mockStorage.hasReceivedWelcomeReward as jest.Mock).mockReturnValue(false);
+    (mockStorage.addTokens as jest.Mock).mockResolvedValue(undefined);
+    (mockStorage.spendTokens as jest.Mock).mockResolvedValue(true);
+    (mockStorage.markWelcomeRewardReceived as jest.Mock).mockReturnValue(undefined);
   });
 
   afterEach(() => {
@@ -127,6 +146,10 @@ describe('TokenProvider', () => {
 
   it('deve conceder tokens de boas-vindas para novo usuário', async () => {
     const testAddress = '0x1234567890123456789012345678901234567890';
+    
+    (mockStorage.hasReceivedWelcomeReward as jest.Mock).mockReturnValue(false);
+    (mockStorage.getTokenBalance as jest.Mock).mockResolvedValue(10);
+    
     mockUsePrivyAuth.mockReturnValue({
       isConnected: true,
       address: testAddress
@@ -145,20 +168,18 @@ describe('TokenProvider', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('balance')).toHaveTextContent('10');
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(`initial_grant_${testAddress}`, 'true');
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(testAddress, '10');
-      expect(mockJourneyLogger.logFirstLogin).toHaveBeenCalledWith(testAddress, 10);
+      expect(mockStorage.addTokens).toHaveBeenCalledWith(testAddress, 10);
+      expect(mockStorage.markWelcomeRewardReceived).toHaveBeenCalledWith(testAddress);
+      expect(mockjourneyLogger.logFirstLogin).toHaveBeenCalledWith(testAddress, 10);
       expect(mockjourneyLogger.logTokenReward).toHaveBeenCalledWith(testAddress, 10, 'welcome_bonus');
     });
   });
 
   it('deve carregar balance existente para usuário retornando', async () => {
     const testAddress = '0x1234567890123456789012345678901234567890';
-    localStorageMock.getItem.mockImplementation((key: string) => {
-      if (key === `initial_grant_${testAddress}`) return 'true';
-      if (key === testAddress) return '25';
-      return null;
-    });
+    
+    (mockStorage.hasReceivedWelcomeReward as jest.Mock).mockReturnValue(true);
+    (mockStorage.getTokenBalance as jest.Mock).mockResolvedValue(25);
 
     mockUsePrivyAuth.mockReturnValue({
       isConnected: true,
@@ -184,11 +205,11 @@ describe('TokenProvider', () => {
 
   it('deve adicionar tokens corretamente', async () => {
     const testAddress = '0x1234567890123456789012345678901234567890';
-    localStorageMock.getItem.mockImplementation((key: string) => {
-      if (key === `initial_grant_${testAddress}`) return 'true';
-      if (key === testAddress) return '20';
-      return null;
-    });
+    
+    (mockStorage.hasReceivedWelcomeReward as jest.Mock).mockReturnValue(true);
+    (mockStorage.getTokenBalance as jest.Mock)
+      .mockResolvedValueOnce(20) // Initial load
+      .mockResolvedValueOnce(30); // After adding tokens
 
     mockUsePrivyAuth.mockReturnValue({
       isConnected: true,
@@ -216,18 +237,21 @@ describe('TokenProvider', () => {
       addButton.click();
     });
 
-    expect(screen.getByTestId('balance')).toHaveTextContent('30');
-    expect(localStorageMock.setItem).toHaveBeenCalledWith(testAddress, '30');
-    expect(mockjourneyLogger.logTokenReward).toHaveBeenCalledWith(testAddress, 10, 'manual_addition');
+    await waitFor(() => {
+      expect(screen.getByTestId('balance')).toHaveTextContent('30');
+      expect(mockStorage.addTokens).toHaveBeenCalledWith(testAddress, 10);
+      expect(mockjourneyLogger.logTokenReward).toHaveBeenCalledWith(testAddress, 10, 'manual_addition');
+    });
   });
 
   it('deve remover tokens corretamente quando há saldo suficiente', async () => {
     const testAddress = '0x1234567890123456789012345678901234567890';
-    localStorageMock.getItem.mockImplementation((key: string) => {
-      if (key === `initial_grant_${testAddress}`) return 'true';
-      if (key === testAddress) return '20';
-      return null;
-    });
+    
+    (mockStorage.hasReceivedWelcomeReward as jest.Mock).mockReturnValue(true);
+    (mockStorage.getTokenBalance as jest.Mock)
+      .mockResolvedValueOnce(20) // Initial load
+      .mockResolvedValueOnce(15); // After removing tokens
+    (mockStorage.spendTokens as jest.Mock).mockResolvedValue(true);
 
     mockUsePrivyAuth.mockReturnValue({
       isConnected: true,
@@ -255,17 +279,18 @@ describe('TokenProvider', () => {
       removeButton.click();
     });
 
-    expect(screen.getByTestId('balance')).toHaveTextContent('15');
-    expect(localStorageMock.setItem).toHaveBeenCalledWith(testAddress, '15');
+    await waitFor(() => {
+      expect(screen.getByTestId('balance')).toHaveTextContent('15');
+      expect(mockStorage.spendTokens).toHaveBeenCalledWith(testAddress, 5);
+    });
   });
 
   it('não deve remover tokens quando saldo é insuficiente', async () => {
     const testAddress = '0x1234567890123456789012345678901234567890';
-    localStorageMock.getItem.mockImplementation((key: string) => {
-      if (key === `initial_grant_${testAddress}`) return 'true';
-      if (key === testAddress) return '3';
-      return null;
-    });
+    
+    (mockStorage.hasReceivedWelcomeReward as jest.Mock).mockReturnValue(true);
+    (mockStorage.getTokenBalance as jest.Mock).mockResolvedValue(3);
+    (mockStorage.spendTokens as jest.Mock).mockResolvedValue(false);
 
     mockUsePrivyAuth.mockReturnValue({
       isConnected: true,
@@ -294,7 +319,10 @@ describe('TokenProvider', () => {
     });
 
     // Balance deve permanecer o mesmo
-    expect(screen.getByTestId('balance')).toHaveTextContent('3');
+    await waitFor(() => {
+      expect(screen.getByTestId('balance')).toHaveTextContent('3');
+      expect(mockStorage.spendTokens).toHaveBeenCalledWith(testAddress, 5);
+    });
   });
 
   it('não deve fazer nada quando não há endereço conectado', async () => {
@@ -325,14 +353,14 @@ describe('TokenProvider', () => {
     });
 
     expect(screen.getByTestId('balance')).toHaveTextContent('0');
-    expect(localStorageMock.setItem).not.toHaveBeenCalled();
+    expect(mockStorage.addTokens).not.toHaveBeenCalled();
   });
 
   it('deve estar pronto após inicialização', async () => {
     const testAddress = '0xABCDEF1234567890123456789012345678901234';
     
-    // Garantir que o localStorage está limpo para este endereço
-    localStorageMock.getItem.mockImplementation(() => null);
+    (mockStorage.hasReceivedWelcomeReward as jest.Mock).mockReturnValue(false);
+    (mockStorage.getTokenBalance as jest.Mock).mockResolvedValue(10);
     
     mockUsePrivyAuth.mockReturnValue({
       isConnected: true,

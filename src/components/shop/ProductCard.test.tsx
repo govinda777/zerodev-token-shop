@@ -2,12 +2,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ProductCard } from './ProductCard';
 import { Product } from '@/types/product';
 import React from 'react';
-import Image from 'next/image';
 
 // Mock do Next.js Image
 jest.mock('next/image', () => {
-  return function MockImage({ src, alt, ...props }: { src: string; alt: string; className?: string }) {
-    return <Image src={src} alt={alt} className={props.className} {...props} />;
+  return function MockImage({ src, alt, className, ...props }: any) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt={alt} className={className} {...props} />;
   };
 });
 

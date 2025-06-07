@@ -1,5 +1,13 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# artifacts (Hardhat)
+/artifacts
+
+# cache (Hardhat)
+/cache
+cache/
+
+# test results
 /test-results
 
 # dependencies
@@ -21,6 +29,7 @@
 
 # production
 /build
+/dist/
 
 # misc
 .DS_Store
@@ -34,6 +43,11 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env
+.env.local
+.env.dev
+.env.development.local
+.env.test.local
+.env.production.local
 
 # vercel
 .vercel
@@ -42,12 +56,52 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local env files
-.env
-
 # Playwright
 node_modules/
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# SWC (compiler cache)
+.swc/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Hardhat Network Files
+# Uncomment if you need to keep track of deployed contracts
+# /deployments
+/deployments/localhost/
+
+# TypeChain (auto-generated types for smart contracts)
+/typechain
+/typechain-types

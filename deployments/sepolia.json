@@ -1,0 +1,21 @@
+{
+  "network": "sepolia",
+  "timestamp": "2025-06-07T16:17:02.499Z",
+  "deployer": "0x17eDfB8a794ec4f13190401EF7aF1c17f3cc90c5",
+  "contracts": {
+    "ZeroDevToken": {
+      "address": "0xcac5c82D2523c5986D80620061500dAAb94A9B8c",
+      "name": "ZeroDev Token",
+      "symbol": "ZDT",
+      "decimals": 18,
+      "totalSupply": "1000000.0"
+    },
+    "TokenFaucet": {
+      "address": "0xb1e4C7a5919b35e30b9fB3e8deB1FA593652962E",
+      "tokenAddress": "0xcac5c82D2523c5986D80620061500dAAb94A9B8c",
+      "faucetAmount": "25.0",
+      "cooldownTime": 86400,
+      "balance": "200000.0"
+    }
+  }
+}

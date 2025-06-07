@@ -5,6 +5,7 @@ import { useTokens } from '@/hooks/useTokens';
 import { useJourney } from './JourneyProvider';
 import { useBlockchain } from '@/hooks/useBlockchain';
 import { MISSION_REWARDS } from '@/contracts/config';
+import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationService';
 
 export function FaucetComponent() {
   const { addTokens } = useTokens();
@@ -30,7 +31,7 @@ export function FaucetComponent() {
     return timeDiff >= cooldownTime;
   }, [canClaimFromContract, lastClaim]);
 
-  // Verificar se pode reivindicar do contrato
+  // Verificar se pode reivindicar do contrato e se já usou o faucet antes
   useEffect(() => {
     const checkCanClaim = async () => {
       try {
@@ -40,7 +41,14 @@ export function FaucetComponent() {
         // Obter último claim do contrato
         const lastClaimTime = await faucetOperations.getLastClaim();
         if (lastClaimTime > 0) {
-          setLastClaim(lastClaimTime * 1000); // Converter para milliseconds
+          // useBlockchain.getLastClaim() já retorna em milliseconds para consistência
+          setLastClaim(lastClaimTime);
+          
+          // Se o usuário já usou o faucet antes E a missão não está completa, marcar como completa
+          if (!isCompleted) {
+            console.log('🎯 Usuário já usou o faucet antes, completando missão...');
+            completeMission('faucet');
+          }
         }
       } catch (error) {
         // console.error('Erro ao verificar faucet:', error);
@@ -53,7 +61,7 @@ export function FaucetComponent() {
     if (isUnlocked) {
       checkCanClaim();
     }
-  }, [isUnlocked, faucetOperations, canClaim]);
+  }, [isUnlocked, faucetOperations, canClaim, isCompleted, completeMission]);
 
   const getTimeUntilNextClaim = () => {
     if (!lastClaim) return null;

@@ -109,7 +109,6 @@ describe('AuthButton', () => {
   });
 
   it('deve tratar erro durante connect', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const mockConnect = jest.fn().mockRejectedValue(new Error('Connection failed'));
     
     mockUsePrivyAuth.mockReturnValue({
@@ -124,11 +123,16 @@ describe('AuthButton', () => {
     const button = screen.getByRole('button');
     fireEvent.click(button);
 
+    // Esperar que o connect seja chamado e falhe
     await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith('Authentication error:', expect.any(Error));
+      expect(mockConnect).toHaveBeenCalled();
     });
 
-    consoleSpy.mockRestore();
+    // Verificar que o botão não está mais em loading após o erro
+    await waitFor(() => {
+      expect(screen.getByRole('button')).not.toBeDisabled();
+      expect(screen.queryByText('Logging in...')).not.toBeInTheDocument();
+    });
   });
 
   it('deve aplicar classes CSS corretas quando não conectado', () => {

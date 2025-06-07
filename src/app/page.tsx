@@ -10,6 +10,8 @@ import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import { ProductProvider } from '@/components/shop/ProductProvider';
 import { JourneyProvider, useJourney } from '@/components/journey/JourneyProvider';
 import { JourneyDashboard } from '@/components/journey/JourneyDashboard'; // Import JourneyDashboard
+import { FaucetDebug } from '@/components/debug/FaucetDebug';
+import { ContractDebug } from '@/components/debug/ContractDebug';
 
 // Componente interno que usa o hook useJourney
 function HomeContent() {
@@ -156,6 +158,12 @@ function HomeContent() {
             </section>
           ) : (
             <>
+              <div className="section-spacing">
+                <div className="container-responsive">
+                  <ContractDebug />
+                  <FaucetDebug />
+                </div>
+              </div>
               <JourneyDashboard />
               {isJourneyComplete && (
                 <section id="products" className="section-spacing bg-black/20" aria-labelledby="products-title">

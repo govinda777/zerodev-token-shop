@@ -1,29 +1,48 @@
 // Smart Contract Addresses on Sepolia Testnet
 export const CONTRACTS = {
-  // Token Contract (ERC-20)
-  TOKEN: "0x1234567890123456789012345678901234567890", // TODO: Deploy real contract
+  // Token Contract (ERC-20) - Real deployment
+  TOKEN: process.env.NEXT_PUBLIC_TOKEN_CONTRACT || "0xcac5c82D2523c5986D80620061500dAAb94A9B8c",
   
-  // Faucet Contract
-  FAUCET: "0x2345678901234567890123456789012345678901", // TODO: Deploy real contract
+  // Faucet Contract - Real deployment
+  FAUCET: process.env.NEXT_PUBLIC_FAUCET_CONTRACT || "0xb1e4C7a5919b35e30b9fB3e8deB1FA593652962E",
   
-  // Staking Contract
-  STAKING: "0x3456789012345678901234567890123456789012", // TODO: Deploy real contract
+  // Staking Contract - Using placeholder (not deployed yet)
+  STAKING: process.env.NEXT_PUBLIC_STAKING_CONTRACT || "0x3456789012345678901234567890123456789012",
   
-  // NFT Contract (ERC-721)
-  NFT: "0x4567890123456789012345678901234567890123", // TODO: Deploy real contract
+  // NFT Contract (ERC-721) - Using placeholder (not deployed yet)
+  NFT: process.env.NEXT_PUBLIC_NFT_CONTRACT || "0x4567890123456789012345678901234567890123",
   
-  // NFT Marketplace Contract
-  NFT_MARKETPLACE: "0x5678901234567890123456789012345678901234", // TODO: Deploy real contract
+  // NFT Marketplace Contract - Using placeholder (not deployed yet)
+  NFT_MARKETPLACE: process.env.NEXT_PUBLIC_NFT_MARKETPLACE_CONTRACT || "0x5678901234567890123456789012345678901234",
   
-  // Airdrop Contract
-  AIRDROP: "0x6789012345678901234567890123456789012345", // TODO: Deploy real contract
+  // Airdrop Contract - Using placeholder (not deployed yet)
+  AIRDROP: process.env.NEXT_PUBLIC_AIRDROP_CONTRACT || "0x6789012345678901234567890123456789012345",
   
-  // Subscription Contract
-  SUBSCRIPTION: "0x7890123456789012345678901234567890123456", // TODO: Deploy real contract
+  // Subscription Contract - Using placeholder (not deployed yet)
+  SUBSCRIPTION: process.env.NEXT_PUBLIC_SUBSCRIPTION_CONTRACT || "0x7890123456789012345678901234567890123456",
   
-  // Passive Income Contract
-  PASSIVE_INCOME: "0x8901234567890123456789012345678901234567", // TODO: Deploy real contract
+  // Passive Income Contract - Using placeholder (not deployed yet)
+  PASSIVE_INCOME: process.env.NEXT_PUBLIC_PASSIVE_INCOME_CONTRACT || "0x8901234567890123456789012345678901234567",
 } as const;
+
+// Check which contracts are using placeholders
+const PLACEHOLDER_CONTRACTS = Object.entries(CONTRACTS).filter(([key, address]) => 
+  address.includes('1234567890')
+).map(([key]) => key);
+
+// Flag para usar mocks apenas para contratos não deployados
+export const USE_MOCK_CONTRACTS = process.env.NODE_ENV === 'development' && 
+  PLACEHOLDER_CONTRACTS.length > 0;
+
+// Helper function to check if a specific contract is deployed
+export const isContractDeployed = (contractKey: keyof typeof CONTRACTS): boolean => {
+  return !CONTRACTS[contractKey].includes('1234567890');
+};
+
+// Helper function to check if we should use mock for a specific contract
+export const shouldUseMockForContract = (contractKey: keyof typeof CONTRACTS): boolean => {
+  return USE_MOCK_CONTRACTS && !isContractDeployed(contractKey);
+};
 
 // Network Configuration
 export const NETWORK_CONFIG = {
