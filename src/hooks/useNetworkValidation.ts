@@ -34,7 +34,7 @@ export function useNetworkValidation(): NetworkValidation {
         setError(null);
         
         // Obter o chain ID atual
-        const chainId = await window.ethereum.request({ 
+        const chainId = await (window.ethereum as any).request({ 
           method: 'eth_chainId' 
         });
         
@@ -58,10 +58,10 @@ export function useNetworkValidation(): NetworkValidation {
         setError(null);
       };
 
-      window.ethereum.on('chainChanged', handleChainChanged);
+      (window.ethereum as any).on('chainChanged', handleChainChanged);
 
       return () => {
-        window.ethereum.removeListener('chainChanged', handleChainChanged);
+        (window.ethereum as any).removeListener('chainChanged', handleChainChanged);
       };
     }
   }, [isConnected]);
@@ -78,7 +78,7 @@ export function useNetworkValidation(): NetworkValidation {
       setError(null);
 
       // Tentar trocar para Sepolia
-      await window.ethereum.request({
+      await (window.ethereum as any).request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: `0x${SEPOLIA_CHAIN_ID.toString(16)}` }],
       });
@@ -86,7 +86,7 @@ export function useNetworkValidation(): NetworkValidation {
       // Se a rede não estiver adicionada, tentar adicionar
       if (switchError instanceof Error && switchError.message.includes('4902')) {
         try {
-          await window.ethereum.request({
+          await (window.ethereum as any).request({
             method: 'wallet_addEthereumChain',
             params: [
               {

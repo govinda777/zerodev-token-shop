@@ -135,6 +135,14 @@ export function JourneyDashboard() {
   const { journey, getNextAvailableMission } = useJourney();
 
   const nextMission = getNextAvailableMission(); // Get the next available mission
+  
+  // DEBUG: Log mission states
+  console.log('🔍 DEBUG - Estado das missões:', {
+    nextMission: nextMission?.id,
+    faucetMission: journey.missions.find(m => m.id === 'faucet'),
+    completedMissions: journey.completedMissions,
+    allMissions: journey.missions.map(m => ({ id: m.id, unlocked: m.unlocked, completed: m.completed }))
+  });
 
   if (!isConnected) {
     return (
@@ -171,6 +179,30 @@ export function JourneyDashboard() {
   return (
     <section className="section-spacing">
       <div className="container-responsive">
+        {/* DEBUG INFO */}
+        <div className="mb-8 bg-red-500/20 border border-red-500/50 rounded p-4 text-white text-sm">
+          <h4 className="font-bold mb-2">🔍 DEBUG - Estado das Missões:</h4>
+          <div>Próxima missão: {nextMission?.id || 'Nenhuma'}</div>
+          <div>Missões completas: [{journey.completedMissions.join(', ')}]</div>
+          <div className="mt-2">
+            <strong>Missão Faucet:</strong>
+            {(() => {
+              const faucet = journey.missions.find(m => m.id === 'faucet');
+              return faucet ? ` unlocked: ${faucet.unlocked}, completed: ${faucet.completed}` : ' não encontrada';
+            })()}
+          </div>
+          <div className="mt-2">
+            <strong>Todas as missões:</strong>
+            <ul className="list-disc list-inside mt-1">
+              {journey.missions.map(m => (
+                <li key={m.id}>
+                  {m.id}: {m.unlocked ? '🔓' : '🔒'} {m.completed ? '✅' : '❌'}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-12">
           <h2 className="text-h2 font-bold text-white mb-4">Sua Jornada</h2>

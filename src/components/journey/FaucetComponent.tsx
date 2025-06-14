@@ -8,6 +8,9 @@ import { MISSION_REWARDS } from '@/contracts/config';
 import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationService';
 
 export function FaucetComponent() {
+  // TESTE: Verificar se o componente está sendo executado
+  console.log('🔥 FaucetComponent está sendo renderizado!');
+  
   const { addTokens } = useTokens();
   const { journey, completeMission } = useJourney();
   const { faucetOperations, isLoading: blockchainLoading } = useBlockchain();
@@ -203,58 +206,158 @@ export function FaucetComponent() {
           </div>
         </div>
 
-        {/* Claim Button or Countdown */}
-        {canClaim() ? (
-          <button
-            onClick={handleClaim}
-            disabled={isLoading}
-            className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                Processando...
-              </>
-            ) : (
-              <>
-                🪙 Reivindicar Tokens
-              </>
-            )}
-          </button>
+        {/* TESTE SIMPLES */}
+        <div className="mb-4 bg-red-500 text-white p-4 rounded">
+          <h4>TESTE DE VISIBILIDADE</h4>
+          <p>Se você está vendo isso, o componente está funcionando!</p>
+          <p>lastClaim: {String(lastClaim)}</p>
+          <p>timeRemaining: {String(timeRemaining)}</p>
+        </div>
+
+        {/* CRONÔMETRO GRANDE */}
+        <div className="mb-6 bg-orange-500 text-white p-8 rounded text-center">
+          <h2 className="text-2xl mb-4">CRONÔMETRO TESTE</h2>
+          <div className="text-6xl font-mono">
+            {timeRemaining || '23:59:59'}
+          </div>
+        </div>
+
+        {/* Claim Button or Countdown - Versão Melhorada */}
+        {!lastClaim ? (
+          // Primeiro claim - botão mais visível
+          <div className="w-full space-y-6">
+            <button
+              onClick={handleClaim}
+              disabled={isLoading}
+              className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 
+                        text-white font-bold text-xl py-5 px-8 rounded-xl 
+                        transition-all duration-300 transform hover:scale-105 
+                        shadow-lg hover:shadow-purple-500/50
+                        flex items-center justify-center gap-3"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span className="text-lg">Processando...</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-3xl">🪙</span>
+                  <span className="text-lg">Fazer Primeiro Claim</span>
+                </>
+              )}
+            </button>
+            
+            <div className="bg-blue-500/30 border-2 border-blue-500/50 rounded-xl p-4 text-center text-blue-200 text-base">
+              💡 Este é seu primeiro claim! Após reivindicar, haverá um cooldown de 24 horas.
+            </div>
+          </div>
         ) : (
-          <div className="w-full">
-            {/* Countdown Display */}
-            <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-4 text-center">
-              <div className="text-orange-300 text-sm font-medium mb-2">
-                ⏰ Próximo claim disponível em:
+          // Já fez claim - cronômetro e botão mais visíveis
+          <div className="w-full space-y-6">
+            {/* Countdown Display - Mais visível */}
+            <div className={`rounded-xl p-6 text-center border-2 ${
+              canClaim() 
+                ? 'bg-green-500/30 border-green-500/50 animate-pulse' 
+                : 'bg-orange-500/30 border-orange-500/50'
+            }`}>
+              <div className={`text-lg font-bold mb-4 ${
+                canClaim() ? 'text-green-200' : 'text-orange-200'
+              }`}>
+                {canClaim() ? '✅ Novo claim disponível!' : '⏰ Próximo claim disponível em:'}
               </div>
-              <div className="text-orange-100 text-xl font-mono font-bold">
-                {timeRemaining || '00:00:00'}
+              <div className={`text-5xl font-mono font-bold tracking-wider mb-3 ${
+                canClaim() ? 'text-green-100' : 'text-orange-100'
+              }`}>
+                {canClaim() ? '00:00:00' : (timeRemaining || '00:00:00')}
               </div>
-              <div className="text-orange-300/70 text-xs mt-1">
-                horas : minutos : segundos
+              <div className={`text-sm ${
+                canClaim() ? 'text-green-200/80' : 'text-orange-200/80'
+              }`}>
+                {canClaim() ? 'Você pode coletar seus tokens agora!' : 'horas : minutos : segundos'}
               </div>
             </div>
 
-            {/* Progress Bar */}
-            {lastClaim && (
-              <div className="mt-3">
-                <div className="bg-gray-600/30 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-orange-500 to-purple-500 h-2 rounded-full transition-all duration-1000"
-                    style={{
-                      width: `${Math.max(0, Math.min(100, ((Date.now() - lastClaim) / (24 * 60 * 60 * 1000)) * 100))}%`
-                    }}
-                  ></div>
-                </div>
-                <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>Último claim</span>
-                  <span>Disponível em 24h</span>
-                </div>
+            {/* Progress Bar - Mais visível */}
+            <div className="space-y-3">
+              <div className="bg-gray-700/50 rounded-full h-4 overflow-hidden">
+                <div 
+                  className="bg-gradient-to-r from-orange-500 to-purple-500 h-4 rounded-full transition-all duration-1000 shadow-lg"
+                  style={{
+                    width: `${Math.max(0, Math.min(100, ((Date.now() - lastClaim) / (24 * 60 * 60 * 1000)) * 100))}%`
+                  }}
+                ></div>
               </div>
+              <div className="flex justify-between text-sm text-gray-300">
+                <span>Último: {new Date(lastClaim).toLocaleString()}</span>
+                <span>{canClaim() ? 'Disponível!' : 'Em 24h'}</span>
+              </div>
+            </div>
+
+            {/* Claim Button - Mais visível quando disponível */}
+            {canClaim() && (
+              <button
+                onClick={handleClaim}
+                disabled={isLoading}
+                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-600/50 
+                          text-white font-bold text-xl py-5 px-8 rounded-xl 
+                          transition-all duration-300 transform hover:scale-105 
+                          shadow-lg hover:shadow-green-500/50
+                          animate-pulse
+                          flex items-center justify-center gap-3"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span className="text-lg">Processando...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-3xl">🪙</span>
+                    <span className="text-lg">Coletar Tokens</span>
+                  </>
+                )}
+              </button>
             )}
           </div>
         )}
+
+        {/* Debug Info - Colapsável */}
+        <details className="mt-6">
+          <summary className="cursor-pointer text-sm text-gray-400 hover:text-gray-300">
+            🔧 Debug Info (clique para expandir)
+          </summary>
+          <div className="mt-2 bg-gray-800/50 rounded-lg p-3 text-xs text-gray-400 space-y-1">
+            <div>lastClaim: {lastClaim ? new Date(lastClaim).toLocaleString() : 'null'}</div>
+            <div>canClaim(): {canClaim().toString()}</div>
+            <div>canClaimFromContract: {canClaimFromContract.toString()}</div>
+            <div>timeRemaining: {timeRemaining || 'null'}</div>
+            <div>isCompleted: {isCompleted.toString()}</div>
+            
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button 
+                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs transition-colors"
+                onClick={() => setLastClaim(Date.now() - 1000)}
+              >
+                Simular Claim (1s atrás)
+              </button>
+              <button 
+                className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs transition-colors"
+                onClick={() => setLastClaim(Date.now() - 12 * 60 * 60 * 1000)}
+              >
+                Simular 12h atrás
+              </button>
+              <button 
+                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs transition-colors"
+                onClick={() => setLastClaim(null)}
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </details>
+
+
 
         {/* Mission Status */}
         {isCompleted && (

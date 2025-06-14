@@ -86,8 +86,8 @@ const PRODUCTS: Product[] = [
 interface ProductContextType {
   products: Product[];
   purchases: Purchase[];
-  buyProduct: (productId: string, installments?: number) => boolean;
-  buyProductInstallment: (productId: string, installments: number) => boolean;
+  buyProduct: (productId: string, installments?: number) => Promise<boolean>;
+  buyProductInstallment: (productId: string, installments: number) => Promise<boolean>;
 }
 
 export const ProductContext = createContext<ProductContextType | undefined>(undefined);

@@ -153,7 +153,7 @@ export function JourneyProvider({ children }: JourneyProviderProps) {
       // Dar recompensa APÓS a atualização do estado
       if (mission?.reward?.type === 'tokens' && mission.reward.amount) {
         setTimeout(() => {
-          addTokens(mission.reward.amount);
+          addTokens(mission.reward!.amount!);
         }, 0);
       }
       

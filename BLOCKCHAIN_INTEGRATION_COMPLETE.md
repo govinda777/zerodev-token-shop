@@ -47,8 +47,8 @@ Os seguintes componentes utilizam `useBlockchain.ts` e estão preparados para in
 - ✅ Persiste o progresso no `localStorage`.
 - ✅ Desbloqueia missões sequencialmente.
 
-### (Anteriormente `JourneyPOC.tsx` - Agora considerado uma POC obsoleta)
-- `JourneyPOC.tsx` foi uma prova de conceito inicial. A lógica de jornada principal foi movida para `JourneyProvider` e os componentes de missão individuais.
+### (Anteriormente `JourneyPOC.tsx` - REMOVIDO)
+- `JourneyPOC.tsx` foi uma prova de conceito inicial que foi removida do projeto. A lógica de jornada principal está implementada em `JourneyProvider` e os componentes de missão individuais.
 
 ### 2. FaucetComponent.tsx
 - ✅ **Estrutura para verificação de cooldown** e **requisição de tokens** (atualmente simulado/fallback).
@@ -156,7 +156,7 @@ src/
 ├── hooks/
 │   └── useBlockchain.ts # Hook principal de integração
 └── components/journey/
-    ├── JourneyPOC.tsx
+    ├── [REMOVIDO] JourneyPOC.tsx
     ├── FaucetComponent.tsx
     ├── StakingComponent.tsx
     ├── NFTMarketplace.tsx
