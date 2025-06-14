@@ -35,10 +35,23 @@ export function useBlockchain() {
   const isConnected = !!user?.wallet?.address;
 
   // Create public client for reading blockchain data
-  const publicClient = useMemo(() => createPublicClient({
-    chain: sepolia,
-    transport: http(NETWORK_CONFIG.rpcUrl),
-  }), []);
+  const publicClient = useMemo(() => {
+    console.log('🔧 Creating publicClient with RPC:', NETWORK_CONFIG.rpcUrl);
+    return createPublicClient({
+      chain: {
+        ...sepolia,
+        rpcUrls: {
+          default: {
+            http: [NETWORK_CONFIG.rpcUrl],
+          },
+          public: {
+            http: [NETWORK_CONFIG.rpcUrl],
+          },
+        },
+      },
+      transport: http(NETWORK_CONFIG.rpcUrl),
+    });
+  }, []);
 
   // Create wallet client for transactions
   const getWalletClient = useCallback(() => {

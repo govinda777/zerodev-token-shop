@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTokens } from '@/hooks/useTokens';
-import { useJourney } from './JourneyProvider';
 import { useBlockchain } from '@/hooks/useBlockchain';
 import { SUBSCRIPTION_PLANS } from '@/contracts/config';
 import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationService';
@@ -12,15 +11,10 @@ interface SubscriptionPlan {
   name: string;
   description: string;
   price: number;
-  duration: 'monthly' | 'annual';
+  duration: number; // em dias
   features: string[];
   icon: string;
   popular?: boolean;
-}
-
-interface SubscriptionInfo {
-  planId: number;
-  [key: string]: unknown;
 }
 
 const subscriptionPlans: SubscriptionPlan[] = [
@@ -29,53 +23,54 @@ const subscriptionPlans: SubscriptionPlan[] = [
     name: SUBSCRIPTION_PLANS.MONTHLY.name,
     description: 'Acesso a funcionalidades essenciais premium',
     price: SUBSCRIPTION_PLANS.MONTHLY.price,
-    duration: 'monthly',
-    icon: '⭐',
-    popular: true,
-    features: [...SUBSCRIPTION_PLANS.MONTHLY.benefits]
+    duration: SUBSCRIPTION_PLANS.MONTHLY.duration,
+    features: [
+      'Acesso básico à plataforma',
+      'Suporte por email',
+      'Dashboard básico',
+      'Até 5 transações por dia'
+    ],
+    icon: '📱'
   },
   {
     id: 'annual',
     name: SUBSCRIPTION_PLANS.ANNUAL.name,
     description: 'Melhor valor com desconto anual',
     price: SUBSCRIPTION_PLANS.ANNUAL.price,
-    duration: 'annual',
-    icon: '👑',
-    features: [...SUBSCRIPTION_PLANS.ANNUAL.benefits]
+    duration: SUBSCRIPTION_PLANS.ANNUAL.duration,
+    features: [...SUBSCRIPTION_PLANS.ANNUAL.benefits],
+    icon: '🚀',
+    popular: true
   }
 ];
 
 export function SubscriptionComponent() {
   const { balance, removeTokens } = useTokens();
-  const { journey, completeMission } = useJourney();
   const { subscriptionOperations, tokenOperations, isLoading: blockchainLoading } = useBlockchain();
-  const [activeSubscription, setActiveSubscription] = useState<string | null>(null);
+  const [activeSubscription, setActiveSubscription] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<string | null>(null);
 
-  const subscriptionMission = journey.missions.find(m => m.id === 'subscription');
-  const isUnlocked = subscriptionMission?.unlocked || false;
-  const isCompleted = subscriptionMission?.completed || false;
-
-  // Carregar informações da assinatura
+  // Carregar assinatura ativa - OTIMIZADO
   useEffect(() => {
-    const loadSubscriptionInfo = async () => {
+    let isMounted = true;
+
+    const loadActiveSubscription = async () => {
       try {
-        const isActive = await subscriptionOperations.isActive();
-        if (isActive) {
-          const subscription = await subscriptionOperations.getSubscription();
-          const sub = subscription as SubscriptionInfo;
-          setActiveSubscription(sub.planId === 1 ? 'monthly' : 'annual');
+        const subscription = await subscriptionOperations.getSubscription();
+        if (isMounted) {
+          setActiveSubscription(subscription);
         }
       } catch (error) {
-        // console.error('Erro ao carregar informações da assinatura:', error);
-        // Potentially notifyError("Não foi possível carregar os dados da sua assinatura.");
+        console.warn('Erro ao carregar assinatura ativa:', error);
       }
     };
 
-    if (isUnlocked) {
-      loadSubscriptionInfo();
-    }
-  }, [isUnlocked, subscriptionOperations]);
+    loadActiveSubscription();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Removido subscriptionOperations para executar apenas uma vez
 
   const handleSubscribe = async (plan: SubscriptionPlan) => {
     if (balance < plan.price || isLoading || activeSubscription || blockchainLoading) return;
@@ -101,10 +96,6 @@ export function SubscriptionComponent() {
           await removeTokens(plan.price); // removeTokens is async
           setActiveSubscription(plan.id);
           notifySuccess(`Assinatura do plano "${plan.name}" realizada com sucesso!`);
-
-          if (!isCompleted) {
-            completeMission('subscription');
-          }
         } else {
           notifyError(`Falha na assinatura: ${subscribeResult.error?.message || 'Erro desconhecido'}`);
           throw new Error(subscribeResult.error?.message || 'Falha na assinatura');
@@ -124,10 +115,6 @@ export function SubscriptionComponent() {
         await removeTokens(plan.price); // removeTokens is async
         setActiveSubscription(plan.id);
         notifySuccess(`Assinatura do plano "${plan.name}" (simulada) realizada com sucesso!`);
-
-        if (!isCompleted) {
-          completeMission('subscription');
-        }
       } catch (fallbackError) {
         // console.error('Erro no fallback da assinatura:', fallbackError); // Dev log
         notifyError(`Falha ao assinar o plano "${plan.name}" mesmo com simulação.`);
@@ -140,18 +127,6 @@ export function SubscriptionComponent() {
   const getActivePlan = () => {
     return subscriptionPlans.find(plan => plan.id === activeSubscription);
   };
-
-  if (!isUnlocked) {
-    return (
-      <div className="card">
-        <div className="text-center">
-          <div className="text-4xl mb-4">🔒</div>
-          <h3 className="text-h3 font-bold text-white mb-2">Assinaturas Bloqueadas</h3>
-          <p className="text-white/80">Complete a missão de airdrop para desbloquear assinaturas premium.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -168,7 +143,7 @@ export function SubscriptionComponent() {
           <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4">
             <div className="text-green-400 font-medium mb-2">✅ Assinatura Ativa</div>
             <div className="text-white">
-              {getActivePlan()?.name} - {getActivePlan()?.duration === 'monthly' ? 'Mensal' : 'Anual'}
+              {getActivePlan()?.name} - {getActivePlan()?.id === 'monthly' ? 'Mensal' : 'Anual'}
             </div>
           </div>
         )}
@@ -218,9 +193,9 @@ export function SubscriptionComponent() {
                     {plan.price} Tokens
                   </div>
                   <div className="text-white/60 text-sm">
-                    {plan.duration === 'monthly' ? 'por mês' : 'por ano'}
+                    {plan.id === 'monthly' ? 'por mês' : 'por ano'}
                   </div>
-                  {plan.duration === 'annual' && (
+                  {plan.id === 'annual' && (
                     <div className="text-green-400 text-xs mt-1">
                       Economize 17%!
                     </div>
@@ -308,17 +283,6 @@ export function SubscriptionComponent() {
           </div>
         </div>
       </div>
-
-      {/* Mission Status */}
-      {isCompleted && (
-        <div className="card">
-          <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4">
-            <div className="text-green-400 font-medium text-center">
-              ✅ Missão de Assinatura Concluída! Você desbloqueou renda passiva.
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 } 

@@ -31,8 +31,8 @@ jest.mock('./ProductCard', () => ({
   )),
 }));
 
-jest.mock('./DebugPanel', () => ({
-  DebugPanel: jest.fn(() => <div data-testid="debug-panel">DebugPanel Mock</div>),
+jest.mock('./IntegratedWallet', () => ({
+  IntegratedWallet: jest.fn(() => <div data-testid="integrated-wallet">IntegratedWallet Mock</div>),
 }));
 
 const mockUseProducts = useProducts as jest.Mock;
@@ -278,8 +278,8 @@ describe('ProductGrid', () => {
     });
   });
 
-  it('renders DebugPanel', () => {
+  it('renders IntegratedWallet', () => {
     render(<ProductGrid />);
-    expect(screen.getByTestId('debug-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('integrated-wallet')).toBeInTheDocument();
   });
 });

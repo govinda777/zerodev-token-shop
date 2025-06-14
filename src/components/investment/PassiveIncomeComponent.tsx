@@ -2,10 +2,28 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTokens } from '@/hooks/useTokens';
-import { useJourney } from './JourneyProvider';
 import { useBlockchain } from '@/hooks/useBlockchain';
 import { PASSIVE_INCOME_CONFIG } from '@/contracts/config';
 import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationService';
+import { CONTRACTS } from '@/contracts/config';
+
+// Função utilitária para validar endereços de contratos
+function isValidContractAddress(address: string) {
+  return /^0x[a-fA-F0-9]{40}$/.test(address) && !address.includes('1234567890');
+}
+
+interface InvestmentPool {
+  id: string;
+  name: string;
+  description: string;
+  apy: number;
+  minInvestment: number;
+  maxInvestment: number;
+  totalInvested: number;
+  availableSlots: number;
+  risk: 'Baixo' | 'Médio' | 'Alto';
+  icon: string;
+}
 
 interface IncomeStream {
   id: string;
@@ -21,30 +39,30 @@ interface IncomeStream {
 const incomeStreams: IncomeStream[] = [
   {
     id: 'basic-passive',
-    name: 'Renda Passiva Básica',
-    description: 'Investimento seguro com retorno garantido baseado na configuração do contrato',
+    name: 'Renda Básica',
+    description: 'Ganhe tokens diariamente com baixo risco',
     initialInvestment: 100,
-    dailyReturn: Math.floor(100 * PASSIVE_INCOME_CONFIG.DAILY_RATE), // 0.1% daily
+    dailyReturn: 1,
     icon: '🏦',
     riskLevel: 'low',
-    duration: 30
+    duration: 365
   },
   {
     id: 'premium-passive',
-    name: 'Renda Passiva Premium',
-    description: 'Para assinantes premium com retornos maiores',
-    initialInvestment: 200,
-    dailyReturn: Math.floor(200 * PASSIVE_INCOME_CONFIG.DAILY_RATE * 1.5), // 1.5x multiplier
+    name: 'Renda Premium',
+    description: 'Maior retorno com risco moderado',
+    initialInvestment: 500,
+    dailyReturn: 7,
     icon: '💎',
     riskLevel: 'medium',
-    duration: 60
+    duration: 180
   },
   {
     id: 'elite-passive',
-    name: 'Renda Passiva Elite',
-    description: 'Estratégia avançada com altos retornos',
-    initialInvestment: 500,
-    dailyReturn: Math.floor(500 * PASSIVE_INCOME_CONFIG.DAILY_RATE * 2), // 2x multiplier
+    name: 'Renda Elite',
+    description: 'Máximo retorno para investidores experientes',
+    initialInvestment: 1000,
+    dailyReturn: 20,
     icon: '👑',
     riskLevel: 'high',
     duration: 90
@@ -73,44 +91,48 @@ interface ActiveInvestment {
 
 export function PassiveIncomeComponent() {
   const { balance, removeTokens, addTokens } = useTokens();
-  const { journey, completeMission } = useJourney();
   const { passiveIncomeOperations, subscriptionOperations, isLoading: blockchainLoading } = useBlockchain();
   const [activeInvestments, setActiveInvestments] = useState<ActiveInvestment[]>([]);
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [isPassiveIncomeActive, setIsPassiveIncomeActive] = useState(false);
 
-  const passiveIncomeMission = journey.missions.find(m => m.id === 'passive-income');
-  const isUnlocked = passiveIncomeMission?.unlocked || false;
-  const isCompleted = passiveIncomeMission?.completed || false;
-
-  // Verificar status da renda passiva e carregar dados
+  // Verificar status da renda passiva e carregar dados - CORRIGIDO
   useEffect(() => {
     const loadPassiveIncomeData = async () => {
       try {
-        // Verificar se a renda passiva está ativa
-        const isActive = await passiveIncomeOperations.isActive();
-        setIsPassiveIncomeActive(isActive);
+        // Só tenta acessar contratos se eles forem válidos
+        if (isValidContractAddress(CONTRACTS.PASSIVE_INCOME)) {
+          const isActive = await passiveIncomeOperations.isActive();
+          setIsPassiveIncomeActive(isActive);
+        } else {
+          // Usar estado local se contrato não estiver deployado
+          setIsPassiveIncomeActive(false);
+        }
 
-        // Verificar se tem assinatura ativa (requisito para renda passiva)
-        const hasActiveSubscription = await subscriptionOperations.isActive();
-        if (!hasActiveSubscription && PASSIVE_INCOME_CONFIG.MIN_SUBSCRIPTION_REQUIRED) {
-          // console.warn('Assinatura ativa necessária para renda passiva');
-          // UI should ideally prevent actions if this is a strict requirement not met.
+        // Verificar assinatura apenas se o contrato for válido
+        if (isValidContractAddress(CONTRACTS.SUBSCRIPTION) && PASSIVE_INCOME_CONFIG.MIN_SUBSCRIPTION_REQUIRED) {
+          const hasActiveSubscription = await subscriptionOperations.isActive();
+          if (!hasActiveSubscription) {
+            // Subscription não ativa, mas não loga erro
+          }
         }
       } catch (error) {
-        // console.error('Erro ao carregar dados da renda passiva:', error);
-        // Potentially notifyError("Não foi possível carregar dados da renda passiva.");
+        // Não loga erro se contratos não estiverem deployados
+        setIsPassiveIncomeActive(false);
       }
     };
 
-    if (isUnlocked) {
+    // Só executa se as operações estiverem disponíveis
+    if (passiveIncomeOperations && subscriptionOperations) {
       loadPassiveIncomeData();
-      
-      // Atualizar dados a cada 30 segundos
+    }
+    
+    // Não configura interval se contratos não estão deployados
+    if (isValidContractAddress(CONTRACTS.PASSIVE_INCOME)) {
       const interval = setInterval(loadPassiveIncomeData, 30000);
       return () => clearInterval(interval);
     }
-  }, [isUnlocked, passiveIncomeOperations, subscriptionOperations]);
+  }, []); // Array vazio - executa apenas uma vez na montagem
 
   // Calcular ganhos pendentes
   const calculatePendingEarnings = (investment: ActiveInvestment): number => {
@@ -142,10 +164,6 @@ export function PassiveIncomeComponent() {
         // console.log('✅ Renda passiva ativada via contrato:', result.hash); // Dev log
         setIsPassiveIncomeActive(true);
         notifySuccess('Renda passiva ativada com sucesso!');
-        
-        if (!isCompleted) {
-          completeMission('passive-income');
-        }
       } else {
         notifyError(`Falha ao ativar renda passiva: ${result.error?.message || 'Erro desconhecido'}`);
         throw new Error(result.error?.message || 'Falha ao ativar renda passiva');
@@ -159,10 +177,6 @@ export function PassiveIncomeComponent() {
         await new Promise(resolve => setTimeout(resolve, 2000));
         setIsPassiveIncomeActive(true);
         notifySuccess('Renda passiva (simulada) ativada com sucesso!');
-        
-        if (!isCompleted) {
-          completeMission('passive-income');
-        }
       } catch (fallbackError) {
         // console.error('Erro no fallback da ativação de renda passiva:', fallbackError); // Dev log
         notifyError('Falha ao ativar renda passiva mesmo com simulação.');
@@ -243,18 +257,6 @@ export function PassiveIncomeComponent() {
     const months = Math.floor(days / 30);
     return `${months} ${months === 1 ? 'mês' : 'meses'}`;
   };
-
-  if (!isUnlocked) {
-    return (
-      <div className="card">
-        <div className="text-center">
-          <div className="text-4xl mb-4">🔒</div>
-          <h3 className="text-h3 font-bold text-white mb-2">Renda Passiva Bloqueada</h3>
-          <p className="text-white/80">Complete a missão de assinatura para desbloquear renda passiva.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -434,17 +436,6 @@ export function PassiveIncomeComponent() {
                 </div>
               );
             })}
-          </div>
-        </div>
-      )}
-
-      {/* Mission Status */}
-      {isCompleted && (
-        <div className="card">
-          <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4">
-            <div className="text-green-400 font-medium text-center">
-              ✅ Missão de Renda Passiva Concluída! Você completou todas as jornadas!
-            </div>
           </div>
         </div>
       )}

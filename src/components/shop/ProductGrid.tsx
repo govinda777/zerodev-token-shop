@@ -4,7 +4,7 @@ import { useTokens } from '@/hooks/useTokens';
 import { useInvestment } from '@/components/investment/InvestmentProvider';
 import { Product } from '@/types/product';
 import { useState } from 'react';
-import { DebugPanel } from './DebugPanel';
+import { IntegratedWallet } from './IntegratedWallet';
 import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationService';
 
 export const ProductGrid = () => {
@@ -139,7 +139,7 @@ export const ProductGrid = () => {
       </section>
 
       {/* Debug Panel - only in development */}
-      <DebugPanel />
+      <IntegratedWallet />
     </div>
   );
 };

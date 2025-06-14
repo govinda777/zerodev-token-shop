@@ -71,9 +71,12 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isConnected, address, mounted]);
 
+  // OTIMIZADO - useEffect com controle para evitar loops
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    if (mounted) {
+      loadData();
+    }
+  }, [mounted, isConnected, address]); // Removido loadData das dependências para evitar re-renders excessivos
 
   const addTokensProvider = useCallback(async (amount: number) => {
     if (!address) return;

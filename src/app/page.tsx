@@ -8,19 +8,16 @@ import { LoginDemo } from "@/components/auth/LoginDemo";
 import { NetworkGuard } from "@/components/common/NetworkGuard";
 import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import { ProductProvider } from '@/components/shop/ProductProvider';
-import { JourneyProvider, useJourney } from '@/components/journey/JourneyProvider';
-import { JourneyDashboard } from '@/components/journey/JourneyDashboard'; // Import JourneyDashboard
+import { FaucetComponent } from '@/components/tools/FaucetComponent';
+import { StakingComponent } from '@/components/investment/StakingComponent';
+import { PassiveIncomeComponent } from '@/components/investment/PassiveIncomeComponent';
+import { NFTMarketplace } from '@/components/nft/NFTMarketplace';
+import { AirdropComponent } from '@/components/rewards/AirdropComponent';
 
 
-// Componente interno que usa o hook useJourney
+// Componente interno simplificado
 function HomeContent() {
   const { isConnected } = usePrivyAuth();
-  const { journey, getNextAvailableMission } = useJourney(); // getNextAvailableMission might still be needed for isJourneyComplete logic
-
-  const progressPercentage = (journey.completedMissions.length / journey.missions.length) * 100;
-  // Journey is complete if there are no more available missions OR if all missions are in completedMissions
-  const isJourneyComplete = !getNextAvailableMission() || (journey.missions.length > 0 && journey.completedMissions.length === journey.missions.length);
-  const nextMissionInfo = getNextAvailableMission(); // For hero section display
 
   return (
     <div className="flex flex-col min-h-screen gradient-background">
@@ -53,45 +50,21 @@ function HomeContent() {
                   <span className="text-purple-300 font-medium"> Conecte-se na rede Sepolia</span> e descubra um mundo de possibilidades.
                 </p>
 
-                {/* Progress Section - só mostra se conectado */}
+                {/* Welcome Section - só mostra se conectado */}
                 {isConnected && (
                   <div className="bg-black/20 border border-white/20 rounded-lg p-6 max-w-2xl mx-auto space-elements">
                     <div className="flex items-center justify-center mb-4">
-                      <svg className="w-5 h-5 text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                       </svg>
-                      <span className="text-purple-400 font-medium">Progresso da Jornada</span>
+                      <span className="text-green-400 font-medium">Bem-vindo ao Marketplace!</span>
                     </div>
                     
-                    {/* Progress Bar */}
-                    <div className="mb-4">
-                      <div className="bg-gray-700 rounded-full h-3 overflow-hidden">
-                        <div 
-                          className="bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-500 ease-out"
-                          style={{ width: `${progressPercentage}%` }}
-                        />
-                      </div>
-                      <div className="text-white/60 text-sm mt-2">
-                        {journey.completedMissions.length} de {journey.missions.length} etapas concluídas
-                      </div>
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">🎉</div>
+                      <div className="text-white font-medium">Todas as funcionalidades estão liberadas!</div>
+                      <div className="text-white/70 text-sm">Explore todos os produtos e recursos disponíveis</div>
                     </div>
-
-                    {/* Next Mission Info */}
-                    {nextMissionInfo && !isJourneyComplete && (
-                      <div className="text-center">
-                        <div className="text-2xl mb-2">{nextMissionInfo.icon}</div>
-                        <div className="text-white font-medium">Próxima Etapa: {nextMissionInfo.title}</div>
-                        <div className="text-white/70 text-sm">{nextMissionInfo.description}</div>
-                      </div>
-                    )}
-
-                    {isJourneyComplete && (
-                      <div className="text-center">
-                        <div className="text-4xl mb-2">🏆</div>
-                        <div className="text-green-400 font-medium">Jornada Completa!</div>
-                        <div className="text-white/70 text-sm">Todas as funcionalidades desbloqueadas</div>
-                      </div>
-                    )}
                   </div>
                 )}
 
@@ -147,7 +120,7 @@ function HomeContent() {
             </div>
           </section>
 
-          {/* Conditional Rendering for Login or Journey/Products */}
+          {/* Conditional Rendering for Login or Tools/Products */}
           {!isConnected ? (
             <section className="section-spacing bg-black/10" aria-labelledby="auth-demo-title">
               <div className="container-responsive">
@@ -157,26 +130,148 @@ function HomeContent() {
             </section>
           ) : (
             <>
-
-              <JourneyDashboard />
-              {isJourneyComplete && (
-                <section id="products" className="section-spacing bg-black/20" aria-labelledby="products-title">
-                  <div className="container-responsive">
-                    <div className="text-center mb-8">
-                      <div className="text-6xl mb-4">🎉</div>
-                      <h2 id="products-title" className="text-h2 font-bold text-white mb-4">
-                        Parabéns! Jornada Completa!
-                      </h2>
-                      <p className="text-white/80 text-body-lg mb-8">
-                        Você desbloqueou todas as funcionalidades. Agora explore nossos produtos!
-                      </p>
-                    </div>
-                    <NetworkGuard>
-                      <ProductGrid />
-                    </NetworkGuard>
+              {/* Tools Section */}
+              <section id="tools" className="section-spacing bg-black/10" aria-labelledby="tools-title">
+                <div className="container-responsive">
+                  <div className="text-center mb-8">
+                    <h2 id="tools-title" className="text-h2 font-bold text-white mb-4">
+                      Ferramentas e Recursos
+                    </h2>
+                    <p className="text-white/80 text-body-lg mb-8">
+                      Acesse ferramentas úteis para gerenciar seus tokens e interagir com a plataforma
+                    </p>
                   </div>
-                </section>
-              )}
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                    {/* Faucet */}
+                    <div className="bg-black/20 border border-white/20 rounded-lg p-6">
+                      <NetworkGuard>
+                        <FaucetComponent />
+                      </NetworkGuard>
+                    </div>
+                    
+                    {/* Placeholder para outras ferramentas */}
+                    <div className="card text-center">
+                      <div className="text-4xl mb-4">🔧</div>
+                      <h3 className="text-h3 font-bold text-white mb-2">Mais Ferramentas</h3>
+                      <p className="text-white/80 mb-4">
+                        Novas funcionalidades em breve!
+                      </p>
+                      <button
+                        disabled
+                        className="w-full bg-gray-600 text-gray-400 py-2 px-4 rounded-lg cursor-not-allowed"
+                      >
+                        Em Desenvolvimento
+                      </button>
+                    </div>
+                    
+                    <div className="card text-center">
+                      <div className="text-4xl mb-4">⚡</div>
+                      <h3 className="text-h3 font-bold text-white mb-2">Recursos Avançados</h3>
+                      <p className="text-white/80 mb-4">
+                        Funcionalidades especiais chegando em breve
+                      </p>
+                      <button
+                        disabled
+                        className="w-full bg-gray-600 text-gray-400 py-2 px-4 rounded-lg cursor-not-allowed"
+                      >
+                        Em Breve
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Investimentos e Recursos Avançados */}
+              <section id="investments" className="section-spacing bg-black/10" aria-labelledby="investments-title">
+                <div className="container-responsive">
+                  <div className="text-center mb-8">
+                    <h2 id="investments-title" className="text-h2 font-bold text-white mb-4">
+                      Investimentos e Recursos Avançados
+                    </h2>
+                    <p className="text-white/80 text-body-lg mb-8">
+                      Explore todas as funcionalidades de investimento e recursos especiais da plataforma
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+                    {/* Staking */}
+                    <div className="bg-black/20 border border-white/20 rounded-lg p-6">
+                      <NetworkGuard>
+                        <StakingComponent />
+                      </NetworkGuard>
+                    </div>
+                    
+                    {/* Passive Income */}
+                    <div className="bg-black/20 border border-white/20 rounded-lg p-6">
+                      <NetworkGuard>
+                        <PassiveIncomeComponent />
+                      </NetworkGuard>
+                    </div>
+                    
+                    {/* NFT Marketplace */}
+                    <div className="bg-black/20 border border-white/20 rounded-lg p-6">
+                      <NetworkGuard>
+                        <NFTMarketplace />
+                      </NetworkGuard>
+                    </div>
+                    
+                    {/* Airdrop */}
+                    <div className="bg-black/20 border border-white/20 rounded-lg p-6">
+                      <NetworkGuard>
+                        <AirdropComponent />
+                      </NetworkGuard>
+                    </div>
+                    
+                    {/* Subscription Services - COMENTADO TEMPORARIAMENTE */}
+                    {/*
+                    <div className="col-span-1 lg:col-span-2">
+                      <div className="bg-black/20 border border-white/20 rounded-lg p-6">
+                        <NetworkGuard>
+                          <SubscriptionComponent />
+                        </NetworkGuard>
+                      </div>
+                    </div>
+                    */}
+                    
+                    {/* Placeholder para subscription */}
+                    <div className="col-span-1 lg:col-span-2">
+                      <div className="bg-black/20 border border-white/20 rounded-lg p-6">
+                        <div className="text-center">
+                          <div className="text-4xl mb-4">⭐</div>
+                          <h3 className="text-h3 font-bold text-white mb-2">Assinaturas Premium</h3>
+                          <p className="text-white/80 mb-4">
+                            Planos de assinatura premium em desenvolvimento
+                          </p>
+                          <button
+                            disabled
+                            className="w-full bg-gray-600 text-gray-400 py-2 px-4 rounded-lg cursor-not-allowed"
+                          >
+                            Em Breve
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Products Section */}
+              <section id="products" className="section-spacing bg-black/20" aria-labelledby="products-title">
+                <div className="container-responsive">
+                  <div className="text-center mb-8">
+                    <h2 id="products-title" className="text-h2 font-bold text-white mb-4">
+                      Nossos Produtos
+                    </h2>
+                    <p className="text-white/80 text-body-lg mb-8">
+                      Explore nossa coleção de tokens e produtos digitais
+                    </p>
+                  </div>
+                  <NetworkGuard>
+                    <ProductGrid />
+                  </NetworkGuard>
+                </div>
+              </section>
             </>
           )}
         </ProductProvider>
@@ -188,9 +283,5 @@ function HomeContent() {
 }
 
 export default function Home() {
-  return (
-    <JourneyProvider>
-      <HomeContent />
-    </JourneyProvider>
-  );
+  return <HomeContent />;
 }

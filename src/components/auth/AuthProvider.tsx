@@ -1,9 +1,10 @@
 "use client";
 
 import { PrivyProvider, usePrivy } from '@privy-io/react-auth';
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
 import { MockAuthProvider } from './MockAuthProvider';
 import { sepolia } from 'viem/chains';
+import { NETWORK_CONFIG } from '@/contracts/config';
 
 interface AuthContextType {
   isConnected: boolean;
@@ -15,34 +16,102 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-function PrivyWrapper({ children }: { children: React.ReactNode }) {
-  const { ready } = usePrivy();
-  const [useFallback, setUseFallback] = useState(false);
-  
-  useEffect(() => {
-    console.log('Privy ready status:', ready);
-    
-    // Timeout de 6 segundos para fallback automático
-    const timeout = setTimeout(() => {
-      if (!ready) {
-        console.warn('Privy loading timeout - switching to fallback auth');
-        setUseFallback(true);
-      }
-    }, 6000);
+// Interceptação global mais robusta
+let interceptorInstalled = false;
 
+const installRPCInterceptor = () => {
+  if (typeof window === 'undefined' || interceptorInstalled) return;
+  
+  const originalFetch = window.fetch;
+  window.fetch = function(input: RequestInfo | URL, init?: RequestInit) {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+    
+    // Interceptar requisições para sepolia.drpc.org
+    if (url && url.includes('sepolia.drpc.org')) {
+      console.log('🚫 AuthProvider interceptor: Blocked drpc.org request, using:', NETWORK_CONFIG.rpcUrl);
+      const newInput = typeof input === 'string' 
+        ? input.replace(/https?:\/\/sepolia\.drpc\.org/g, NETWORK_CONFIG.rpcUrl)
+        : input instanceof URL 
+          ? new URL(input.href.replace(/https?:\/\/sepolia\.drpc\.org/g, NETWORK_CONFIG.rpcUrl))
+          : { ...input, url: input.url.replace(/https?:\/\/sepolia\.drpc\.org/g, NETWORK_CONFIG.rpcUrl) };
+      
+      return originalFetch.call(this, newInput, init);
+    }
+    
+    return originalFetch.call(this, input, init);
+  };
+  
+  interceptorInstalled = true;
+  console.log('✅ RPC Interceptor installed successfully');
+};
+
+// Instalar interceptor imediatamente
+installRPCInterceptor();
+
+// Configuração customizada do Sepolia com nosso RPC
+const customSepolia = {
+  ...sepolia,
+  rpcUrls: {
+    default: {
+      http: [NETWORK_CONFIG.rpcUrl],
+      webSocket: [`wss://rpc.sepolia.org`],
+    },
+    public: {
+      http: [NETWORK_CONFIG.rpcUrl],
+      webSocket: [`wss://rpc.sepolia.org`],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Etherscan',
+      url: 'https://sepolia.etherscan.io',
+    },
+  },
+};
+
+console.log('🔧 AuthProvider: Using custom RPC:', NETWORK_CONFIG.rpcUrl);
+
+function PrivyWrapper({ children }: { children: React.ReactNode }) {
+  const { ready, authenticated, user } = usePrivy();
+  const [useFallback, setUseFallback] = useState(false);
+  const [initializationAttempts, setInitializationAttempts] = useState(0);
+  
+  const handleFallback = useCallback(() => {
+    console.warn('🔄 Switching to fallback authentication');
+    setUseFallback(true);
+  }, []);
+
+  useEffect(() => {
+    console.log('Privy status:', { ready, authenticated, user: !!user });
+    
     if (ready) {
-      clearTimeout(timeout);
+      console.log('✅ Privy initialized successfully');
+      return;
     }
 
+    // Timeout progressivo para fallback
+    const timeout = setTimeout(() => {
+      setInitializationAttempts(prev => {
+        const newAttempts = prev + 1;
+        console.warn(`⏰ Privy initialization attempt ${newAttempts}/3`);
+        
+        if (newAttempts >= 3) {
+          handleFallback();
+        }
+        
+        return newAttempts;
+      });
+    }, 3000 + (initializationAttempts * 2000)); // 3s, 5s, 7s
+
     return () => clearTimeout(timeout);
-  }, [ready]);
+  }, [ready, authenticated, user, initializationAttempts, handleFallback]);
   
   if (useFallback) {
     return (
       <MockAuthProvider>
         <div className="bg-yellow-500/10 border border-yellow-500/30 p-3 mb-4 rounded-lg">
           <p className="text-yellow-400 text-sm">
-            ⚠️ Usando autenticação simulada (Privy indisponível)
+            ⚠️ Usando autenticação simulada (Privy indisponível após 3 tentativas)
           </p>
         </div>
         {children}
@@ -56,16 +125,18 @@ function PrivyWrapper({ children }: { children: React.ReactNode }) {
         <div className="text-center max-w-md">
           <div className="animate-spin w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-6"></div>
           <h2 className="text-2xl font-bold text-white mb-3">Inicializando autenticação</h2>
-          <p className="text-gray-400 mb-6">Conectando com o Privy...</p>
+          <p className="text-gray-400 mb-6">
+            Conectando com o Privy... (Tentativa {initializationAttempts + 1}/3)
+          </p>
           <div className="text-xs text-gray-500">
             <p>Powered by Privy</p>
-            <p className="mt-2">Fallback automático em 6 segundos</p>
+            <p className="mt-2">Fallback automático após 3 tentativas</p>
           </div>
           <button
-            onClick={() => setUseFallback(true)}
+            onClick={handleFallback}
             className="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors"
           >
-            Usar Modo Demo
+            Usar Modo Demo Agora
           </button>
         </div>
       </div>
@@ -79,7 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 
   if (!appId) {
-    console.error('NEXT_PUBLIC_PRIVY_APP_ID is not set - using fallback auth');
+    console.error('❌ NEXT_PUBLIC_PRIVY_APP_ID is not set - using fallback auth');
     return (
       <MockAuthProvider>
         <div className="bg-red-500/10 border border-red-500/30 p-3 mb-4 rounded-lg">
@@ -96,13 +167,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <PrivyProvider
       appId={appId}
       config={{
-        loginMethods: ['wallet'],
+        loginMethods: ['wallet', 'email'],
         appearance: {
           theme: 'dark',
+          accentColor: '#8B5CF6',
+          logo: undefined,
         },
-        // Configurar apenas Sepolia como rede suportada
-        supportedChains: [sepolia],
-        defaultChain: sepolia,
+        // Configurar Sepolia customizado com nosso RPC
+        supportedChains: [customSepolia],
+        defaultChain: customSepolia,
+        // Configurações otimizadas para evitar conflitos
+        embeddedWallets: {
+          createOnLogin: 'users-without-wallets',
+          requireUserPasswordOnCreate: false,
+        },
+        // Configurações de carteiras externas simplificadas
+        externalWallets: {
+          walletConnect: {
+            enabled: true,
+          },
+          coinbaseWallet: {
+            connectionOptions: 'all',
+          },
+        },
       }}
     >
       <PrivyWrapper>

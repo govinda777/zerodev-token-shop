@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTokens } from '@/hooks/useTokens';
-import { useJourney } from './JourneyProvider';
 import { useBlockchain } from '@/hooks/useBlockchain';
 import { STAKING_POOLS } from '@/contracts/config';
 import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationService';
@@ -53,16 +52,11 @@ const stakePools: StakePool[] = [
 
 export function StakingComponent() {
   const { balance, removeTokens } = useTokens();
-  const { journey, completeMission } = useJourney();
   const { stakingOperations, tokenOperations, isLoading: blockchainLoading } = useBlockchain();
   const [selectedPool, setSelectedPool] = useState<StakePool | null>(null);
   const [stakeAmount, setStakeAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [stakedAmount, setStakedAmount] = useState(0);
-
-  const stakeMission = journey.missions.find(m => m.id === 'stake');
-  const isUnlocked = stakeMission?.unlocked || false;
-  const isCompleted = stakeMission?.completed || false;
 
   // Carregar dados de staking do usuário
   useEffect(() => {
@@ -91,10 +85,8 @@ export function StakingComponent() {
       }
     };
 
-    if (isUnlocked) {
-      loadUserStakes();
-    }
-  }, [isUnlocked, stakingOperations, tokenOperations]);
+    loadUserStakes();
+  }, [stakingOperations, tokenOperations]);
 
   const handleStake = async () => {
     if (!selectedPool || !stakeAmount || isLoading || blockchainLoading) return;
@@ -124,10 +116,6 @@ export function StakingComponent() {
           setStakedAmount(prev => prev + amount);
           setStakeAmount('');
           notifySuccess(`${amount} tokens investidos com sucesso em ${selectedPool.name}!`);
-          
-          if (!isCompleted) {
-            completeMission('stake');
-          }
         } else {
           // This path might not be hit if stakingOperations.stake itself throws an error that's caught by the outer catch.
           notifyError('Falha ao registrar o stake no contrato.');
@@ -149,10 +137,6 @@ export function StakingComponent() {
         setStakedAmount(prev => prev + amount);
         setStakeAmount('');
         notifySuccess(`${amount} tokens (simulados) investidos em ${selectedPool.name}!`);
-        
-        if (!isCompleted) {
-          completeMission('stake');
-        }
       } catch (fallbackError) {
         // console.error('Erro no fallback do stake:', fallbackError); // Dev log
         notifyError('Falha ao fazer stake mesmo com simulação.');
@@ -161,18 +145,6 @@ export function StakingComponent() {
       setIsLoading(false);
     }
   };
-
-  if (!isUnlocked) {
-    return (
-      <div className="card">
-        <div className="text-center">
-          <div className="text-4xl mb-4">🔒</div>
-          <h3 className="text-h3 font-bold text-white mb-2">Staking Bloqueado</h3>
-          <p className="text-white/80">Complete a missão do faucet para desbloquear o staking.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -307,17 +279,6 @@ export function StakingComponent() {
                 Saldo insuficiente
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* Mission Status */}
-      {isCompleted && (
-        <div className="card">
-          <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4">
-            <div className="text-green-400 font-medium text-center">
-              ✅ Missão de Staking Concluída! Você desbloqueou investimentos avançados.
-            </div>
           </div>
         </div>
       )}
