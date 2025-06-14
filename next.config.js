@@ -20,15 +20,16 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://auth.privy.io https://rpc.sepolia.org https://*.privy.io",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://auth.privy.io https://rpc.sepolia.org https://*.privy.io https://*.zerodev.app data: blob:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "font-src 'self' https://fonts.gstatic.com",
+              "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data: https: blob: https://*.walletconnect.com https://*.walletconnect.org https://api.web3modal.org",
-              "connect-src 'self' https://auth.privy.io https://rpc.sepolia.org wss://rpc.sepolia.org https://api.privy.io https://*.zerodev.app https://*.walletconnect.com https://*.walletconnect.org https://pulse.walletconnect.org https://api.web3modal.org https://explorer-api.walletconnect.com https://rpc.walletconnect.com wss://*.walletconnect.com https://*.privy.systems https://sepolia.rpc.privy.systems",
+              "connect-src 'self' https://auth.privy.io https://rpc.sepolia.org wss://rpc.sepolia.org https://api.privy.io https://*.zerodev.app https://*.walletconnect.com https://*.walletconnect.org https://pulse.walletconnect.org https://api.web3modal.org https://explorer-api.walletconnect.com https://rpc.walletconnect.com wss://*.walletconnect.com https://*.privy.systems https://sepolia.rpc.privy.systems https://rpc.zerodev.app wss://rpc.zerodev.app",
               "frame-src 'self' https://auth.privy.io https://*.privy.io https://*.walletconnect.com https://*.walletconnect.org https://verify.walletconnect.com",
               "worker-src 'self' blob:",
               "object-src 'none'",
-              "base-uri 'self'"
+              "base-uri 'self'",
+              "form-action 'self'"
             ].join('; ')
           },
           {

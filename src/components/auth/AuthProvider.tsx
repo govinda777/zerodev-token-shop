@@ -97,26 +97,36 @@ function PrivyWrapper({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    console.log('Privy status:', { ready, authenticated, user: !!user });
+    console.log('🔧 PrivyWrapper: Privy status update:', { 
+      ready, 
+      authenticated, 
+      user: !!user,
+      userEmail: user?.email?.address,
+      userWallet: user?.wallet?.address,
+      attempts: initializationAttempts
+    });
     
     if (ready) {
       console.log('✅ Privy initialized successfully');
       return;
     }
 
-    // Timeout progressivo para fallback
+    console.log(`⏳ Privy not ready yet, attempt ${initializationAttempts + 1}/3`);
+
+    // Timeout mais rápido para fallback (1s, 2s, 3s)
     const timeout = setTimeout(() => {
       setInitializationAttempts(prev => {
         const newAttempts = prev + 1;
         console.warn(`⏰ Privy initialization attempt ${newAttempts}/3`);
         
         if (newAttempts >= 3) {
+          console.error('❌ Privy failed to initialize after 3 attempts, switching to fallback');
           handleFallback();
         }
         
         return newAttempts;
       });
-    }, 3000 + (initializationAttempts * 2000)); // 3s, 5s, 7s
+    }, 1000 + (initializationAttempts * 1000)); // 1s, 2s, 3s
 
     return () => clearTimeout(timeout);
   }, [ready, authenticated, user, initializationAttempts, handleFallback]);
@@ -164,6 +174,14 @@ function PrivyWrapper({ children }: { children: React.ReactNode }) {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 
+  console.log('🔧 AuthProvider: App ID from env:', appId);
+  console.log('🔧 AuthProvider: All env vars:', {
+    PRIVY_APP_ID: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
+    ZERODEV_RPC: process.env.NEXT_PUBLIC_ZERODEV_RPC,
+    CHAIN: process.env.NEXT_PUBLIC_CHAIN,
+    PROJECT_ID: process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID,
+  });
+
   if (!appId) {
     console.error('❌ NEXT_PUBLIC_PRIVY_APP_ID is not set - using fallback auth');
     return (
@@ -178,41 +196,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
+  console.log('🔧 AuthProvider: Initializing Privy with App ID:', appId);
+
   return (
     <PrivyProvider
       appId={appId}
       config={{
-        loginMethods: ['wallet', 'email', 'google', 'twitter'],
+        // Configuração mínima para teste
+        loginMethods: ['wallet', 'email'],
         appearance: {
           theme: 'dark',
           accentColor: '#8B5CF6',
-          logo: undefined,
         },
-        // Configurar Sepolia customizado com nosso RPC
-        supportedChains: [customSepolia],
-        defaultChain: customSepolia,
-        // Configurações otimizadas para evitar conflitos
+        // Usar configuração padrão do Sepolia
+        supportedChains: [sepolia],
+        defaultChain: sepolia,
+        // Configurações simplificadas
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
-          requireUserPasswordOnCreate: false,
-        },
-        // Configurações de carteiras externas simplificadas
-        externalWallets: {
-          walletConnect: {
-            enabled: true,
-            // Configuração dinâmica da URL para resolver problema de porta
-            ...(typeof window !== 'undefined' && {
-              metadata: {
-                name: 'ZeroDev Token Shop',
-                description: 'Marketplace de tokens na blockchain Sepolia',
-                url: window.location.origin,
-                icons: [`${window.location.origin}/favicon.ico`]
-              }
-            })
-          },
-          coinbaseWallet: {
-            connectionOptions: 'all',
-          },
         },
       }}
     >

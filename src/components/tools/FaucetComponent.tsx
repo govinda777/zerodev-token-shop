@@ -210,7 +210,7 @@ export function FaucetComponent() {
         }
       } else {
         // Se falhou, verificar o tipo de erro
-        if (result.error?.code === 'EMBEDDED_WALLET_ERROR' || result.error?.code === 'EMBEDDED_WALLET_FAILED') {
+        if (result.error?.code === 'EMBEDDED_WALLET_ERROR') {
           console.warn('Faucet: Embedded wallet error detected, using local fallback');
           notifyWarning('Carteira embarcada com problemas. Usando modo local.');
           

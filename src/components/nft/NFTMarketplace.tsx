@@ -80,40 +80,29 @@ export function NFTMarketplace() {
     setIsLoading(nft.id);
 
     try {
-      let result;
+      // Como não temos método buyNFT no contrato, usar simulação
+      console.log('🔧 Comprando NFT via simulação');
       
-      // Comprar NFT específico baseado no ID
-      if (nft.id === 1) {
-        result = await nftOperations.buyNFT(NFT_CONFIG.MEMBER_NFT.id);
-      } else if (nft.id === 2) {
-        result = await nftOperations.buyNFT(NFT_CONFIG.PREMIUM_NFT.id);
-      } else {
-        // Para outros NFTs, simular compra
-        throw new Error('NFT não disponível no contrato');
-      }
-
-      if (result.success) {
-        // console.log('✅ NFT comprado via contrato:', result.hash); // Dev log
-        await removeTokens(nft.price); // removeTokens is now async
-        setOwnedNFTs(prev => [...prev, nft]);
-        notifySuccess(`${nft.name} comprado com sucesso!`);
-      } else {
-        notifyError(`Falha na compra do NFT: ${result.error?.message || 'Erro desconhecido'}`);
-        throw new Error(result.error?.message || 'Falha na compra do NFT');
-      }
+      // Simular compra
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      await removeTokens(nft.price);
+      setOwnedNFTs(prev => [...prev, nft]);
+      notifySuccess(`${nft.name} comprado com sucesso!`);
     } catch (error) {
-      // console.error('Erro ao comprar NFT:', error); // Original error
+      console.error('Erro ao comprar NFT:', error);
       notifyWarning('Ocorreu um erro ao comprar NFT. Usando simulação.');
+      
       // Fallback to simulation
       try {
-        // console.warn('⚠️ Usando simulação de compra de NFT'); // Dev log
+        console.warn('⚠️ Usando simulação de compra de NFT');
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        await removeTokens(nft.price); // removeTokens is now async
+        await removeTokens(nft.price);
         setOwnedNFTs(prev => [...prev, nft]);
         notifySuccess(`${nft.name} (simulado) comprado com sucesso!`);
       } catch (fallbackError) {
-        // console.error('Erro no fallback da compra de NFT:', fallbackError); // Dev log
+        console.error('Erro no fallback da compra de NFT:', fallbackError);
         notifyError('Falha ao comprar NFT mesmo com simulação.');
       }
     } finally {

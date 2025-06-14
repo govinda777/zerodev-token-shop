@@ -157,7 +157,14 @@ export function useBlockchain() {
         } catch (embeddedError) {
           console.warn('Embedded wallet transaction failed:', embeddedError);
           // Para carteiras embarcadas, retornar erro específico para fallback
-          throw new Error('EMBEDDED_WALLET_FAILED');
+          return {
+            success: false,
+            error: {
+              code: 'EMBEDDED_WALLET_ERROR',
+              message: 'Embedded wallet transaction failed. Using fallback mode.',
+              details: embeddedError,
+            },
+          };
         }
       }
 
@@ -187,18 +194,6 @@ export function useBlockchain() {
       };
     } catch (error: unknown) {
       console.error(`Error executing ${functionName}:`, error);
-      
-      // Se for erro de carteira embarcada, retornar erro específico
-      if ((error as Error).message === 'EMBEDDED_WALLET_FAILED') {
-        return {
-          success: false,
-          error: {
-            code: 'EMBEDDED_WALLET_ERROR',
-            message: 'Embedded wallet transaction failed. Network issues detected.',
-            details: error,
-          },
-        };
-      }
       
       return {
         success: false,

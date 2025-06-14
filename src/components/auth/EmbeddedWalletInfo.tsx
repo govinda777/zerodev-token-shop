@@ -5,20 +5,19 @@ import { usePrivyAuth } from "@/hooks/usePrivyAuth";
 export function EmbeddedWalletInfo() {
   const { isAuthenticated, user } = usePrivyAuth();
 
-  // Só mostrar se estiver autenticado
-  if (!isAuthenticated || !user) {
+  // Só mostrar se estiver autenticado e tiver carteira
+  if (!isAuthenticated || !user || !user.wallet?.address) {
     return null;
   }
 
-  // Verificar se é login social (tem email mas pode não ter carteira externa conectada)
+  // Verificar se é login social (tem email)
   const hasEmail = !!(user as any)?.email?.address;
-  const hasExternalWallet = user.linkedAccounts?.some(acc => acc.type === 'wallet');
-  const isSocialLogin = hasEmail && !hasExternalWallet;
   
-  // Verificar se tem carteira embarcada (não é uma carteira externa como MetaMask)
-  const hasEmbeddedWallet = !!user.wallet?.address && (typeof window !== 'undefined' && !window?.ethereum);
+  // Verificar se não tem MetaMask disponível (indicativo de carteira embarcada)
+  const isEmbeddedWallet = typeof window !== 'undefined' && !window?.ethereum;
 
-  if (!isSocialLogin && !hasEmbeddedWallet) {
+  // Só mostrar para logins sociais ou quando não há MetaMask
+  if (!hasEmail && !isEmbeddedWallet) {
     return null;
   }
 
@@ -47,7 +46,7 @@ export function EmbeddedWalletInfo() {
             </p>
           </div>
           <p className="text-blue-300 text-xs">
-            Endereço da carteira: {user.wallet?.address ? `${user.wallet.address.slice(0, 10)}...${user.wallet.address.slice(-8)}` : 'Carregando...'}
+            Endereço da carteira: {user.wallet.address.slice(0, 10)}...{user.wallet.address.slice(-8)}
           </p>
         </div>
       </div>

@@ -67,10 +67,12 @@ export function AirdropComponent() {
   // Carregar airdrops já reivindicados - CORRIGIDO para evitar loops
   useEffect(() => {
     const loadClaimedAirdrops = async () => {
-      // Verifica se o contrato de airdrop é válido antes de tentar acessar
+      // Se o contrato não está deployado, usar dados locais
       if (!isValidAirdropAddress(CONTRACTS.AIRDROP)) {
-        // Não tenta acessar nem loga erro repetidamente
-        setClaimedAirdrops([]);
+        const localClaimed = localStorage.getItem('claimed_airdrops');
+        if (localClaimed) {
+          setClaimedAirdrops(JSON.parse(localClaimed));
+        }
         return;
       }
       
@@ -79,8 +81,10 @@ export function AirdropComponent() {
         const claimed = await Promise.all(
           airdropCampaigns.map(async (campaign) => {
             try {
-              const isClaimed = await airdropOperations.hasReceived();
-              return isClaimed ? campaign.id : null;
+              // canClaimAirdrop retorna true se pode clamar (não clamou ainda)
+              // então invertemos a lógica
+              const canClaim = await airdropOperations.canClaimAirdrop();
+              return !canClaim ? campaign.id : null; // Se não pode clamar, já foi reivindicado
             } catch {
               // Não loga erro se o contrato não está deployado
               return null;

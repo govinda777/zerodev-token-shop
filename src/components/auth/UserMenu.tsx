@@ -8,7 +8,7 @@ export function UserMenu() {
   const { 
     isAuthenticated, 
     address, 
-    userInfo, 
+    user,
     disconnect 
   } = usePrivyAuth();
   
@@ -18,6 +18,11 @@ export function UserMenu() {
   if (!isAuthenticated) {
     return null;
   }
+
+  // Get user email safely
+  const userEmail = (user as any)?.email?.address;
+  const displayName = userEmail || (address ? `${address.slice(0, 8)}...${address.slice(-6)}` : "Usuário");
+  const userId = user?.id ? `ID: ${user.id.slice(0, 8)}...` : "Conta conectada";
 
   return (
     <div className="relative">
@@ -60,10 +65,10 @@ export function UserMenu() {
               </div>
               <div>
                 <p className="text-white font-medium">
-                  {userInfo?.email || (address ? `${address.slice(0, 8)}...${address.slice(-6)}` : "Usuário")}
+                  {displayName}
                 </p>
                 <p className="text-gray-400 text-sm">
-                  {userInfo?.id ? `ID: ${userInfo.id.slice(0, 8)}...` : "Conta conectada"}
+                  {userId}
                 </p>
               </div>
             </div>

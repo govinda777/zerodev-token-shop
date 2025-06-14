@@ -24,6 +24,37 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${poppins.variable} font-sans bg-black text-white antialiased`}>
+        <Script id="warning-suppressor" strategy="beforeInteractive">
+          {`
+            // Suprimir warnings conhecidos e não críticos em desenvolvimento
+            if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+              const originalWarn = console.warn;
+              const originalError = console.error;
+              
+              const suppressedPatterns = [
+                'mathTaming',
+                'dateTaming', 
+                'Removing unpermitted intrinsics',
+                'toTemporalInstant',
+                'lockdown-install.js'
+              ];
+              
+              console.warn = (...args) => {
+                const message = args.join(' ');
+                if (!suppressedPatterns.some(pattern => message.includes(pattern))) {
+                  originalWarn.apply(console, args);
+                }
+              };
+              
+              console.error = (...args) => {
+                const message = args.join(' ');
+                if (!suppressedPatterns.some(pattern => message.includes(pattern))) {
+                  originalError.apply(console, args);
+                }
+              };
+            }
+          `}
+        </Script>
         <Script id="rpc-interceptor" strategy="beforeInteractive">
           {`
             // Interceptação global robusta para drpc.org
