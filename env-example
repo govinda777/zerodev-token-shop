@@ -6,5 +6,10 @@ NEXT_PUBLIC_PRIVY_APP_ID=cmaqqs10k00onl20md0g7c7bg
 # Privy Configuration
 NEXT_PUBLIC_PRIVY_APP_ID=cmaqqs10k00onl20md0g7c7bg
 
-# ZeroDev Configuration (se necessário)
-NEXT_PUBLIC_ZERODEV_PROJECT_ID=your_zerodev_project_id_here
+# ZeroDev Configuration
+NEXT_PUBLIC_ZERODEV_PROJECT_ID=ca6057ad-912b-4760-ac3d-1f3812d63b12
+
+# Paymaster Configuration
+NEXT_PUBLIC_VERIFYING_PAYMASTER=0xd740b875E8b2B1Ec94b624403f5a3427984cF458
+NEXT_PUBLIC_ERC20_PAYMASTER=0xe6Cc06Dd1447f31036e3F0347E8E6a6bEd8B5D42
+NEXT_PUBLIC_SELF_FUNDED_RPC=https://rpc.zerodev.app/api/v3/ca6057ad-912b-4760-ac3d-1f3812d63b12/chain/11155111?selfFunded=true

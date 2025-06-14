@@ -32,6 +32,7 @@
     "test:claim:local": "hardhat run scripts/test-claim.ts --network localhost",
     "node:local": "hardhat node",
     "test:contracts": "hardhat test test/ZeroDevToken.test.ts test/TokenFaucet.test.ts",
+    "test:paymaster": "node scripts/test-paymaster.js",
     "blockchain:setup": "npm run compile && npm run deploy:sepolia && npm run verify:sepolia",
     "blockchain:test": "npm run test:claim",
     "clean": "rm -rf .next node_modules/.cache && npm install",

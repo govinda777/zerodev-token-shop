@@ -202,18 +202,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <PrivyProvider
       appId={appId}
       config={{
-        // Configuração mínima para teste
-        loginMethods: ['wallet', 'email'],
+        // Métodos de login disponíveis
+        loginMethods: ['email', 'google', 'wallet', 'sms'],
         appearance: {
           theme: 'dark',
           accentColor: '#8B5CF6',
+          logo: undefined,
+          showWalletLoginFirst: false, // Mostrar e-mail primeiro
         },
-        // Usar configuração padrão do Sepolia
-        supportedChains: [sepolia],
-        defaultChain: sepolia,
-        // Configurações simplificadas
+        // Configuração de carteiras embarcadas
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
+          requireUserPasswordOnCreate: false,
+          showWalletUIs: true,
+        },
+        // Redes suportadas
+        supportedChains: [sepolia],
+        defaultChain: sepolia,
+        // Configurações adiciais para melhor UX
+        mfa: {
+          noPromptOnMfaRequired: false,
         },
       }}
     >
