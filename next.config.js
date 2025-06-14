@@ -20,12 +20,12 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://auth.privy.io https://rpc.sepolia.org",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://auth.privy.io https://rpc.sepolia.org https://*.privy.io",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://auth.privy.io https://rpc.sepolia.org wss://rpc.sepolia.org https://api.privy.io",
-              "frame-src 'self' https://auth.privy.io",
+              "img-src 'self' data: https: blob: https://*.walletconnect.com https://*.walletconnect.org https://api.web3modal.org",
+              "connect-src 'self' https://auth.privy.io https://rpc.sepolia.org wss://rpc.sepolia.org https://api.privy.io https://*.zerodev.app https://*.walletconnect.com https://*.walletconnect.org https://pulse.walletconnect.org https://api.web3modal.org https://explorer-api.walletconnect.com https://rpc.walletconnect.com wss://*.walletconnect.com",
+              "frame-src 'self' https://auth.privy.io https://*.privy.io https://*.walletconnect.com https://*.walletconnect.org https://verify.walletconnect.com",
               "worker-src 'self' blob:",
               "object-src 'none'",
               "base-uri 'self'"
@@ -38,6 +38,14 @@ const nextConfig = {
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff'
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'unsafe-none'
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups'
           }
         ],
       },

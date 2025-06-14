@@ -16,7 +16,7 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Interceptação global mais robusta
+// Interceptação global mais robusta e silenciosa
 let interceptorInstalled = false;
 
 const installRPCInterceptor = () => {
@@ -26,14 +26,27 @@ const installRPCInterceptor = () => {
   window.fetch = function(input: RequestInfo | URL, init?: RequestInit) {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
     
-    // Interceptar requisições para sepolia.drpc.org
-    if (url && url.includes('sepolia.drpc.org')) {
-      console.log('🚫 AuthProvider interceptor: Blocked drpc.org request, using:', NETWORK_CONFIG.rpcUrl);
+    // Interceptar apenas RPCs não autorizados (não ZeroDev)
+    const blockedDomains = [
+      'sepolia.drpc.org',
+      '.drpc.org',
+      'ethereum-sepolia-rpc.allthatnode.com'
+    ];
+    
+    const isZeroDevRPC = url && url.includes('zerodev.app');
+    const shouldIntercept = !isZeroDevRPC && blockedDomains.some(domain => url && url.includes(domain));
+    
+    if (shouldIntercept && NETWORK_CONFIG.rpcUrl) {
+      // Log apenas em desenvolvimento para evitar spam no console
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 RPC redirected:', url, '->', NETWORK_CONFIG.rpcUrl);
+      }
+      
       const newInput = typeof input === 'string' 
-        ? input.replace(/https?:\/\/sepolia\.drpc\.org/g, NETWORK_CONFIG.rpcUrl)
+        ? NETWORK_CONFIG.rpcUrl
         : input instanceof URL 
-          ? new URL(input.href.replace(/https?:\/\/sepolia\.drpc\.org/g, NETWORK_CONFIG.rpcUrl))
-          : { ...input, url: input.url.replace(/https?:\/\/sepolia\.drpc\.org/g, NETWORK_CONFIG.rpcUrl) };
+          ? new URL(NETWORK_CONFIG.rpcUrl)
+          : { ...input, url: NETWORK_CONFIG.rpcUrl };
       
       return originalFetch.call(this, newInput, init);
     }
@@ -42,7 +55,9 @@ const installRPCInterceptor = () => {
   };
   
   interceptorInstalled = true;
-  console.log('✅ RPC Interceptor installed successfully');
+  if (process.env.NODE_ENV === 'development') {
+    console.log('✅ RPC Interceptor installed successfully');
+  }
 };
 
 // Instalar interceptor imediatamente
@@ -185,6 +200,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         externalWallets: {
           walletConnect: {
             enabled: true,
+            // Configuração dinâmica da URL para resolver problema de porta
+            ...(typeof window !== 'undefined' && {
+              metadata: {
+                name: 'ZeroDev Token Shop',
+                description: 'Marketplace de tokens na blockchain Sepolia',
+                url: window.location.origin,
+                icons: [`${window.location.origin}/favicon.ico`]
+              }
+            })
           },
           coinbaseWallet: {
             connectionOptions: 'all',

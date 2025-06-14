@@ -33,7 +33,9 @@
     "node:local": "hardhat node",
     "test:contracts": "hardhat test test/ZeroDevToken.test.ts test/TokenFaucet.test.ts",
     "blockchain:setup": "npm run compile && npm run deploy:sepolia && npm run verify:sepolia",
-    "blockchain:test": "npm run test:claim"
+    "blockchain:test": "npm run test:claim",
+    "clean": "rm -rf .next node_modules/.cache && npm install",
+    "fix-deps": "npm update @privy-io/react-auth @zerodev/sdk @zerodev/ecdsa-validator && npm run clean"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.1",
