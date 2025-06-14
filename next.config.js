@@ -24,7 +24,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https: blob: https://*.walletconnect.com https://*.walletconnect.org https://api.web3modal.org",
-              "connect-src 'self' https://auth.privy.io https://rpc.sepolia.org wss://rpc.sepolia.org https://api.privy.io https://*.zerodev.app https://*.walletconnect.com https://*.walletconnect.org https://pulse.walletconnect.org https://api.web3modal.org https://explorer-api.walletconnect.com https://rpc.walletconnect.com wss://*.walletconnect.com",
+              "connect-src 'self' https://auth.privy.io https://rpc.sepolia.org wss://rpc.sepolia.org https://api.privy.io https://*.zerodev.app https://*.walletconnect.com https://*.walletconnect.org https://pulse.walletconnect.org https://api.web3modal.org https://explorer-api.walletconnect.com https://rpc.walletconnect.com wss://*.walletconnect.com https://*.privy.systems https://sepolia.rpc.privy.systems",
               "frame-src 'self' https://auth.privy.io https://*.privy.io https://*.walletconnect.com https://*.walletconnect.org https://verify.walletconnect.com",
               "worker-src 'self' blob:",
               "object-src 'none'",

@@ -182,7 +182,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <PrivyProvider
       appId={appId}
       config={{
-        loginMethods: ['wallet', 'email'],
+        loginMethods: ['wallet', 'email', 'google', 'twitter'],
         appearance: {
           theme: 'dark',
           accentColor: '#8B5CF6',

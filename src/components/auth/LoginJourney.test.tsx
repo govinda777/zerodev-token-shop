@@ -26,7 +26,7 @@ jest.mock('@/utils/journeyLogger', () => ({
 }));
 
 import { render, screen } from '@testing-library/react';
-import { LoginDemo } from './LoginDemo';
+import { LoginScreen } from './LoginScreen';
 import { TokenProvider } from './TokenProvider';
 import { MockAuthProvider } from './MockAuthProvider';
 
@@ -48,12 +48,12 @@ describe('Login Journey - Recompensa Inicial', () => {
   it('deve exibir botão de login quando não conectado', () => {
     render(
       <TestWrapper>
-        <LoginDemo />
+        <LoginScreen />
       </TestWrapper>
     );
 
-    expect(screen.getByText('Conectar Carteira')).toBeInTheDocument();
-    expect(screen.getByText('Faça login para acessar o marketplace')).toBeInTheDocument();
+    expect(screen.getByText('Conectar com Carteira')).toBeInTheDocument();
+    expect(screen.getByText('Faça seu Login')).toBeInTheDocument();
   });
 
   it('deve conceder tokens de boas-vindas no primeiro login', async () => {
@@ -61,56 +61,56 @@ describe('Login Journey - Recompensa Inicial', () => {
     // Vamos apenas verificar se o componente renderiza corretamente
     render(
       <TestWrapper>
-        <LoginDemo />
+        <LoginScreen />
       </TestWrapper>
     );
 
     // Verificar se o botão de conectar está presente
-    expect(screen.getByText('Conectar Carteira')).toBeInTheDocument();
-    expect(screen.getByText('Faça login para acessar o marketplace')).toBeInTheDocument();
+    expect(screen.getByText('Conectar com Carteira')).toBeInTheDocument();
+    expect(screen.getByText('Faça seu Login')).toBeInTheDocument();
   });
 
   it('não deve conceder tokens novamente em logins subsequentes', async () => {
     // Teste simplificado - apenas verifica renderização
     render(
       <TestWrapper>
-        <LoginDemo />
+        <LoginScreen />
       </TestWrapper>
     );
 
-    expect(screen.getByText('Conectar Carteira')).toBeInTheDocument();
+    expect(screen.getByText('Conectar com Carteira')).toBeInTheDocument();
   });
 
   it('deve exibir informações da carteira após login', async () => {
     // Teste simplificado - apenas verifica renderização
     render(
       <TestWrapper>
-        <LoginDemo />
+        <LoginScreen />
       </TestWrapper>
     );
 
-    expect(screen.getByText('Demonstração do Privy')).toBeInTheDocument();
+    expect(screen.getByText('Faça seu Login')).toBeInTheDocument();
   });
 
   it('deve permitir desconectar após login', async () => {
     // Teste simplificado - apenas verifica renderização
     render(
       <TestWrapper>
-        <LoginDemo />
+        <LoginScreen />
       </TestWrapper>
     );
 
-    expect(screen.getByText('Conectar Carteira')).toBeInTheDocument();
+    expect(screen.getByText('Conectar com Carteira')).toBeInTheDocument();
   });
 
   it('deve registrar logs de autenticação com detalhes corretos', async () => {
     // Teste simplificado - apenas verifica renderização
     render(
       <TestWrapper>
-        <LoginDemo />
+        <LoginScreen />
       </TestWrapper>
     );
 
-    expect(screen.getByText('Conectar Carteira')).toBeInTheDocument();
+    expect(screen.getByText('Conectar com Carteira')).toBeInTheDocument();
   });
 }); 

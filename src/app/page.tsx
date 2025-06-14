@@ -4,7 +4,8 @@ import { Header } from "@/components/common/Header";
 import { Footer } from "@/components/common/Footer";
 import { SkipLinks } from "@/components/common/SkipLinks";
 import { ProductGrid } from "@/components/shop/ProductGrid";
-import { LoginDemo } from "@/components/auth/LoginDemo";
+import { LoginScreen } from "@/components/auth/LoginScreen";
+import { EmbeddedWalletInfo } from "@/components/auth/EmbeddedWalletInfo";
 import { NetworkGuard } from "@/components/common/NetworkGuard";
 import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 import { ProductProvider } from '@/components/shop/ProductProvider';
@@ -13,7 +14,6 @@ import { StakingComponent } from '@/components/investment/StakingComponent';
 import { PassiveIncomeComponent } from '@/components/investment/PassiveIncomeComponent';
 import { NFTMarketplace } from '@/components/nft/NFTMarketplace';
 import { AirdropComponent } from '@/components/rewards/AirdropComponent';
-
 
 // Componente interno simplificado
 function HomeContent() {
@@ -122,14 +122,16 @@ function HomeContent() {
 
           {/* Conditional Rendering for Login or Tools/Products */}
           {!isConnected ? (
-            <section className="section-spacing bg-black/10" aria-labelledby="auth-demo-title">
-              <div className="container-responsive">
-                <h2 id="auth-demo-title" className="sr-only">Demonstração de autenticação</h2>
-                <LoginDemo />
-              </div>
-            </section>
+            <LoginScreen />
           ) : (
             <>
+              {/* Embedded Wallet Info */}
+              <section className="section-spacing">
+                <div className="container-responsive">
+                  <EmbeddedWalletInfo />
+                </div>
+              </section>
+
               {/* Tools Section */}
               <section id="tools" className="section-spacing bg-black/10" aria-labelledby="tools-title">
                 <div className="container-responsive">
@@ -222,17 +224,6 @@ function HomeContent() {
                         <AirdropComponent />
                       </NetworkGuard>
                     </div>
-                    
-                    {/* Subscription Services - COMENTADO TEMPORARIAMENTE */}
-                    {/*
-                    <div className="col-span-1 lg:col-span-2">
-                      <div className="bg-black/20 border border-white/20 rounded-lg p-6">
-                        <NetworkGuard>
-                          <SubscriptionComponent />
-                        </NetworkGuard>
-                      </div>
-                    </div>
-                    */}
                     
                     {/* Placeholder para subscription */}
                     <div className="col-span-1 lg:col-span-2">

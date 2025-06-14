@@ -8,25 +8,37 @@ import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationS
 
 export function FaucetComponent() {
   const { addTokens } = useTokens();
-  const { faucetOperations, isLoading: blockchainLoading } = useBlockchain();
+  const { faucetOperations, isLoading: blockchainLoading, isConnected } = useBlockchain();
   const [isLoading, setIsLoading] = useState(false);
   const [lastClaim, setLastClaim] = useState<number | null>(null);
   const [canClaimFromContract, setCanClaimFromContract] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
   const [hasNotifiedCooldownEnd, setHasNotifiedCooldownEnd] = useState(false);
+  const [networkError, setNetworkError] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const canClaim = useCallback(() => {
-    // Usar verificação do contrato se disponível, senão usar lógica local
+    // Se há erro de rede, usar lógica local
+    if (networkError) {
+      if (!lastClaim) return true;
+      const now = Date.now();
+      const timeDiff = now - lastClaim;
+      const cooldownTime = 24 * 60 * 60 * 1000; // 24 horas
+      return timeDiff >= cooldownTime;
+    }
+    
+    // Usar verificação do contrato se disponível
     if (canClaimFromContract !== undefined) {
       return canClaimFromContract;
     }
+    
+    // Fallback para lógica local
     if (!lastClaim) return true;
     const now = Date.now();
     const timeDiff = now - lastClaim;
     const cooldownTime = 24 * 60 * 60 * 1000; // 24 horas
     return timeDiff >= cooldownTime;
-  }, [canClaimFromContract, lastClaim]);
+  }, [canClaimFromContract, lastClaim, networkError]);
 
   const updateTimeRemaining = useCallback(() => {
     if (!lastClaim) {
@@ -41,10 +53,8 @@ export function FaucetComponent() {
     
     if (remaining <= 0) {
       setTimeRemaining(null);
-      // Quando o cooldown acabar, atualizar o estado para permitir novo claim
       setCanClaimFromContract(true);
       
-      // Notificar apenas uma vez que o cooldown acabou
       if (!hasNotifiedCooldownEnd) {
         notifySuccess('🎉 Faucet liberado! Você pode reivindicar novos tokens agora.');
         setHasNotifiedCooldownEnd(true);
@@ -59,9 +69,8 @@ export function FaucetComponent() {
     setTimeRemaining(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
   }, [lastClaim, hasNotifiedCooldownEnd]);
 
-  // Timer para atualizar o countdown a cada segundo - OTIMIZADO
+  // Timer para atualizar o countdown a cada segundo
   useEffect(() => {
-    // Limpar interval anterior
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
@@ -71,45 +80,81 @@ export function FaucetComponent() {
       return;
     }
 
-    // Atualizar imediatamente
     updateTimeRemaining();
-
-    // Configurar interval para atualizar a cada segundo
     intervalRef.current = setInterval(updateTimeRemaining, 1000);
 
-    // Cleanup
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
     };
-  }, [lastClaim, updateTimeRemaining]); // Removido canClaim das dependências para evitar loop
+  }, [lastClaim, updateTimeRemaining]);
 
-  // Verificar se pode reivindicar do contrato - OTIMIZADO
+  // Verificar se pode reivindicar do contrato com melhor tratamento de erro
   useEffect(() => {
     let isMounted = true;
 
     const checkCanClaim = async () => {
+      // Se não estiver conectado, não tentar verificar o contrato
+      if (!isConnected) {
+        if (isMounted) {
+          setNetworkError(false);
+          setCanClaimFromContract(true);
+        }
+        return;
+      }
+
       try {
-        const canClaimResult = await faucetOperations.canClaim();
+        setNetworkError(false);
+        
+        // Timeout para evitar travamento
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 5000)
+        );
+        
+        const canClaimPromise = faucetOperations.canClaim();
+        const lastClaimPromise = faucetOperations.getLastClaim();
+        
+        const [canClaimResult, lastClaimTime] = await Promise.race([
+          Promise.all([canClaimPromise, lastClaimPromise]),
+          timeoutPromise
+        ]) as [boolean, number];
+        
         if (isMounted) {
           setCanClaimFromContract(canClaimResult);
-        }
-        
-        // Obter último claim do contrato
-        const lastClaimTime = await faucetOperations.getLastClaim();
-        if (isMounted && lastClaimTime > 0) {
-          setLastClaim(lastClaimTime);
+          if (lastClaimTime > 0) {
+            setLastClaim(lastClaimTime);
+          }
         }
       } catch (error) {
-        // Fallback para lógica local se contrato não estiver disponível
+        console.warn('Faucet: Erro ao verificar contrato, usando modo local:', error);
         if (isMounted) {
-          setCanClaimFromContract(canClaim());
+          // Detectar diferentes tipos de erro de rede
+          const errorMessage = (error as Error).message?.toLowerCase() || '';
+          const errorName = (error as Error).name?.toLowerCase() || '';
+          const errorStack = (error as Error).stack?.toLowerCase() || '';
+          
+          const isNetworkError = errorMessage.includes('network') || 
+                                errorMessage.includes('fetch') || 
+                                errorMessage.includes('timeout') ||
+                                errorMessage.includes('http request failed') ||
+                                errorMessage.includes('connection') ||
+                                errorName.includes('httprequesterror') ||
+                                errorName.includes('networkerror') ||
+                                errorStack.includes('httprequesterror') ||
+                                errorStack.includes('fetch resource');
+          
+          setNetworkError(isNetworkError);
+          
+          // Usar dados do localStorage como fallback
+          const localLastClaim = localStorage.getItem('faucet_last_claim');
+          if (localLastClaim) {
+            setLastClaim(parseInt(localLastClaim));
+          }
         }
       }
     };
 
-    // Só executa se faucetOperations estiver disponível
     if (faucetOperations) {
       checkCanClaim();
     }
@@ -117,7 +162,7 @@ export function FaucetComponent() {
     return () => {
       isMounted = false;
     };
-  }, []); // Array vazio - executa apenas uma vez na montagem
+  }, [faucetOperations, isConnected]);
 
   const handleClaim = async () => {
     if (!canClaim() || isLoading || blockchainLoading) return;
@@ -125,33 +170,75 @@ export function FaucetComponent() {
     setIsLoading(true);
     
     try {
-      // Tentar usar o contrato real primeiro
-      const result = await faucetOperations.requestTokens();
+      // Se há erro de rede ou não está conectado, usar simulação diretamente
+      if (networkError || !isConnected) {
+        notifyWarning('Usando modo offline. Tokens serão adicionados localmente.');
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const now = Date.now();
+        addTokens(MISSION_REWARDS.FAUCET);
+        setLastClaim(now);
+        localStorage.setItem('faucet_last_claim', now.toString());
+        setCanClaimFromContract(false);
+        setHasNotifiedCooldownEnd(false);
+        notifySuccess(`${MISSION_REWARDS.FAUCET} tokens adicionados com sucesso!`);
+        return;
+      }
+
+      // Tentar usar o contrato real com timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout na transação')), 10000)
+      );
       
+      const result = await Promise.race([
+        faucetOperations.requestTokens(),
+        timeoutPromise
+      ]) as any;
+      
+      // Verificar se a transação foi bem-sucedida
       if (result.success) {
         addTokens(MISSION_REWARDS.FAUCET);
         setLastClaim(Date.now());
         setCanClaimFromContract(false);
         setHasNotifiedCooldownEnd(false);
-        notifySuccess(`${MISSION_REWARDS.FAUCET} tokens reivindicados com sucesso!`);
-      } else {
-        notifyWarning('Interação com contrato falhou. Usando simulação para conceder tokens do faucet.');
-        await new Promise(resolve => setTimeout(resolve, 2000));
         
-        addTokens(MISSION_REWARDS.FAUCET);
-        setLastClaim(Date.now());
-        setHasNotifiedCooldownEnd(false);
+        // Verificar se foi usado fallback
+        if (result.error?.code === 'FALLBACK_USED') {
+          notifySuccess(`${MISSION_REWARDS.FAUCET} tokens adicionados localmente (blockchain indisponível)!`);
+        } else {
+          notifySuccess(`${MISSION_REWARDS.FAUCET} tokens reivindicados da blockchain!`);
+        }
+      } else {
+        // Se falhou, verificar o tipo de erro
+        if (result.error?.code === 'EMBEDDED_WALLET_ERROR' || result.error?.code === 'EMBEDDED_WALLET_FAILED') {
+          console.warn('Faucet: Embedded wallet error detected, using local fallback');
+          notifyWarning('Carteira embarcada com problemas. Usando modo local.');
+          
+          const now = Date.now();
+          addTokens(MISSION_REWARDS.FAUCET);
+          setLastClaim(now);
+          localStorage.setItem('faucet_last_claim', now.toString());
+          setCanClaimFromContract(false);
+          setHasNotifiedCooldownEnd(false);
+          notifySuccess(`${MISSION_REWARDS.FAUCET} tokens adicionados localmente!`);
+        } else {
+          throw new Error(result.error?.message || 'Transação falhou');
+        }
       }
     } catch (error) {
-      notifyWarning('Ocorreu um erro. Usando simulação para conceder tokens do faucet.');
-      // Fallback to simulation
+      console.warn('Faucet: Erro na transação blockchain, usando fallback:', error);
+      notifyWarning('Blockchain indisponível. Usando modo local para conceder tokens.');
+      
       try {
         await new Promise(resolve => setTimeout(resolve, 1000));
+        const now = Date.now();
         addTokens(MISSION_REWARDS.FAUCET);
-        setLastClaim(Date.now());
+        setLastClaim(now);
+        localStorage.setItem('faucet_last_claim', now.toString());
         setHasNotifiedCooldownEnd(false);
+        notifySuccess(`${MISSION_REWARDS.FAUCET} tokens adicionados localmente!`);
       } catch (fallbackError) {
-        notifyError('Falha ao reivindicar tokens do faucet mesmo com simulação.');
+        notifyError('Falha ao reivindicar tokens do faucet.');
       }
     } finally {
       setIsLoading(false);
@@ -166,6 +253,18 @@ export function FaucetComponent() {
         <p className="text-white/80 mb-6">
           Reivindique tokens gratuitos a cada 24 horas!
         </p>
+
+        {/* Network Status */}
+        {networkError && (
+          <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3 mb-4">
+            <div className="flex items-center gap-2 text-yellow-400 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <span>Modo offline ativo - Blockchain indisponível</span>
+            </div>
+          </div>
+        )}
 
         {/* Faucet Stats */}
         <div className="bg-black/20 rounded-lg p-4 mb-6">
@@ -221,6 +320,7 @@ export function FaucetComponent() {
             <li>Reivindique tokens gratuitos a cada 24 horas</li>
             <li>Tokens são adicionados à sua carteira automaticamente</li>
             <li>Use os tokens para comprar produtos no marketplace</li>
+            <li>{networkError ? 'Modo offline: tokens salvos localmente' : 'Conectado à blockchain Sepolia'}</li>
           </ul>
         </div>
       </div>
