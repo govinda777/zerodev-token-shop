@@ -1,287 +1,318 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTokens } from '@/hooks/useTokens';
-import { useBlockchain } from '@/hooks/useBlockchain';
-import { STAKING_POOLS } from '@/contracts/config';
-import { notifySuccess, notifyError, notifyWarning } from '@/utils/notificationService';
-
-interface StakePool {
-  id: string;
-  name: string;
-  apy: number;
-  minStake: number;
-  description: string;
-  icon: string;
-}
-
-interface StakeInfo {
-  poolId: number;
-  amount?: number;
-  timestamp?: number;
-  rewards?: number;
-  [key: string]: unknown;
-}
-
-const stakePools: StakePool[] = [
-  {
-    id: STAKING_POOLS.BASIC.id,
-    name: STAKING_POOLS.BASIC.name,
-    apy: STAKING_POOLS.BASIC.apy,
-    minStake: STAKING_POOLS.BASIC.minStake,
-    description: 'Pool de entrada com baixo risco',
-    icon: '🟢'
-  },
-  {
-    id: STAKING_POOLS.PREMIUM.id,
-    name: STAKING_POOLS.PREMIUM.name,
-    apy: STAKING_POOLS.PREMIUM.apy,
-    minStake: STAKING_POOLS.PREMIUM.minStake,
-    description: 'Pool avançado com maiores retornos',
-    icon: '🟡'
-  },
-  {
-    id: STAKING_POOLS.ELITE.id,
-    name: STAKING_POOLS.ELITE.name,
-    apy: STAKING_POOLS.ELITE.apy,
-    minStake: STAKING_POOLS.ELITE.minStake,
-    description: 'Pool exclusivo para grandes investidores',
-    icon: '🔴'
-  }
-];
+import { useInvestment } from '@/components/investment/InvestmentProvider';
+import { notifySuccess, notifyWarning } from '@/utils/notificationService';
+import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 
 export function StakingComponent() {
-  const { balance, removeTokens } = useTokens();
-  const { stakingOperations, tokenOperations, isLoading: blockchainLoading } = useBlockchain();
-  const [selectedPool, setSelectedPool] = useState<StakePool | null>(null);
-  const [stakeAmount, setStakeAmount] = useState('');
+  const { addTokens } = useTokens();
+  const { stakeOptions, stakePositions, stakeTokens, unstakeTokens } = useInvestment();
+  const { isConnected } = usePrivyAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [stakedAmount, setStakedAmount] = useState(0);
+  const [amount, setAmount] = useState<string>('');
+  const [selectedOption, setSelectedOption] = useState<string>('stake-1');
 
-  // Carregar dados de staking do usuário
-  useEffect(() => {
-    const loadUserStakes = async () => {
-      try {
-        // Carregar stakes do usuário para cada pool
-        const stakes = await Promise.all(
-          stakePools.map(async (pool, index) => {
-            try {
-              const userAddress = await tokenOperations.getBalance(); // Usar para obter endereço
-              const stakeInfo = await stakingOperations.getUserStake(userAddress, index);
-              return typeof stakeInfo === 'object' && stakeInfo !== null ? { poolId: index, ...stakeInfo } : { poolId: index };
-            } catch (error) {
-              console.warn(`Erro ao carregar stake do pool ${pool.id}:`, error);
-              return { poolId: index, amount: 0, timestamp: 0, rewards: 0 };
-            }
-          })
-        );
-        
-        // Calcular total em stake
-        const total = stakes.reduce((sum: number, stake: StakeInfo) => sum + Number(stake.amount || 0), 0);
-        setStakedAmount(total);
-      } catch (error) {
-        // console.error('Erro ao carregar stakes do usuário:', error);
-        // Potentially notifyError("Não foi possível carregar seus stakes anteriores.");
-      }
-    };
-
-    loadUserStakes();
-  }, [stakingOperations, tokenOperations]);
+  const selectedStakeOption = stakeOptions.find(option => option.id === selectedOption);
+  
+  // Calcular total em staking
+  const totalStaked = stakePositions.reduce((total, position) => total + position.amount, 0);
 
   const handleStake = async () => {
-    if (!selectedPool || !stakeAmount || isLoading || blockchainLoading) return;
-
-    const amount = parseInt(stakeAmount);
-    if (amount < selectedPool.minStake || amount > balance) return;
+    if (!amount || parseFloat(amount) <= 0 || isLoading || !selectedStakeOption) return;
 
     setIsLoading(true);
-
+    
     try {
-      // Encontrar o índice do pool selecionado
-      const poolIndex = stakePools.findIndex(p => p.id === selectedPool.id);
+      console.log('🏦 Executando staking...');
       
-      // Primeiro aprovar tokens para o contrato de staking
-      const approveResult = await tokenOperations.approve(
-        "0x3456789012345678901234567890123456789012", // STAKING contract address
-        stakeAmount
-      );
-
-      if (approveResult.success) {
-        // Fazer stake no contrato
-        const tx: unknown = await stakingOperations.stake(poolIndex, stakeAmount);
+      const stakeAmount = parseFloat(amount);
+      
+      // Usar a função real do InvestmentProvider
+      const success = await stakeTokens(selectedOption, stakeAmount);
+      
+      if (success) {
+        // Calcular recompensa instantânea
+        const reward = Math.floor(stakeAmount * 0.1); // 10% bonus imediato
+        addTokens(reward);
         
-        if (tx) {
-          // console.log('✅ Stake realizado via contrato:', tx); // Dev log
-          await removeTokens(amount); // removeTokens is now async
-          setStakedAmount(prev => prev + amount);
-          setStakeAmount('');
-          notifySuccess(`${amount} tokens investidos com sucesso em ${selectedPool.name}!`);
-        } else {
-          // This path might not be hit if stakingOperations.stake itself throws an error that's caught by the outer catch.
-          notifyError('Falha ao registrar o stake no contrato.');
-          throw new Error('Falha no stake (transação não confirmada ou tx é null/undefined)');
-        }
+        notifySuccess(`🎉 ${stakeAmount} tokens em staking! Bônus imediato: ${reward} tokens!`);
+        console.log('✅ Staking realizado:', { amount: stakeAmount, option: selectedStakeOption.name, bonus: reward });
+        
+        setAmount('');
       } else {
-        notifyError(`Falha ao aprovar tokens para stake: ${approveResult.error?.message || 'Erro desconhecido'}`);
-        throw new Error(approveResult.error?.message || 'Falha na aprovação');
+        notifyWarning('Erro ao fazer staking. Verifique se você tem tokens suficientes.');
       }
-    } catch (error) {
-      // console.error('Erro ao fazer stake:', error); // Original error
-      notifyWarning('Ocorreu um erro ao fazer stake. Usando simulação.');
-      // Fallback to simulation
-      try {
-        // console.warn('⚠️ Usando simulação de stake'); // Dev log
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        await removeTokens(amount); // removeTokens is now async
-        setStakedAmount(prev => prev + amount);
-        setStakeAmount('');
-        notifySuccess(`${amount} tokens (simulados) investidos em ${selectedPool.name}!`);
-      } catch (fallbackError) {
-        // console.error('Erro no fallback do stake:', fallbackError); // Dev log
-        notifyError('Falha ao fazer stake mesmo com simulação.');
-      }
+      
+    } catch (error: any) {
+      console.warn('Erro no staking:', error);
+      notifyWarning('Erro ao fazer staking. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleUnstake = async (positionId: string) => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    
+    try {
+      console.log('💰 Executando unstake...');
+      
+      const success = await unstakeTokens(positionId);
+      
+      if (success) {
+        notifySuccess('🎉 Tokens retirados com sucesso!');
+        console.log('✅ Unstake realizado:', { positionId });
+      } else {
+        notifyWarning('Erro ao retirar tokens. Tente novamente.');
+      }
+      
+    } catch (error: any) {
+      console.warn('Erro no unstake:', error);
+      notifyWarning('Erro ao retirar tokens. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatCurrency = (value: number): string => {
+    return value.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="card text-center">
-        <div className="text-4xl mb-4">📈</div>
+    <div className="card">
+      <div className="text-center">
+        <div className="text-4xl mb-4">🏦</div>
         <h3 className="text-h3 font-bold text-white mb-2">Staking de Tokens</h3>
-        <p className="text-white/80 mb-4">
-          Invista seus tokens e ganhe recompensas passivas!
+        <p className="text-white/80 mb-6">
+          Faça staking dos seus tokens e ganhe recompensas!
         </p>
-        
+
+        {/* Status de Conexão */}
+        {!isConnected && (
+          <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 mb-4">
+            <div className="flex items-center gap-2 text-red-400 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <span>Conecte sua carteira para fazer staking</span>
+            </div>
+          </div>
+        )}
+
+        {/* Modo Patrocinado Banner */}
+        {isConnected && (
+          <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3 mb-4">
+            <div className="flex items-center gap-2 text-green-400 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>✅ Staking Patrocinado - Sem gas fees!</span>
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-4 bg-black/20 rounded-lg p-4">
-          <div>
-            <div className="text-purple-300 font-medium text-sm">Saldo Disponível</div>
-            <div className="text-white text-lg font-bold">{balance} Tokens</div>
-          </div>
-          <div>
-            <div className="text-purple-300 font-medium text-sm">Total em Stake</div>
-            <div className="text-white text-lg font-bold">{stakedAmount} Tokens</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stake Pools */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {stakePools.map((pool) => (
-          <div
-            key={pool.id}
-            className={`card card-hover cursor-pointer transition-all ${
-              selectedPool?.id === pool.id 
-                ? 'border-purple-500/50 bg-purple-500/10' 
-                : 'border-gray-500/30'
-            }`}
-            onClick={() => setSelectedPool(pool)}
-          >
-            <div className="text-center">
-              <div className="text-3xl mb-3">{pool.icon}</div>
-              <h4 className="text-lg font-bold text-white mb-2">{pool.name}</h4>
-              <div className="text-2xl font-bold text-purple-400 mb-2">{pool.apy}% APY</div>
-              <p className="text-white/80 text-sm mb-3">{pool.description}</p>
-              <div className="text-xs text-white/60">
-                Mínimo: {pool.minStake} tokens
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Stake Form */}
-      {selectedPool && (
-        <div className="card">
-          <h4 className="text-lg font-bold text-white mb-4">
-            Fazer Stake - {selectedPool.name}
-          </h4>
-          
-          <div className="space-y-4">
+        <div className="bg-black/20 rounded-lg p-4 mb-6">
+          <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <label className="block text-white/80 text-sm font-medium mb-2">
-                Quantidade de Tokens
-              </label>
-              <input
-                type="number"
-                value={stakeAmount}
-                onChange={(e) => setStakeAmount(e.target.value)}
-                min={selectedPool.minStake}
-                max={balance}
-                className="w-full bg-black/20 border border-gray-500/30 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:border-purple-500/50 focus:outline-none"
-                placeholder={`Mínimo: ${selectedPool.minStake} tokens`}
-              />
+              <div className="text-purple-300 font-medium">Total em Staking</div>
+              <div className="text-white">{formatCurrency(totalStaked)} Tokens</div>
             </div>
-
-            {/* Quick Amount Buttons */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setStakeAmount(selectedPool.minStake.toString())}
-                className="flex-1 bg-gray-600/20 hover:bg-gray-600/30 text-white text-sm py-2 px-3 rounded-lg transition-colors"
-              >
-                Mínimo
-              </button>
-              <button
-                onClick={() => setStakeAmount(Math.floor(balance * 0.25).toString())}
-                className="flex-1 bg-gray-600/20 hover:bg-gray-600/30 text-white text-sm py-2 px-3 rounded-lg transition-colors"
-              >
-                25%
-              </button>
-              <button
-                onClick={() => setStakeAmount(Math.floor(balance * 0.5).toString())}
-                className="flex-1 bg-gray-600/20 hover:bg-gray-600/30 text-white text-sm py-2 px-3 rounded-lg transition-colors"
-              >
-                50%
-              </button>
-              <button
-                onClick={() => setStakeAmount(balance.toString())}
-                className="flex-1 bg-gray-600/20 hover:bg-gray-600/30 text-white text-sm py-2 px-3 rounded-lg transition-colors"
-              >
-                Máximo
-              </button>
+            <div>
+              <div className="text-purple-300 font-medium">Posições Ativas</div>
+              <div className="text-white">{stakePositions.length}</div>
             </div>
+          </div>
+        </div>
 
-            {/* Stake Button */}
-            <button
-              onClick={handleStake}
-              disabled={
-                isLoading || 
-                !stakeAmount || 
-                parseInt(stakeAmount) < selectedPool.minStake || 
-                parseInt(stakeAmount) > balance
-              }
-              className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+        {/* Form */}
+        <div className="space-y-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-white/80 mb-2">
+              Opção de Staking
+            </label>
+            <select
+              value={selectedOption}
+              onChange={(e) => setSelectedOption(e.target.value)}
+              className="w-full px-3 py-2 bg-black/30 border border-white/20 rounded-lg text-white focus:border-purple-500 focus:outline-none"
+              disabled={!isConnected}
             >
-              {isLoading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Processando Stake...
-                </>
-              ) : (
-                <>
-                  📈 Fazer Stake
-                </>
-              )}
-            </button>
+              {stakeOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name} - {option.apy}% APY ({option.duration} dias)
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-white/80 mb-2">
+              Quantidade de Tokens
+            </label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-full px-3 py-2 bg-black/30 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-purple-500 focus:outline-none"
+              placeholder={selectedStakeOption ? `Mínimo: ${selectedStakeOption.minTokens}` : "Ex: 100"}
+              min={selectedStakeOption?.minTokens || 1}
+              disabled={!isConnected}
+            />
+          </div>
+        </div>
 
-            {/* Validation Messages */}
-            {stakeAmount && parseInt(stakeAmount) < selectedPool.minStake && (
-              <div className="text-red-400 text-sm">
-                Quantidade mínima: {selectedPool.minStake} tokens
+        {/* Preview */}
+        {amount && parseFloat(amount) > 0 && selectedStakeOption && (
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-6">
+            <div className="text-blue-400 text-sm">
+              <div className="font-medium mb-1">Informações do Staking</div>
+              <div className="text-blue-300 space-y-1">
+                <div>APY: {selectedStakeOption.apy}%</div>
+                <div>Duração: {selectedStakeOption.duration} dias</div>
+                <div>Bônus imediato: {Math.floor(parseFloat(amount) * 0.1)} tokens</div>
               </div>
-            )}
-            {stakeAmount && parseInt(stakeAmount) > balance && (
-              <div className="text-red-400 text-sm">
-                Saldo insuficiente
+            </div>
+          </div>
+        )}
+
+        {/* Stake Button */}
+        <button
+          onClick={handleStake}
+          disabled={!amount || parseFloat(amount) <= 0 || isLoading || !isConnected || (selectedStakeOption && parseFloat(amount) < selectedStakeOption.minTokens)}
+          className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
+            amount && parseFloat(amount) > 0 && !isLoading && isConnected && selectedStakeOption && parseFloat(amount) >= selectedStakeOption.minTokens
+              ? 'bg-purple-600 hover:bg-purple-700 text-white transform hover:scale-[1.02] active:scale-[0.98]'
+              : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              Fazendo Staking...
+            </div>
+          ) : !isConnected ? (
+            'Conecte sua carteira'
+          ) : !amount || parseFloat(amount) <= 0 ? (
+            'Digite uma quantidade'
+          ) : selectedStakeOption && parseFloat(amount) < selectedStakeOption.minTokens ? (
+            `Mínimo: ${selectedStakeOption.minTokens} tokens`
+          ) : (
+            `🚀 Fazer Staking de ${amount} Tokens`
+          )}
+        </button>
+
+        {/* Current Positions */}
+        {stakePositions.length > 0 && (
+          <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <div className="text-blue-400 text-sm mb-3">
+              <div className="font-medium">Suas Posições de Staking</div>
+            </div>
+            <div className="space-y-3">
+              {stakePositions
+                .filter(position => position.status === 'active')
+                .map((position) => {
+                const option = stakeOptions.find(opt => opt.id === position.stakeOptionId);
+                const endDate = new Date(position.endDate);
+                const now = new Date();
+                const isMatured = now >= endDate;
+                const daysLeft = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+                
+                return (
+                  <div key={position.id} className="bg-black/20 rounded-lg p-3">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="text-blue-300 text-sm font-medium">
+                          {option?.name || position.optionName}
+                        </div>
+                        <div className="text-blue-400 text-xs">
+                          APY: {position.apy}%
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-white text-sm font-medium">
+                          {formatCurrency(position.amount)} tokens
+                        </div>
+                        <div className="text-green-400 text-xs">
+                          +{formatCurrency(Math.floor(position.rewards))} recompensa
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center text-xs">
+                      <div className="text-blue-300">
+                        {isMatured ? (
+                          <span className="text-green-400">✅ Disponível para retirada</span>
+                        ) : (
+                          <span>{daysLeft} dias restantes</span>
+                        )}
+                      </div>
+                      
+                      {isMatured && (
+                        <button
+                          onClick={() => handleUnstake(position.id)}
+                          disabled={isLoading}
+                          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs transition-colors"
+                        >
+                          {isLoading ? 'Retirando...' : 'Retirar'}
+                        </button>
+                      )}
+                    </div>
+                    
+                    {/* Progress bar */}
+                    <div className="mt-2">
+                      <div className="bg-blue-900/50 rounded-full h-1">
+                        <div 
+                          className="bg-blue-500 rounded-full h-1 transition-all duration-300"
+                          style={{ 
+                            width: `${Math.min(100, ((Date.now() - position.startDate) / (position.endDate - position.startDate)) * 100)}%` 
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Withdrawn positions */}
+            {stakePositions.filter(p => p.status === 'withdrawn').length > 0 && (
+              <div className="mt-4 pt-3 border-t border-blue-500/20">
+                <div className="text-blue-400 text-xs mb-2">Posições Retiradas</div>
+                <div className="space-y-2">
+                  {stakePositions
+                    .filter(position => position.status === 'withdrawn')
+                    .slice(-3) // Show only last 3
+                    .map((position) => (
+                    <div key={position.id} className="flex justify-between text-xs text-blue-300/70">
+                      <span>{position.optionName}</span>
+                      <span>✅ {formatCurrency(position.amount + Math.floor(position.rewards))} retirados</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
+        )}
+
+        {/* Instructions */}
+        <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+          <div className="text-blue-400 text-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span className="font-medium">Staking Automatizado</span>
+            </div>
+            <p className="text-blue-300 text-xs">
+              As recompensas são calculadas automaticamente e creditadas instantaneamente com Account Abstraction!
+            </p>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 } 

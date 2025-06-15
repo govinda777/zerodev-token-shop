@@ -15,15 +15,29 @@ import { PassiveIncomeComponent } from '@/components/investment/PassiveIncomeCom
 import { NFTMarketplace } from '@/components/nft/NFTMarketplace';
 import { AirdropComponent } from '@/components/rewards/AirdropComponent';
 
+
 // Componente interno simplificado
 function HomeContent() {
   const { isConnected } = usePrivyAuth();
 
   return (
-    <div className="flex flex-col min-h-screen gradient-background">
+    <div className="flex flex-col min-h-screen">
       <SkipLinks />
-      <Header />
       
+      {/* Banner de Transações Patrocinadas */}
+      <div className="bg-green-500/10 border-b border-green-500/20">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-center gap-3 text-green-400">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span className="text-sm font-medium">
+              🎉 ZeroDev Account Abstraction Ativo! Gas fees patrocinados - Use sem precisar de ETH!
+            </span>
+          </div>
+        </div>
+      </div>
+
       <main id="main-content" className="flex-grow w-full">
         <ProductProvider>
           {/* Hero Section */}
@@ -274,5 +288,10 @@ function HomeContent() {
 }
 
 export default function Home() {
-  return <HomeContent />;
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <Header />
+      <HomeContent />
+    </div>
+  );
 }

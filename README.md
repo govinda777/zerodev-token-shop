@@ -99,13 +99,13 @@ O **ERC-4337** é o padrão Ethereum que implementa Account Abstraction sem modi
 Copie o arquivo `.env-example` para `.env.local` e preencha as seguintes variáveis:
 
 ```env
-NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id_here
-NEXT_PUBLIC_ZERODEV_PROJECT_ID=your_zerodev_project_id_here
-# NEXT_PUBLIC_ZERODEV_RPC is optional if you use ZeroDev's default RPC with your Project ID.
-# Define it if you need a custom RPC endpoint for Sepolia.
-# Example: NEXT_PUBLIC_ZERODEV_RPC=https://rpc.zerodev.app/api/v2/bundler/your_zerodev_project_id_here
+NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id
+NEXT_PUBLIC_ZERODEV_PROJECT_ID=your_zerodev_project_id
+NEXT_PUBLIC_ZERODEV_RPC=https://rpc.zerodev.app/api/v3/your_project_id/chain/11155111
+NEXT_PUBLIC_CHAIN=11155111
+NEXT_PUBLIC_TARGET_CHAIN_ID=0xaa36a7
+NEXT_PUBLIC_TARGET_NETWORK_NAME=Sepolia
 ```
-A variável `NEXT_PUBLIC_CHAIN` não é mais diretamente usada; a configuração da chain (Sepolia) está em `src/contracts/config.ts` e nos provedores.
 
 ### Como configurar o ZeroDev
 

@@ -79,7 +79,7 @@ export function useBlockchain() {
     return user.wallet.address as `0x${string}`;
   }, [user]);
 
-  // Execute transaction helper - Updated to handle both embedded and external wallets
+  // Execute transaction helper - Updated to use ZeroDev with Paymasters
   const executeTransaction = useCallback(async (
     contractAddress: string,
     abi: Abi,
@@ -103,23 +103,19 @@ export function useBlockchain() {
         };
       }
 
-      // Para carteiras embarcadas do Privy - melhor tratamento de erro
+      // FORÇA O USO DO ZERODEV COM PAYMASTERS
+      // Se o usuário tem uma carteira Privy embarcada, tentamos extrair a private key para usar com ZeroDev
       if (user?.wallet?.walletClientType === 'privy' || !window.ethereum) {
-        console.log('🔧 Using Privy sendTransaction for embedded wallet');
+        console.log('🚀 Using ZeroDev with Paymaster for embedded wallet');
         
         try {
-          // Timeout para evitar travamento
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Transaction timeout')), 15000)
-          );
+          // Importar os utilitários do ZeroDev
+          const { createKernelClientForUser } = await import('@/utils/zerodev');
           
-          // Encode the function call data properly
-          const contract = getContract({
-            address: contractAddress as `0x${string}`,
-            abi,
-            client: publicClient,
-          });
-
+          // Para transações patrocinadas, vamos usar uma abordagem diferente
+          // Em vez de tentar extrair a private key (que pode não ser possível),
+          // vamos usar o paymaster diretamente
+          
           // Encode the function data
           const data = encodeFunctionData({
             abi,
@@ -127,48 +123,82 @@ export function useBlockchain() {
             args,
           });
 
-          // Tentar usar o método sendTransaction do Privy com timeout
-          const transactionPromise = sendTransaction({
-            to: contractAddress as `0x${string}`,
-            data,
-            value: value || BigInt(0),
-          });
-
-          const transactionHash = await Promise.race([
-            transactionPromise,
-            timeoutPromise
-          ]) as `0x${string}`;
-
-          // Wait for transaction confirmation com timeout
-          const receiptPromise = publicClient.waitForTransactionReceipt({ hash: transactionHash });
-          const receiptTimeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Receipt timeout')), 30000)
-          );
+          // Usar o RPC Self-Funded do ZeroDev para transações patrocinadas
+          const SELF_FUNDED_RPC = "https://rpc.zerodev.app/api/v3/ca6057ad-912b-4760-ac3d-1f3812d63b12/chain/11155111?selfFunded=true";
           
-          const receipt = await Promise.race([
-            receiptPromise,
-            receiptTimeoutPromise
-          ]) as any;
-          
-          return {
-            success: receipt.status === 'success',
-            hash: transactionHash as unknown as string,
-          };
-        } catch (embeddedError) {
-          console.warn('Embedded wallet transaction failed:', embeddedError);
-          // Para carteiras embarcadas, retornar erro específico para fallback
-          return {
-            success: false,
-            error: {
-              code: 'EMBEDDED_WALLET_ERROR',
-              message: 'Embedded wallet transaction failed. Using fallback mode.',
-              details: embeddedError,
+          // Tentar fazer a transação usando o RPC patrocinado
+          const response = await fetch(SELF_FUNDED_RPC, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
-          };
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              id: 1,
+              method: 'eth_sendTransaction',
+              params: [{
+                from: userAddress,
+                to: contractAddress,
+                data,
+                value: value ? `0x${value.toString(16)}` : '0x0',
+              }]
+            })
+          });
+          
+          const result = await response.json();
+          
+          if (result.result) {
+            // Wait for transaction confirmation
+            const receipt = await publicClient.waitForTransactionReceipt({ 
+              hash: result.result as `0x${string}` 
+            });
+            
+            return {
+              success: receipt.status === 'success',
+              hash: result.result as string,
+            };
+          } else {
+            throw new Error(result.error?.message || 'Transaction failed');
+          }
+          
+        } catch (zerodevError) {
+          console.warn('ZeroDev transaction failed, falling back to Privy:', zerodevError);
+          
+          // Fallback para Privy mas com aviso
+          try {
+            const data = encodeFunctionData({
+              abi,
+              functionName,
+              args,
+            });
+
+            const transactionHash = await sendTransaction({
+              to: contractAddress as `0x${string}`,
+              data,
+              value: value || BigInt(0),
+            });
+
+            const receipt = await publicClient.waitForTransactionReceipt({ hash: transactionHash });
+            
+            return {
+              success: receipt.status === 'success',
+              hash: transactionHash as unknown as string,
+            };
+          } catch (privyError) {
+            console.error('Both ZeroDev and Privy failed:', privyError);
+            return {
+              success: false,
+              error: {
+                code: 'TRANSACTION_FAILED',
+                message: 'Transaction failed on both ZeroDev and Privy. You may need ETH for gas fees.',
+                details: privyError,
+              },
+            };
+          }
         }
       }
 
-      // Para carteiras externas (MetaMask, etc.)
+      // Para carteiras externas (MetaMask, etc.) - usar ZeroDev se possível
       const walletClient = await getWalletClient();
       if (!walletClient) {
         throw new Error('Wallet client not available');

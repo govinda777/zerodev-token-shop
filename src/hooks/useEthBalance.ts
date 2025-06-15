@@ -13,7 +13,7 @@ export function useEthBalance() {
 
   const publicClient = createPublicClient({
     chain: sepolia,
-    transport: http()
+    transport: http(process.env.NEXT_PUBLIC_ZERODEV_RPC || 'https://rpc.sepolia.org')
   });
 
   const fetchBalance = useCallback(async () => {

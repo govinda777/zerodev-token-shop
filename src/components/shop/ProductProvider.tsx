@@ -12,7 +12,7 @@ const PRODUCTS: Product[] = [
     name: 'Premium Service',
     description: 'Access to premium features and priority support',
     price: 5,
-    image: '/products/premium.jpg',
+    image: '/products/premium.svg',
     type: 'service',
     installments: true,
     requiredStake: 20
@@ -22,7 +22,7 @@ const PRODUCTS: Product[] = [
     name: 'API Access',
     description: 'Full API access for developers with unlimited requests',
     price: 3,
-    image: '/products/api.jpg',
+    image: '/products/api.svg',
     type: 'service'
   },
   {
@@ -30,7 +30,7 @@ const PRODUCTS: Product[] = [
     name: 'NFT Collection Pack',
     description: 'Exclusive NFT collection with rare items',
     price: 12,
-    image: '/products/nft-pack.jpg',
+    image: '/products/nft-pack.svg',
     type: 'product',
     installments: true,
     requiredStake: 50
@@ -40,7 +40,7 @@ const PRODUCTS: Product[] = [
     name: 'Governance Rights',
     description: 'Extended voting rights in DAO decisions',
     price: 8,
-    image: '/products/governance.jpg',
+    image: '/products/governance.svg',
     type: 'service',
     installments: true
   },
@@ -49,7 +49,7 @@ const PRODUCTS: Product[] = [
     name: 'Trading Bot Access',
     description: 'Access to automated trading bot with AI features',
     price: 15,
-    image: '/products/trading-bot.jpg',
+    image: '/products/trading-bot.svg',
     type: 'service',
     installments: true,
     requiredStake: 100
@@ -59,7 +59,7 @@ const PRODUCTS: Product[] = [
     name: 'Private Pool Access',
     description: 'Access to exclusive high-yield liquidity pools',
     price: 6,
-    image: '/products/private-pool.jpg',
+    image: '/products/private-pool.svg',
     type: 'service'
   },
   {
@@ -67,7 +67,7 @@ const PRODUCTS: Product[] = [
     name: 'Educational Course',
     description: 'Complete DeFi and blockchain development course',
     price: 4,
-    image: '/products/course.jpg',
+    image: '/products/course.svg',
     type: 'service',
     installments: true
   },
@@ -76,7 +76,7 @@ const PRODUCTS: Product[] = [
     name: 'VIP Membership',
     description: 'VIP membership with exclusive benefits and rewards',
     price: 20,
-    image: '/products/vip.jpg',
+    image: '/products/vip.svg',
     type: 'service',
     installments: true,
     requiredStake: 200

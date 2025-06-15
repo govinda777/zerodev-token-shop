@@ -161,6 +161,30 @@ export function InvestmentProvider({ children }: { children: React.ReactNode }) 
   const [airdrops, setAirdrops] = useState<Airdrop[]>([]);
   const [installmentPurchases, setInstallmentPurchases] = useState<InstallmentPurchase[]>([]);
 
+  // Load saved staking positions from localStorage
+  useEffect(() => {
+    if (isConnected && address) {
+      const savedPositions = localStorage.getItem(`stake_positions_${address}`);
+      if (savedPositions) {
+        try {
+          const positions = JSON.parse(savedPositions);
+          setStakePositions(positions);
+          console.log('✅ Posições de staking carregadas:', positions);
+        } catch (error) {
+          console.warn('Erro ao carregar posições de staking:', error);
+        }
+      }
+    }
+  }, [isConnected, address]);
+
+  // Save staking positions to localStorage whenever they change
+  useEffect(() => {
+    if (isConnected && address && stakePositions.length > 0) {
+      localStorage.setItem(`stake_positions_${address}`, JSON.stringify(stakePositions));
+      console.log('💾 Posições de staking salvas:', stakePositions);
+    }
+  }, [stakePositions, isConnected, address]);
+
   // Initialize with mock airdrops for connected users
   useEffect(() => {
     if (isConnected && address) {
@@ -225,7 +249,13 @@ export function InvestmentProvider({ children }: { children: React.ReactNode }) 
         status: 'active'
       };
       
-      setStakePositions(prev => [...prev, newPosition]);
+      setStakePositions(prev => {
+        const updated = [...prev, newPosition];
+        // Save immediately to localStorage
+        localStorage.setItem(`stake_positions_${address}`, JSON.stringify(updated));
+        console.log('💾 Nova posição de staking salva:', newPosition);
+        return updated;
+      });
       
       // Log staking action
       JourneyLogger.logStake(address, amount, optionId);
@@ -246,9 +276,13 @@ export function InvestmentProvider({ children }: { children: React.ReactNode }) 
 
       const totalReceived = position.amount + position.rewards;
       addTokens(totalReceived);
-      setStakePositions(prev => 
-        prev.map(p => p.id === positionId ? { ...p, status: 'withdrawn' as const } : p)
-      );
+      setStakePositions(prev => {
+        const updated = prev.map(p => p.id === positionId ? { ...p, status: 'withdrawn' as const } : p);
+        // Save immediately to localStorage
+        localStorage.setItem(`stake_positions_${address}`, JSON.stringify(updated));
+        console.log('💾 Posição de staking atualizada (retirada):', positionId);
+        return updated;
+      });
       
       // Log unstaking action
       JourneyLogger.logUnstake(address, position.amount, position.rewards);
