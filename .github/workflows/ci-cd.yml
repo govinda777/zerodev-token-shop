@@ -1,35 +1,20 @@
-name: Deploy to GitHub Pages
+name: Deploy Static Site
 
 on:
   push:
     branches: [main]
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Allow only one concurrent deployment
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
-  # Build job
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-      
-      - name: Create simple index.html
+      - name: Create static site
         run: |
-          mkdir -p ./dist
-          cat > ./dist/index.html << 'EOF'
+          mkdir -p ./docs
+          cat > ./docs/index.html << 'EOF'
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -37,14 +22,20 @@ jobs:
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>ZeroDev Token Shop</title>
               <style>
+                  * {
+                      margin: 0;
+                      padding: 0;
+                      box-sizing: border-box;
+                  }
                   body {
                       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                      max-width: 800px;
-                      margin: 0 auto;
-                      padding: 2rem;
                       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                       color: white;
                       min-height: 100vh;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      padding: 1rem;
                   }
                   .container {
                       background: rgba(255, 255, 255, 0.1);
@@ -52,23 +43,78 @@ jobs:
                       border-radius: 20px;
                       backdrop-filter: blur(10px);
                       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                      max-width: 800px;
+                      width: 100%;
                   }
-                  h1 { text-align: center; margin-bottom: 2rem; }
+                  h1 { 
+                      text-align: center; 
+                      margin-bottom: 2rem; 
+                      font-size: 2.5rem;
+                      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                  }
                   .status { 
                       background: rgba(0, 255, 0, 0.2); 
-                      padding: 1rem; 
-                      border-radius: 10px; 
-                      margin: 1rem 0;
-                      border-left: 4px solid #00ff00;
+                      padding: 1.5rem; 
+                      border-radius: 15px; 
+                      margin: 1.5rem 0;
+                      border-left: 5px solid #00ff00;
+                      animation: pulse 2s infinite;
+                  }
+                  @keyframes pulse {
+                      0% { opacity: 1; }
+                      50% { opacity: 0.8; }
+                      100% { opacity: 1; }
                   }
                   .info {
                       background: rgba(255, 255, 255, 0.1);
-                      padding: 1rem;
-                      border-radius: 10px;
+                      padding: 1.5rem;
+                      border-radius: 15px;
+                      margin: 1.5rem 0;
+                      border-left: 5px solid #87ceeb;
+                  }
+                  .tech-stack {
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                      gap: 1rem;
                       margin: 1rem 0;
                   }
-                  a { color: #87ceeb; text-decoration: none; }
-                  a:hover { text-decoration: underline; }
+                  .tech-item {
+                      background: rgba(255, 255, 255, 0.05);
+                      padding: 1rem;
+                      border-radius: 10px;
+                      text-align: center;
+                      border: 1px solid rgba(255, 255, 255, 0.1);
+                  }
+                  a { 
+                      color: #87ceeb; 
+                      text-decoration: none; 
+                      font-weight: 500;
+                  }
+                  a:hover { 
+                      text-decoration: underline; 
+                      color: #add8e6;
+                  }
+                  ul {
+                      list-style: none;
+                      padding-left: 0;
+                  }
+                  li {
+                      padding: 0.5rem 0;
+                      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                  }
+                  li:last-child {
+                      border-bottom: none;
+                  }
+                  .emoji {
+                      font-size: 1.2em;
+                      margin-right: 0.5rem;
+                  }
+                  .footer {
+                      text-align: center;
+                      margin-top: 2rem;
+                      opacity: 0.7;
+                      font-size: 0.9rem;
+                  }
               </style>
           </head>
           <body>
@@ -76,61 +122,77 @@ jobs:
                   <h1>🚀 ZeroDev Token Shop</h1>
                   
                   <div class="status">
-                      <h3>✅ Deployment Status: SUCCESS</h3>
-                      <p>GitHub Pages deployment is working correctly!</p>
-                      <p><strong>Deployed at:</strong> $(date)</p>
+                      <h3><span class="emoji">✅</span>Deployment Status: SUCCESS</h3>
+                      <p>Static site deployment is working perfectly!</p>
+                      <p><strong>Last deployed:</strong> $(date)</p>
                   </div>
                   
                   <div class="info">
-                      <h3>📋 Project Information</h3>
+                      <h3><span class="emoji">🛠️</span>Technology Stack</h3>
+                      <div class="tech-stack">
+                          <div class="tech-item">
+                              <strong>Frontend</strong><br>
+                              Next.js 15.3.3<br>
+                              React + TypeScript
+                          </div>
+                          <div class="tech-item">
+                              <strong>Blockchain</strong><br>
+                              Ethereum Sepolia<br>
+                              Viem + Wagmi
+                          </div>
+                          <div class="tech-item">
+                              <strong>Wallet</strong><br>
+                              Privy Auth<br>
+                              ZeroDev AA
+                          </div>
+                          <div class="tech-item">
+                              <strong>Testing</strong><br>
+                              Playwright E2E<br>
+                              Jest Unit Tests
+                          </div>
+                      </div>
+                  </div>
+                  
+                  <div class="info">
+                      <h3><span class="emoji">🔗</span>Project Links</h3>
                       <ul>
-                          <li><strong>Framework:</strong> Next.js 15.3.3</li>
-                          <li><strong>Blockchain:</strong> Ethereum Sepolia</li>
-                          <li><strong>Wallet:</strong> Privy + ZeroDev</li>
-                          <li><strong>Testing:</strong> Playwright E2E + Jest Unit</li>
-                          <li><strong>Pipeline:</strong> GitHub Actions</li>
+                          <li><span class="emoji">📂</span><a href="https://github.com/govinda777/zerodev-token-shop" target="_blank">GitHub Repository</a></li>
+                          <li><span class="emoji">⚙️</span><a href="https://github.com/govinda777/zerodev-token-shop/actions" target="_blank">CI/CD Pipeline</a></li>
+                          <li><span class="emoji">📊</span><a href="https://github.com/govinda777/zerodev-token-shop/pulse" target="_blank">Project Activity</a></li>
                       </ul>
                   </div>
                   
                   <div class="info">
-                      <h3>🔗 Links</h3>
-                      <ul>
-                          <li><a href="https://github.com/govinda777/zerodev-token-shop" target="_blank">GitHub Repository</a></li>
-                          <li><a href="https://github.com/govinda777/zerodev-token-shop/actions" target="_blank">CI/CD Pipeline</a></li>
-                      </ul>
-                  </div>
-                  
-                  <div class="info">
-                      <h3>🚧 Development Status</h3>
-                      <p>The full Next.js application is currently being optimized for production deployment. 
-                      This static page confirms that the GitHub Pages deployment pipeline is working correctly.</p>
+                      <h3><span class="emoji">🚧</span>Development Progress</h3>
+                      <p>This is a Web3 token shop built with modern technologies. The full Next.js application is being optimized for production deployment.</p>
                       
-                      <p><strong>Next Steps:</strong></p>
+                      <h4>✅ Completed:</h4>
                       <ul>
-                          <li>✅ GitHub Pages deployment working</li>
-                          <li>🔄 Resolve WalletConnect dependency conflicts</li>
-                          <li>🔄 Fix TypeScript issues in test files</li>
-                          <li>🔄 Enable full Next.js static export</li>
+                          <li><span class="emoji">✅</span>Static site deployment pipeline</li>
+                          <li><span class="emoji">✅</span>Pre-push validation hooks</li>
+                          <li><span class="emoji">✅</span>E2E and Unit test suites</li>
+                          <li><span class="emoji">✅</span>ESLint and TypeScript setup</li>
                       </ul>
+                      
+                      <h4>🔄 In Progress:</h4>
+                      <ul>
+                          <li><span class="emoji">🔄</span>Resolving WalletConnect dependencies</li>
+                          <li><span class="emoji">🔄</span>Fixing TypeScript test configurations</li>
+                          <li><span class="emoji">🔄</span>Enabling full Next.js static export</li>
+                      </ul>
+                  </div>
+                  
+                  <div class="footer">
+                      <p>Built with ❤️ using GitHub Actions</p>
                   </div>
               </div>
           </body>
           </html>
           EOF
       
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./dist
-
-  # Deployment job
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          force_orphan: true
