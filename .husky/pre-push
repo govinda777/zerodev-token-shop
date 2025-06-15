@@ -1,5 +1,9 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+echo "🚀 Pre-push Hook: Validando código antes do push..."
+echo ""
+echo "Opções disponíveis:"
+echo "  --skip-tests     : Pula todos os testes"
+echo "  --quick          : Executa apenas validações rápidas (lint, type-check, unit tests)"
+echo "  --all-tests      : Executa todos os testes e2e (não apenas os críticos)"
+echo ""
 
-echo "Running e2e tests before push..."
 node scripts/pre-push-test.js "$@" 
