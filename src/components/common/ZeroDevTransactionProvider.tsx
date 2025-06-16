@@ -1,40 +1,87 @@
 "use client";
 
-// Temporarily disabled for deployment - simplified version
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
+import { createKernelClientForUser, generateNewPrivateKey } from '@/utils/zerodev';
 
 interface ZeroDevTransactionContextType {
-  executeTransaction: () => Promise<void>;
+  executeTransaction: (to: string, value: bigint, data?: string) => Promise<string>;
   isLoading: boolean;
+  kernelClient: any;
+  accountAddress: string | null;
+  initializeAccount: () => Promise<void>;
 }
 
 const ZeroDevTransactionContext = createContext<ZeroDevTransactionContextType | null>(null);
 
 const ZeroDevTransactionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const executeTransaction = async () => {
-    console.log('Transaction execution temporarily disabled for deployment');
-  };
+  const { user, authenticated } = usePrivy();
+  const [isLoading, setIsLoading] = useState(false);
+  const [kernelClient, setKernelClient] = useState<any>(null);
+  const [accountAddress, setAccountAddress] = useState<string | null>(null);
+
+  const initializeAccount = useCallback(async () => {
+    if (!authenticated || !user) {
+      console.log('User not authenticated');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // Generate or retrieve private key for the user
+      // In a real app, you'd store this securely associated with the user
+      const privateKey = generateNewPrivateKey();
+      
+      // Create kernel client
+      const { kernelClient: client, accountAddress: address } = await createKernelClientForUser(privateKey);
+      
+      setKernelClient(client);
+      setAccountAddress(address);
+      
+      console.log('ZeroDev account initialized:', address);
+    } catch (error) {
+      console.error('Failed to initialize ZeroDev account:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [authenticated, user]);
+
+  const executeTransaction = useCallback(async (to: string, value: bigint, data?: string) => {
+    if (!kernelClient) {
+      throw new Error('Kernel client not initialized. Call initializeAccount first.');
+    }
+
+    try {
+      setIsLoading(true);
+      
+      const txHash = await kernelClient.sendTransaction({
+        to: to as `0x${string}`,
+        value,
+        data: data as `0x${string}`,
+      });
+
+      console.log('Transaction sent:', txHash);
+      return txHash;
+    } catch (error) {
+      console.error('Transaction failed:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [kernelClient]);
 
   const value = {
     executeTransaction,
-    isLoading: false,
+    isLoading,
+    kernelClient,
+    accountAddress,
+    initializeAccount,
   };
 
   return (
     <ZeroDevTransactionContext.Provider value={value}>
-      <div>
-        <div style={{ 
-          padding: '1rem', 
-          background: '#f0f0f0', 
-          borderRadius: '8px', 
-          margin: '1rem 0',
-          textAlign: 'center'
-        }}>
-          <p>🚧 ZeroDev transactions temporarily disabled for deployment</p>
-          <p>Full blockchain functionality will be restored after resolving dependency conflicts</p>
-        </div>
-        {children}
-      </div>
+      {children}
     </ZeroDevTransactionContext.Provider>
   );
 };

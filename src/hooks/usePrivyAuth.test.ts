@@ -13,6 +13,6 @@ describe('usePrivyAuth', () => {
     expect(result.current.hasWallet).toBe(false);
     expect(result.current.isSmartWallet).toBe(false);
     expect(result.current.isExternalWallet).toBe(false);
-    expect(result.current.loginMethods).toEqual([]);
+    expect(result.current.loginMethods).toEqual(['email', 'wallet', 'google']);
   });
 }); 

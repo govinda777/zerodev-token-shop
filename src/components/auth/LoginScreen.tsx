@@ -1,7 +1,7 @@
 "use client";
 
-import { usePrivyAuth } from "@/hooks/usePrivyAuth";
-import { useState } from "react";
+import { useState } from 'react';
+import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 
 interface LoginScreenProps {
   onSuccess?: () => void;
@@ -12,9 +12,7 @@ export function LoginScreen({ onSuccess }: LoginScreenProps) {
     isReady, 
     isAuthenticated, 
     isConnecting, 
-    connect, 
-    address,
-    userInfo
+    connect
   } = usePrivyAuth();
   
   const [loginType, setLoginType] = useState<'wallet' | 'email' | null>(null);
@@ -131,16 +129,6 @@ export function LoginScreen({ onSuccess }: LoginScreenProps) {
               </svg>
               <span>Rápido</span>
             </div>
-          </div>
-        </div>
-
-        {/* Supported Wallets Info */}
-        <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500 mb-2">Carteiras suportadas:</p>
-          <div className="flex justify-center gap-2 opacity-60">
-            <span className="text-xs bg-gray-800 px-2 py-1 rounded">MetaMask</span>
-            <span className="text-xs bg-gray-800 px-2 py-1 rounded">WalletConnect</span>
-            <span className="text-xs bg-gray-800 px-2 py-1 rounded">Coinbase</span>
           </div>
         </div>
       </div>
