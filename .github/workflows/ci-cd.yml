@@ -13,6 +13,7 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: Test  # Use the Test environment that has the variables configured
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,7 +30,17 @@ jobs:
       - name: Build Next.js app
         run: npm run build
         env:
-          NODE_ENV: production
+          NODE_ENV: ${{ vars.NODE_ENV }}
+          # Privy configuration
+          NEXT_PUBLIC_PRIVY_APP_ID: ${{ vars.NEXT_PUBLIC_PRIVY_APP_ID }}
+          # ZeroDev configuration
+          NEXT_PUBLIC_ZERODEV_PROJECT_ID: ${{ vars.NEXT_PUBLIC_ZERODEV_PROJECT_ID }}
+          NEXT_PUBLIC_ZERODEV_RPC: ${{ vars.NEXT_PUBLIC_ZERODEV_RPC }}
+          # Network configuration
+          NEXT_PUBLIC_CHAIN: ${{ vars.NEXT_PUBLIC_CHAIN }}
+          # Contract addresses
+          NEXT_PUBLIC_TOKEN_CONTRACT: ${{ vars.NEXT_PUBLIC_TOKEN_CONTRACT }}
+          NEXT_PUBLIC_FAUCET_CONTRACT: ${{ vars.NEXT_PUBLIC_FAUCET_CONTRACT }}
       
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
