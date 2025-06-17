@@ -1,7 +1,6 @@
 # 🚀 ZeroDev Token Shop
 
- yarn install
- 
+npm install
 
 Um marketplace moderno e acessível para tokens digitais únicos, construído com Next.js, TypeScript e Tailwind CSS.
 
@@ -205,35 +204,35 @@ git clone https://github.com/govinda777/zerodev-token-shop.git
 # Entre no diretório
 cd zerodev-token-shop
 
-# Instale as dependências (usando yarn - como indicado no início do README)
-yarn install
+# Instale as dependências (usando npm - como indicado no início do README)
+npm install
 
 # Configure as variáveis de ambiente
 cp .env-example .env.local
 # Edite .env.local com suas chaves do Privy e ZeroDev (veja a seção Variáveis de Ambiente)
 
 # Execute em desenvolvimento
-yarn dev
+npm run dev
 
 # Build para produção
-yarn build
+npm run build
 
 # Execute o servidor de produção
-yarn start
+npm run start
 ```
 
 ### Scripts Disponíveis
 
 ```bash
-yarn dev          # Servidor de desenvolvimento
-yarn build        # Build de produção
-yarn start        # Servidor de produção
-yarn lint         # ESLint e Prettier
-yarn type-check   # Verificação de tipos TypeScript
-yarn test         # Executa todos os testes (unit e e2e)
-yarn test:unit    # Testes de unidade (Jest)
-yarn test:e2e     # Testes end-to-end (Playwright)
-# yarn test:watch é geralmente um alias para test:unit --watch
+npm run dev          # Servidor de desenvolvimento
+npm run build        # Build de produção
+npm run start        # Servidor de produção
+npm run lint         # ESLint e Prettier
+npm run type-check   # Verificação de tipos TypeScript
+npm run test         # Executa todos os testes (unit e e2e)
+npm run test:unit    # Testes de unidade (Jest)
+npm run test:e2e     # Testes end-to-end (Playwright)
+# npm test:watch é geralmente um alias para test:unit --watch
 ```
 
 ## 🏗️ Deploy de Contratos Blockchain
@@ -375,18 +374,18 @@ Para guia detalhado, consulte: [`BLOCKCHAIN_DEPLOY.md`](./BLOCKCHAIN_DEPLOY.md)
 # 1. Clone e instale dependências
 git clone https://github.com/govinda777/zerodev-token-shop.git
 cd zerodev-token-shop
-yarn install
+npm install
 
 # 2. Configure ambiente
 cp .env-example .env.local
 # Edite .env.local com suas chaves (veja seções anteriores)
 
 # 3. Modo desenvolvimento (com contratos mock)
-yarn dev
+npm run dev
 
 # 4. Ou com contratos reais (após deploy)
 # Configure USE_MOCK_CONTRACTS=false no .env.local
-yarn dev
+npm run dev
 ```
 
 ### 🌐 Ambientes
@@ -407,13 +406,13 @@ yarn dev
 
 ```bash
 # Build para produção
-yarn build
+npm run build
 
 # Servidor de produção
-yarn start
+npm run start
 
 # Preview do build
-yarn preview
+npm run preview
 ```
 
 ### 📊 Monitoramento
@@ -499,13 +498,13 @@ Após o deploy, monitore seus contratos:
 ### Executar Testes
 ```bash
 # Testes de unidade
-yarn test:unit
+npm run test:unit
 
 # Testes End-to-End
-yarn test:e2e
+npm run test:e2e
 
 # Todos os testes (se configurado no package.json para rodar ambos)
-yarn test
+npm run test
 ```
 Para mais detalhes sobre testes, incluindo hooks de pre-commit e pre-push, veja `PRE_COMMIT_GUIDE.md`.
 

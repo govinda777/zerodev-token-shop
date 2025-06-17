@@ -1,263 +1,226 @@
-# Pre-commit Hook - Guia de Uso
+# 🔧 Guia de Pre-commit e Testes
+
+Este guia explica como configurar e usar os hooks de pre-commit e pre-push para manter a qualidade do código.
 
 ## 📋 Visão Geral
 
-O projeto ZeroDev Token Shop utiliza **Husky** para executar automaticamente testes de unidade antes de cada commit, garantindo que apenas código testado e funcionando seja commitado no repositório.
+O projeto usa **Husky** para executar verificações automáticas antes de commits e pushes:
 
-## 🚀 Como Funciona
+- **Pre-commit**: Executa testes unitários rápidos
+- **Pre-push**: Executa validações completas da pipeline
 
-### Fluxo Normal de Commit
+## 🚀 Configuração Inicial
+
+### 1. Instalar Dependências
+```bash
+npm install
+```
+
+### 2. Configurar Husky (se necessário)
+```bash
+npx husky install
+```
+
+## 🧪 Testes Unitários
+
+### Execução Manual
+```bash
+# Executar todos os testes unitários
+npm run test:unit
+
+# Executar em modo watch (desenvolvimento)
+npm run test:unit:watch # Ou o alias configurado em package.json
+
+# Executar com coverage
+npm run test:unit:coverage # Ou o alias configurado
+```
+
+### Testes Específicos
+```bash
+# Executar testes de um arquivo específico
+npm run test
+
+# Executar testes E2E
+npm run test:e2e
+```
+
+## 🔄 Hooks Automáticos
+
+### Pre-commit Hook
+Executa automaticamente antes de cada commit:
 
 ```bash
-# 1. Fazer suas alterações
-git add .
-
-# 2. Tentar fazer commit
-git commit -m "feat: nova funcionalidade"
-
-# 3. Pre-commit executa automaticamente
-🧪 Executando testes de unidade...
-# (A saída exata do teste pode variar)
-# Exemplo:
-# PASS  src/hooks/usePrivyAuth.test.ts
-# PASS  src/components/auth/LoginDemo.test.tsx
-# ... mais testes ...
-
-# Test Suites: XX passed, XX total
-# Tests:       YY passed, YY total
-
-✅ Testes de unidade passaram!
-
-# 4. Commit é realizado com sucesso
-[main abc1234] feat: nova funcionalidade
+# O que é executado:
+npm run test:unit --silent # ou o comando exato do seu package.json
 ```
 
-### Quando os Testes Falham
+**Se os testes falharem**, o commit será cancelado.
 
+### Pre-push Hook
+Executa validações completas antes do push:
+
+1. **Verificação de arquivos essenciais**
+2. **Instalação de dependências** 
+3. **Lint check**
+4. **Type check**
+5. **Testes unitários**
+6. **Build test**
+
+## 🛠️ Configuração do Husky
+
+### Instalação
 ```bash
-git commit -m "feat: código com bug"
-
-🧪 Executando testes de unidade...
- FAIL  src/components/auth/LoginDemo.test.tsx
-  ● LoginDemo › deve renderizar corretamente
-    Expected: "Login"
-    Received: "Loginn"
-
-❌ Testes de unidade falharam. Commit cancelado.
-💡 Execute 'npm run test:unit' para ver os detalhes dos erros.
-
-# Commit é cancelado - você precisa corrigir os erros primeiro
+npm add husky --dev
+npm prepare # Ou o comando configurado em package.json para 'prepare'
 ```
 
-## 🧪 Testes Executados
+### Hooks Configurados
 
-O pre-commit executa os testes de unidade definidos no script `test:unit` do `package.json`.
-O número exato de testes pode variar conforme o desenvolvimento.
-
-**Tempo médio de execução**: Varia, mas geralmente alguns segundos.
-
-## 🛠️ Scripts Disponíveis
-
-### Scripts de Teste
-
+#### `.husky/pre-commit`
 ```bash
-# Executar apenas os testes de unidade (usados pelo pre-commit)
-yarn test:unit
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
 
-# Executar testes de unidade em modo watch (desenvolvimento)
-yarn test:unit:watch # Ou o alias configurado em package.json
-
-# Executar testes de unidade com relatório de cobertura
-yarn test:unit:coverage # Ou o alias configurado
-
-# Executar TODOS os testes (unitários e e2e, se configurado)
-yarn test
-
-# Executar testes End-to-End (Playwright)
-yarn test:e2e
+npm run test:unit --testPathPattern="usePrivyAuth" # Exemplo
 ```
 
-### Scripts de Commit/Push
-
+#### `.husky/pre-push`
 ```bash
-# Push normal (executará pre-push hook se configurado)
-git push
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
 
-# Push pulando hooks de Git (emergência, não recomendado)
-git push --no-verify
-
-# (Outros scripts como push:skip-tests, push:all-tests dependem da configuração em package.json)
+# Execute npm test # Executar todos os testes para identificar
+node scripts/pre-push-test.js
 ```
-
-## 🚨 Situações Especiais
-
-### 1. Pular Pre-commit (Emergência)
-
-```bash
-# Método 1: Flag --no-verify
-git commit -m "hotfix: correção urgente" --no-verify
-
-# Método 2: Script específico
-npm run push:skip-tests
-```
-
-⚠️ **Use apenas em emergências!** Sempre execute os testes manualmente depois.
-
-### 2. Debugging de Testes
-
-```bash
-# Ver detalhes dos erros
-npm run test:unit -- --verbose
-
-# Executar teste específico
-npm test -- --testPathPattern="LoginDemo"
-
-# Executar com watch para desenvolvimento
-npm run test:unit:watch
-```
-
-### 3. Verificar Status do Pre-commit
-
-```bash
-# Executar manualmente o pre-commit
-.husky/pre-commit
-
-# Verificar se Husky está instalado
-npx husky --version
-
-# Reinstalar hooks (se necessário)
-npm run prepare
-```
-
-## 🔧 Configuração Técnica
-
-### Arquivos Envolvidos
-
-```
-.husky/
-├── pre-commit          # Script executado antes do commit
-└── _/
-    └── husky.sh       # Configuração do Husky
-
-package.json            # Scripts npm
-jest.config.js         # Configuração do Jest
-src/setupTests.ts      # Setup global dos testes
-```
-
-### Conteúdo do Pre-commit
-
-```bash
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-echo "🧪 Executando testes de unidade..."
-
-# Executar testes de unidade
-yarn test:unit --silent # ou o comando exato do seu package.json
-
-if [ $? -ne 0 ]; then
-  echo "❌ Testes de unidade falharam. Commit cancelado."
-  echo "💡 Execute 'npm run test:unit' para ver os detalhes dos erros."
-  exit 1
-fi
-
-echo "✅ Testes de unidade passaram!"
-```
-
-## 📊 Benefícios
-
-### Para o Desenvolvedor
-- ✅ **Feedback imediato**: Detecta problemas antes do push
-- ✅ **Menos debugging**: Evita bugs em produção
-- ✅ **Confiança**: Sabe que o código está testado
-
-### Para a Equipe
-- ✅ **Repositório estável**: Sempre em estado funcional
-- ✅ **CI/CD otimizado**: Menos falhas no pipeline
-- ✅ **Colaboração**: Reduz conflitos e retrabalho
-
-### Para o Projeto
-- ✅ **Qualidade**: Mantém padrão alto de código
-- ✅ **Produtividade**: Menos tempo corrigindo bugs
-- ✅ **Confiabilidade**: Deploy mais seguro
 
 ## 🐛 Troubleshooting
 
-### Problema: "Husky command not found"
+### Testes Falhando no Pre-commit
 
+1. **Identifique o problema**:
+   ```bash
+   npm run test:unit
+   ```
+
+2. **Corrija os testes ou código**
+
+3. **Teste novamente**:
+   ```bash
+   npm run test:unit
+   ```
+
+4. **Commit novamente**
+
+### Bypass Temporário (NÃO RECOMENDADO)
 ```bash
-# Solução: Reinstalar Husky
-yarn add husky --dev
-yarn prepare # Ou o comando configurado em package.json para 'prepare'
+# Apenas em emergências
+git commit --no-verify -m "fix: correção urgente"
 ```
 
-### Problema: "Permission denied"
-
+### Problemas com Husky
 ```bash
-# Solução: Dar permissão de execução
-chmod +x .husky/pre-commit
+# Reinstalar hooks
+npx husky install
 ```
 
-### Problema: "Tests taking too long"
+## 📝 Fluxo de Desenvolvimento Recomendado
 
+### Durante o Desenvolvimento
 ```bash
-# Solução: Executar apenas testes específicos
-yarn test:unit --testPathPattern="usePrivyAuth" # Exemplo
+npm run test:unit:watch  # Executar testes de unidade em modo watch enquanto desenvolve
 ```
 
-### Problema: "False positives"
-
+### Antes de Commitar
 ```bash
-# Solução: Verificar se há testes instáveis
-yarn test # Executar todos os testes para identificar
-
-# Se necessário, revisar ou desabilitar temporariamente o teste problemático
-# (e investigar a causa da instabilidade)
+npm run lint             # Opcional, mas recomendado: verificar lint e formatação
+npm run test:unit        # Verificar se todos os testes de unidade passam
 ```
 
-## 📝 Boas Práticas
-
-### ✅ Faça
-
-- Execute `yarn test:unit` antes de commitar se quiser verificar manualmente.
-- Corrija todos os testes que falharem.
-- Use commits pequenos e frequentes.
-- Escreva mensagens de commit descritivas.
-
-### ❌ Evite
-
-- Usar `--no-verify` em commits ou `git push --no-verify` sem um bom motivo.
-- Commitar código que você sabe que está quebrando os testes.
-- Ignorar falhas de teste reportadas pelo hook.
-- Fazer commits muito grandes que dificultam a identificação de problemas se os testes falharem.
-
-## 🔄 Workflow Recomendado
-
+### Commit
 ```bash
-# 1. Desenvolvimento
-yarn test:unit:watch  # Executar testes de unidade em modo watch enquanto desenvolve
-
-# 2. Antes do commit
-yarn lint             # Opcional, mas recomendado: verificar lint e formatação
-yarn test:unit        # Verificar se todos os testes de unidade passam
-
-# 3. Commit
 git add .
-git commit -m "feat: nova funcionalidade"  # Pre-commit hook executa 'yarn test:unit --silent' automaticamente
-
-# 4. Push
-git push                 # (Pre-push hook pode executar mais testes, como 'yarn test:e2e', se configurado)
+git commit -m "feat: nova funcionalidade"  # Pre-commit hook executa 'npm run test:unit --silent' automaticamente
 ```
 
-## 📞 Suporte
+### Push
+```bash
+git push                 # (Pre-push hook pode executar mais testes, como 'npm run test:e2e', se configurado)
+```
 
-Se você encontrar problemas com o pre-commit:
+## ⚙️ Configuração Avançada
 
-1. **Primeiro**: Execute `npm run test:unit` manualmente
-2. **Segundo**: Verifique os logs de erro
-3. **Terceiro**: Consulte este guia
-4. **Último recurso**: Use `--no-verify` e corrija depois
+### Customizar Testes do Pre-commit
+
+Edite `.husky/pre-commit`:
+```bash
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Executar apenas testes específicos
+npm run test:unit --testPathPattern="(usePrivyAuth|ProductCard|AuthButton)"
+
+# Ou executar todos os testes unitários
+npm run test:unit
+```
+
+### Configurar Pre-push Personalizado
+
+Edite `scripts/pre-push-test.js` para adicionar/remover verificações.
+
+### Desabilitar Hooks Temporariamente
+
+```bash
+# Desabilitar para um commit específico
+git commit --no-verify -m "commit sem verificações"
+
+# Desabilitar para um push específico  
+git push --no-verify
+```
+
+## 📊 Métricas e Coverage
+
+### Executar com Coverage
+```bash
+npm run test:unit:coverage
+```
+
+### Visualizar Relatório
+O relatório de coverage é gerado em `coverage/lcov-report/index.html`.
+
+## 🔍 Debugging de Testes
+
+### Executar Testes Específicos
+```bash
+# Por arquivo
+npm run test:unit src/hooks/usePrivyAuth.test.ts
+
+# Por padrão
+npm run test:unit --testNamePattern="should connect"
+```
+
+### Modo Debug
+```bash
+# Com logs detalhados
+npm run test:unit --verbose
+
+# Com watch mode
+npm run test:unit --watch
+```
+
+## 📚 Recursos Adicionais
+
+- [Husky Documentation](https://typicode.github.io/husky/)
+- [Jest Testing Framework](https://jestjs.io/)
+- [Testing Library](https://testing-library.com/)
+
+## 🎯 Melhores Práticas
+
+1. **Sempre execute testes antes de commitar**
+2. **Mantenha testes rápidos e focados**
+3. **Use mocks para dependências externas**
+4. **Escreva testes para novos recursos**
+5. **Mantenha coverage alto (>80%)**
 
 ---
 
-**Lembre-se**: O pre-commit está aqui para ajudar, não atrapalhar! 🚀 
+**Lembre-se**: Os hooks existem para manter a qualidade do código. Se estão falhando, há algo que precisa ser corrigido! 🚀 

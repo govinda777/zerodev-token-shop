@@ -97,7 +97,10 @@ interface UserProgress {
 
 ### 1. Iniciar a Aplicação
 ```bash
-yarn dev
+npm install
+cp .env-example .env
+# Configure suas chaves no .env
+npm run dev
 ```
 
 ### 2. Acessar a Jornada

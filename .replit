@@ -1,19 +1,20 @@
-modules = ["nodejs-20", "web", "bash"]
-run = "yarn dev"
+run = "npm run dev"
+entrypoint = "src/app/page.tsx"
 
 [nix]
-channel = "stable-24_05"
+channel = "stable-22_11"
 
 [deployment]
-deploymentTarget = "static"
-publicDir = "public"
-run = ["sh", "-c", "npx serve -s out"]
-build = ["sh", "-c", "yarn build && cp -r public/* out/"]
+run = ["sh", "-c", "npm run build"]
+deploymentTarget = "cloudrun"
+build = ["sh", "-c", "npm run build && cp -r public/* out/"]
 
 [[ports]]
 localPort = 3000
 externalPort = 80
 
-[[ports]]
-localPort = 3001
-externalPort = 3001
+[languages.typescript]
+pattern = "**/{*.ts,*.js,*.tsx,*.jsx}"
+
+[languages.typescript.languageServer]
+start = "typescript-language-server --stdio"
