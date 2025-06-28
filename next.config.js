@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  // GitHub Pages configuration
+  output: 'export',
+  trailingSlash: true,
+  basePath: '/zerodev-token-shop',
+  assetPrefix: '/zerodev-token-shop/',
   images: {
     unoptimized: true,
     remotePatterns: [
