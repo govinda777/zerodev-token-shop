@@ -30,7 +30,7 @@ jobs:
       - name: Build Next.js app
         run: npm run build
         env:
-          NODE_ENV: ${{ vars.NODE_ENV }}
+          NODE_ENV: production
           # Privy configuration
           NEXT_PUBLIC_PRIVY_APP_ID: ${{ vars.NEXT_PUBLIC_PRIVY_APP_ID }}
           # ZeroDev configuration
