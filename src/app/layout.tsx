@@ -7,6 +7,7 @@ import { InvestmentProvider } from "@/components/investment/InvestmentProvider";
 import { ZeroDevTransactionProvider } from "@/components/common/ZeroDevTransactionProvider";
 import { NetworkStatusIndicator } from "@/components/common/NetworkStatusIndicator";
 import { WalletDebugPanel } from '@/components/common/WalletDebugPanel';
+import { AuthDebug } from '@/components/auth/AuthDebug';
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const poppins = Poppins({ 
@@ -48,6 +49,7 @@ export default function RootLayout({
                   {children}
                   <NetworkStatusIndicator />
                   <WalletDebugPanel />
+                  <AuthDebug />
                 </div>
               </InvestmentProvider>
             </ZeroDevTransactionProvider>
