@@ -76,7 +76,7 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     if (mounted) {
       loadData();
     }
-  }, [mounted, isConnected, address]); // Removido loadData das dependências para evitar re-renders excessivos
+  }, [mounted, isConnected, address, loadData]); // Added loadData to dependencies
 
   const addTokensProvider = useCallback(async (amount: number) => {
     if (!address) return;
@@ -104,7 +104,7 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     }
     setIsLoading(false);
     return success;
-  }, [address, balance]); // Added balance to dep array for oldBalance logging, though it's removed now
+  }, [address]); // Removed balance dependency as it's not actually needed
 
   const dismissWelcomeNotification = () => {
     setShowWelcomeNotification(false);

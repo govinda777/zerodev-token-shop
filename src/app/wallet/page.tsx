@@ -224,9 +224,9 @@ export default function WalletPage() {
                            <p>O que você deve ver no modal:</p>
                            <ul className="list-disc list-inside space-y-1 ml-4">
                              <li>📧 **Campo de e-mail** (parte superior) - E-mail genérico</li>
-                             <li>🔍 **"Continue with Google"** - Se Google OAuth estiver configurado</li>
-                             <li>📱 "Continue with SMS" - Login por telefone</li>
-                             <li>👛 "Continue with a wallet" - Carteiras Web3</li>
+                             <li>🔍 **&quot;Continue with Google&quot;** - Se Google OAuth estiver configurado</li>
+                             <li>📱 &quot;Continue with SMS&quot; - Login por telefone</li>
+                             <li>👛 &quot;Continue with a wallet&quot; - Carteiras Web3</li>
                            </ul>
                            
                            <div className="bg-yellow-500/20 p-2 rounded mt-3">
@@ -234,7 +234,7 @@ export default function WalletPage() {
                            </div>
                            
                            <p className="mt-3">
-                             <strong>Se não aparece "Continue with Google":</strong> Acesse o{' '}
+                             <strong>Se não aparece &quot;Continue with Google&quot;:</strong> Acesse o{' '}
                              <a 
                                href="https://dashboard.privy.io" 
                                target="_blank" 

@@ -70,7 +70,7 @@ export function SubscriptionComponent() {
     return () => {
       isMounted = false;
     };
-  }, []); // Removido subscriptionOperations para executar apenas uma vez
+  }, [subscriptionOperations]); // Added subscriptionOperations to dependencies
 
   const handleSubscribe = async (plan: SubscriptionPlan) => {
     if (balance < plan.price || isLoading || activeSubscription || blockchainLoading) return;

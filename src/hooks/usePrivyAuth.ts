@@ -63,7 +63,7 @@ export function usePrivyAuth(): PrivyAuthState {
     } finally {
       setIsConnecting(false);
     }
-  }, [privyData?.login]);
+  }, [privyData]);
 
   const disconnect = useCallback(async () => {
     setIsConnecting(true);
@@ -80,7 +80,7 @@ export function usePrivyAuth(): PrivyAuthState {
     } finally {
       setIsConnecting(false);
     }
-  }, [privyData?.logout]);
+  }, [privyData]);
 
   // Extract real data from Privy when available
   const isReady = privyData?.ready ?? true;

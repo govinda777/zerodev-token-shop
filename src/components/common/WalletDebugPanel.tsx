@@ -180,10 +180,10 @@ export function WalletDebugPanel() {
           <div className="mt-4 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded text-xs">
             <p className="text-yellow-400 font-medium mb-1">💡 Para resolver o problema:</p>
             <ol className="text-yellow-300 space-y-1 list-decimal list-inside">
-              <li>Clique em "Verificar Dados"</li>
-              <li>Clique em "Forçar Sincronização"</li>
+              <li>Clique em &quot;Verificar Dados&quot;</li>
+              <li>Clique em &quot;Forçar Sincronização&quot;</li>
               <li>Recarregue a página no outro navegador</li>
-              <li>Se não funcionar, use "Limpar Dados" e recarregue</li>
+              <li>Se não funcionar, use &quot;Limpar Dados&quot; e recarregue</li>
             </ol>
           </div>
         </div>
